@@ -24,7 +24,7 @@
   
   
   
-  ！[](https://github.com/xianfeng92/android-code-read/blob/master/images/20130817090611984.png)
+  ![](https://github.com/xianfeng92/android-code-read/blob/master/images/20130817090611984.png)
 
 
 
