@@ -21,6 +21,10 @@
 5 Handler post一个runnable是如何处理的呢？
 
   Handler会将runnable封装成一个msg对象，并将runnable赋值给msg的一个callback变量。在dispatchMessage，此时检查到callback不为null，会调用callback.run()方法，即runnable的run方法被调用。
+  
+  
+  
+  [](https://github.com/xianfeng92/android-code-read/blob/master/images/20130817090611984.png)
 
 
 
@@ -384,5 +388,6 @@ View的post()方法
 
 如果当前的线程不等于UI线程(主线程)，就去调用Handler的post()方法，否则就直接调用Runnable对象的run()方法。还有什么会比这更清晰明了的吗？
 
+# 参考
 
 [Android异步消息处理机制完全解析，带你从源码的角度彻底理解](https://blog.csdn.net/guolin_blog/article/details/9991569)
