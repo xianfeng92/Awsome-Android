@@ -30,7 +30,14 @@ Fragment，简称碎片，是Android 3.0（API 11）提出的，为了兼容低�
 
 * FragmentManager：管理和维护Fragment。它是抽象类，具体的实现类是FragmentManagerImpl。
 
+  FragmentManager栈视图如下：
 
+
+1. 对于宿主Activity，getSupportFragmentManager()获取的 FragmentActivity 的 FragmentManager 对象
+
+2. 对于Fragment，getFragmentManager()是获取的是父Fragment(如果没有，则是FragmentActivity)的FragmentManager对象
+
+3. getChildFragmentManager()是获取自己的FragmentManager对象。
 
 
 * FragmentTransaction：对Fragment的添加、删除等操作都需要通过事务方式进行。他是抽象类，具体的实现类是BackStackRecord。
@@ -97,10 +104,11 @@ FragmentTransaction有一些基本方法，下面给出调用这些方法时，F
 * attach(): onCreateView()->onStart()->onResume()
 
 
+
 ## Back Stack 的实现原理
 
 我们知道Activity有任务栈，用户通过startActivity将Activity加入栈，点击返回按钮将Activity出栈。__Fragment也有类似的栈，称为回退栈（Back Stack）__，
-回退栈是由FragmentManager管理的。默认情况下，Fragment事务是不会加入回退栈的，如果想将Fragment事务加入回退栈，则可以加入addToBackStack("")。
+回退栈是由 FragmentManager 管理的。默认情况下，Fragment事务是不会加入回退栈的，如果想将Fragment事务加入回退栈，则可以加入addToBackStack("")。
 如果没有加入回退栈，则用户点击返回按钮会直接将Activity出栈；如果加入了回退栈，则用户点击返回按钮会回滚Fragment事务。
 
 下面这个代码的功能就是将Fragment加入Activity中，内部实现为：__创建一个BackStackRecord对象，该对象记录了这个事务的全部操作轨迹__（这里只做了一次add操作，并且加入回退栈），
@@ -117,6 +125,7 @@ getSupportFragmentManager().beginTransaction()
     }
 
 ```
+
 BackStackRecord类的定义如下:
 
 ```
@@ -124,7 +133,7 @@ final class BackStackRecord extends FragmentTransaction implements BackStackEntr
 
 ```
 
-从定义可以看出，BackStackRecord有三重含义：
+从定义可以看出，BackStackRecord 有三重含义：
 
 * 继承了FragmentTransaction，即是事务，保存了整个事务的全部操作轨迹。
 
@@ -132,7 +141,8 @@ final class BackStackRecord extends FragmentTransaction implements BackStackEntr
 
 * 继承了Runnable，即被放入FragmentManager执行队列，等待被执行。
 
-先看第一层含义，getSupportFragmentManager.beginTransaction()返回的就是BackStackRecord对象.
+先看第一层含义，getSupportFragmentManager.beginTransaction()返回的就是BackStackRecord对象。
+
 BackStackRecord类包含了一次事务的整个操作轨迹，是以数组列表形式存在的，元素是Op类，表示其中某个操作，定义如下：
 
 ```
@@ -197,7 +207,8 @@ BackStackRecord类包含了一次事务的整个操作轨迹，是以数组列�
     }
 
 ```
-addOp()是将创建好的Op对象加入数组列表，定义如下
+
+addOp()是将创建好的Op对象加入数组列表（mOps），定义如下
 
 ```
     void addOp(BackStackRecord.Op op) {
@@ -209,6 +220,7 @@ addOp()是将创建好的Op对象加入数组列表，定义如下
     }
 
 ```
+
 
 addToBackStack(“”)会是将mAddToBackStack变量记为true，在commit()中会用到该变量。
 
@@ -242,7 +254,7 @@ commit()是异步的，即不是立即生效的，但是后面会看到整个过
 
             this.mCommitted = true;
             if (this.mAddToBackStack) {
-                this.mIndex = this.mManager.allocBackStackIndex(this);
+                this.mIndex = this.mManager.allocBackStackIndex(this); //mAddToBackStack为true时，给该BackStackRecord分配一个index值。
             } else {
                 this.mIndex = -1;
             }
@@ -285,107 +297,6 @@ commit()是异步的，即不是立即生效的，但是后面会看到整个过
     }
 
 ```
-在commitInternal()中，mManager.enqueueAction(this, allowStateLoss)，是将 BackStackRecord 加入待执行队列中，定义如下：
-
-```
-    public void enqueueAction(FragmentManagerImpl.OpGenerator action, boolean allowStateLoss) {
-        if (!allowStateLoss) {
-            this.checkStateLoss();
-        }
-
-        synchronized(this) {
-            if (!this.mDestroyed && this.mHost != null) {
-                if (this.mPendingActions == null) {
-                    this.mPendingActions = new ArrayList();//mPendingActions就是前面说的待执行队列
-                }
-
-                this.mPendingActions.add(action);
-                this.scheduleCommit();
-            } else if (!allowStateLoss) {
-                throw new IllegalStateException("Activity has been destroyed");
-            }
-        }
-    }
-
-    void scheduleCommit() {
-        synchronized(this) {
-            boolean postponeReady = this.mPostponedTransactions != null && !this.mPostponedTransactions.isEmpty();
-            boolean pendingReady = this.mPendingActions != null && this.mPendingActions.size() == 1;
-            if (postponeReady || pendingReady) {
-                this.mHost.getHandler().removeCallbacks(this.mExecCommit);
-                this.mHost.getHandler().post(this.mExecCommit);
-            }
-
-        }
-    }
-
-    Runnable mExecCommit = new Runnable() {
-        public void run() {
-            FragmentManagerImpl.this.execPendingActions();
-        }
-    };
-
-
-    public boolean execPendingActions() {
-        this.ensureExecReady(true);
-
-        boolean didSomething;
-        for(didSomething = false; this.generateOpsForPendingActions(this.mTmpRecords, this.mTmpIsPop); didSomething = true) {
-            this.mExecutingActions = true;
-
-            try {
-                this.removeRedundantOperationsAndExecute(this.mTmpRecords, this.mTmpIsPop);
-            } finally {
-                this.cleanupExec();
-            }
-        }
-
-        this.doPendingDeferredStart();
-        this.burpActive();
-        return didSomething;
-    }
-
-    private void removeRedundantOperationsAndExecute(ArrayList<BackStackRecord> records, ArrayList<Boolean> isRecordPop) {
-        if (records != null && !records.isEmpty()) {
-            if (isRecordPop != null && records.size() == isRecordPop.size()) {
-                this.executePostponedTransaction(records, isRecordPop);
-                int numRecords = records.size();
-                int startIndex = 0;
-
-                for(int recordNum = 0; recordNum < numRecords; ++recordNum) {
-                    boolean canReorder = ((BackStackRecord)records.get(recordNum)).mReorderingAllowed;
-                    if (!canReorder) {
-                        if (startIndex != recordNum) {
-                            this.executeOpsTogether(records, isRecordPop, startIndex, recordNum);
-                        }
-
-                        int reorderingEnd = recordNum + 1;
-                        if ((Boolean)isRecordPop.get(recordNum)) {
-                            while(reorderingEnd < numRecords && (Boolean)isRecordPop.get(reorderingEnd) && !((BackStackRecord)records.get(reorderingEnd)).mReorderingAllowed) {
-                                ++reorderingEnd;
-                            }
-                        }
-
-                        this.executeOpsTogether(records, isRecordPop, recordNum, reorderingEnd);
-                        startIndex = reorderingEnd;
-                        recordNum = reorderingEnd - 1;
-                    }
-                }
-
-                if (startIndex != numRecords) {
-                    this.executeOpsTogether(records, isRecordPop, startIndex, numRecords);
-                }
-
-            } else {
-                throw new IllegalStateException("Internal error with the back stack records");
-            }
-        }
-    }
-
-```
-mHost.getHandler()就是主线程的Handler，因此Runnable是在主线程执行的，mExecCommit的内部就是调用了execPendingActions()，即把mPendingActions中所有积压的没被执行的事务全部执行。
-执行队列中的事务会怎样被执行呢？就是调用BackStackRecord的run()方法，run()方法就是执行Fragment的生命周期函数，还有将视图添加进container中。
-
 
 与addToBackStack()对应的是popBackStack()，有以下几种变种：
 
