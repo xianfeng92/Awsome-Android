@@ -251,7 +251,10 @@ _data.recycle();
 
 
 [Android系统进程间通信Binder机制在应用程序框架层的Java接口源代码分析](https://blog.csdn.net/Luoshengyang/article/details/6642463)
+
 [可能是讲解Binder机制最好的文章](https://www.jianshu.com/p/1eff5a13000d)
+
 [Android开发艺术探索——第二章：IPC机制](https://blog.csdn.net/qq_26787115/article/details/52664405)
+
 [Android跨进程通信：图文详解 Binder机制 原理](https://blog.csdn.net/carson_ho/article/details/73560642)
 
