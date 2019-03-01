@@ -247,8 +247,7 @@ _data.recycle();
 
 
 
-
-
+# 参考
 
 [Android系统进程间通信Binder机制在应用程序框架层的Java接口源代码分析](https://blog.csdn.net/Luoshengyang/article/details/6642463)
 
