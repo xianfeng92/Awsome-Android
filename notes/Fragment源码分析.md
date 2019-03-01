@@ -1,75 +1,29 @@
 
-## FragmentManager 是什么 ？
+先上结论：
 
-FragmentActivity 中持有类 FragmentController 的一个对象 mFragments，而在 FragmentController 的 createController 方法中会传入 HostCallbacks（ 其为 FragmentActivity 的一个内部类）。
-而该 HostCallbacks（其为接口 FragmentHostCallback 的一个实现类） 在构造时会传入一个当前 activity（FragmentActivity）的引用。
+1. FragmentActivity 是具有支持fragment功能的最底层的 activity, 其他什么 AppCompatActivity 都是他的子类！
 
-===>
+2. __FragmentActivity 主要负责就是生命周期的转发__，比如 onCreate onResume onDestroy 等等，这就是为什么 activity 和 fragment 状态能统一的原因了！
 
- 1 FragmentHostCallback 持有对 fragmentActivity，以及其对应的context和handler的引用
+当然了，分发的原因就是因为 fragmentActivity 对象持有一个 fragmentController 的实例！
 
- 2 FragmentController 通过 mHost 持有对 FragmentHostCallback的引用。
+其实讲白了，fragmentController 就是因为它自己有一个 fragmentHostCallback，然后这个 fragmentHostCallback 还持有了 fragmentManagerImpl,
+
+最终由 fragmentManagerImpl 的 moveToState 方法完成 fragment 生命周期的转换。
 
 
-而当我们调用 getSupportFragmentManager()，其实是 FragmentController 转给 FragmentHostCallback ，并调用其 getFragmentManagerImpl 方法来获取一个 FragmentManagerImpl 对象。
+3. fragementHostCallback 持有了 activity 的很多资源，context，handler 是其中最主要的2个。fragmentManagerImpl 就是因为拿到了 activty 的这2个资源，所以才能和 activty 互相通信的！
 
-===>
- 
- 1 __所以说 FragmentManager 其实就是 FragmentManagerImpl 的对象，其为 FragmentManager 的具体实现类__
+   为什么 fragmentManagerImpl 可以拿到 activty 的 context 和 handler？
 
-##  BackStackRecord 是什么
+   因为其为 fragementHostCallback 的内部类
 
-当我们调用 FragmentManagerImpl 的 beginTransaction方法时，返回一个 BackStackRecord 的对象（该对象继承 FragmentTransaction，并持有对 FragmentManagerImpl 对象的引用）。
-此时我们可以通过对象 backStackRecord 来将 fragmentA 添加到指定的 container 中。添加 fragmentA 本质就是__将 fragment 和对应的操作（如：add remove replace）封装成一个Op对象，然后将该对象存储在一个数组列表中__。
+4. fragmentMangerImple 就是 fragmentManger 的具体实现类。moveToState方法就是在这个里面实现的 
 
-这里需要注意的是，containerId 为什么不存储 ？
+5. FragmentTransition 也是个抽象类，他主要就是提供对外的接口函数的 add replace move 这种。BackStackRecord 就是它的具体实现类。还额外实现了 OpGenerator 接口，该接口只有一个
+  generateOps(ArrayList<BackStackRecord> var1, ArrayList<Boolean> var2) 方法。
 
-其实 containerId 已经存储到 fragmentA 中了！！！
-
-```
-      // BackStackRecord执行add操作时会执行如下代码：
-      fragment.mContainerId = fragment.mFragmentId = containerViewId;
-```
-
-backStackRecord 对象调用commit时又发生了什么呢？
-
-上面说过，backStackRecord 对象持有对 FragmentManagerImpl 对象的引用，而commit操作，其实就回调了 FragmentManagerImpl 对象的 enqueueAction 方法来对 backStackRecord 对象进行操作。
-到这里 backStackRecord 可以说暂时完成使命了。
-
-其实 BackStackRecord 可以理解为 BackStack + Record， Record为记录的意思，记录啥呢？ 其实就是我们要对fragment执行的一些操作。
-
-那么BackStack如何理解呢 ?
-
-## FragmentManagerImpl 到底做了些啥？
-
-我们将 BackStackRecord 对象中记录的一些对fragment的操作当做一个action。 那么当 backStackRecord 调用commit时，FragmentManagerImpl对象如何处理这些 action 的呢？
-
-1 用一个数组列表（PendingActions）去存储这个 action，然后 post 一个runnable（mExecCommit），到主线程去执行。
-
-核心代码如下：
-
-```
-  public boolean execPendingActions() {
-        this.ensureExecReady(true);
-
-        boolean didSomething;
-        for(didSomething = false; this.generateOpsForPendingActions(this.mTmpRecords, this.mTmpIsPop); didSomething = true) {
-            this.mExecutingActions = true;
-
-            try {
-                this.removeRedundantOperationsAndExecute(this.mTmpRecords, this.mTmpIsPop);
-            } finally {
-                this.cleanupExec();
-            }
-        }
-
-        this.doPendingDeferredStart();
-        this.burpActive();
-        return didSomething;
-    }
-```
-该方法的执行，会调用到 BackStackRecord对象的 executeOps，这个方法就是根据不同的操作(所谓操作就是OP.CMD的那个值)来分发不同的事件，
-从而调用 fragmentManger 来转换 fragment 生命周期的方法！
+6. BackStackRecord 里面会有个 executeOps() 方法。这个方法就是根据不同的操作(所谓操作就是OP.CMD的那个值)来分发不同的事件，从而调用 fragmentManager的各种转换 fragment 生命周期的方法！
 
 
 ## 源码如下
@@ -94,7 +48,7 @@ backStackRecord 对象调用commit时又发生了什么呢？
 
 ```
     public FragmentManager getSupportFragmentManager() {
-        //到这里能发现是 mFragment s返回给我们的FragmentManager
+        //到这里能发现是 mFragments 返回给我们的 FragmentManager
         return this.mFragments.getSupportFragmentManager();
     }
 
@@ -102,7 +56,7 @@ backStackRecord 对象调用commit时又发生了什么呢？
     //并且这个函数需要传进去一个 HostCallBack 的对象
     final FragmentController mFragments = FragmentController.createController(new FragmentActivity.HostCallbacks());
 
-   //下面的代码就来自于FragmentController 这个类！！！！！
+   //下面的代码就来自于FragmentController 这个类
    private final FragmentHostCallback<?> mHost;
 
     private FragmentController(FragmentHostCallback<?> callbacks) {
@@ -114,15 +68,15 @@ backStackRecord 对象调用commit时又发生了什么呢？
         return new FragmentController(callbacks);
     }
 
-    //所以这个getSupportFragmentManager返回的就是FragmentManager这个对象，并且这个对象是mHost的getFragmentManagerImpl函数返回的。
+    //所以这个getSupportFragmentManager返回的就是 FragmentManager这个对象，并且这个对象是 mHost 的 getFragmentManagerImpl 函数返回的。
     //这里结合构造函数一看就明白了，这个mHost就是我们在activity代码里面，传进去的HostCallbacks这个对象来帮助初始化的
     public FragmentManager getSupportFragmentManager() {
         return this.mHost.getFragmentManagerImpl();
     }
 
       // 下面的代码在FragmentActivity里
-     // 这个地方一目了然 果然我们这个 HostCallbacks 这个类是继承自 FragmentHostCallback 的，并且能看出来，我们这里把activity的引用也传进去了。
-    // 所以能马上得出一个结论就是一个activity对应着一个HostCallbacks对象 这个对象持有本身这个activity的引用。传进去以后就代表FragmentController
+     // 这个地方一目了然 果然我们这个 HostCallbacks 这个类是继承自 FragmentHostCallback 的，并且能看出来，我们这里把 activity 的引用也传进去了。
+    // 所以能马上得出一个结论就是一个 activity 对应着一个 HostCallback 对象, 这个对象持有本身这个activity的引用。传进去以后就代表FragmentController
     //这个类的成员mHost 也持有了activity的引用
     class HostCallbacks extends FragmentHostCallback<FragmentActivity> {
         public HostCallbacks() {
@@ -140,7 +94,7 @@ backStackRecord 对象调用commit时又发生了什么呢？
     }
 ```
 
-上面 初步分析了getFragmentManager这个方法的由来。那继续看这个方法到底是返回的什么？
+上面初步分析了 getSupportFragmentManager 这个方法的由来。那继续看这个方法到底是返回的什么？
 
 ```
     //下面的代码来源自抽象类FragmentHostCallback
@@ -159,7 +113,10 @@ backStackRecord 对象调用commit时又发生了什么呢？
 
 ```
 
-再进去看看 这个对象的begin方法返回的是什么:
+由上可知，FragmentManagerImpl 是在 FragmentHostCallback 中实例化的，且 FragmentHostCallback 持有对 fragmentActivity 以及其对应的 Handler 和 Context 的引用。
+
+
+再进去看看 这个对象的 beginTransaction 方法返回的是什么:
 
 ```
     // 下面的代码来源自 FragmentManagerImpl
@@ -171,15 +128,14 @@ backStackRecord 对象调用commit时又发生了什么呢？
 ```
 
 ```
-//可以看一下BackStackRecord 是FragmentTransaction的子类 并且实现了
-//BackStackEntry, OpGenerator 这两个接口
+// 可以看一下BackStackRecord 是 FragmentTransaction 的子类，并且实现了 BackStackEntry, OpGenerator 这两个接口
 final class BackStackRecord extends FragmentTransaction implements BackStackEntry, OpGenerator {
     static final String TAG = "FragmentManager";
     final FragmentManagerImpl mManager;
     ...
 
 
-//下面的这个class就是在BackStackRecord这个类的源码里面的，这里Op
+// Op 为 BackStackRecord 的一个静态内部类
 
     static final class Op {
         int cmd;
@@ -215,7 +171,7 @@ final class BackStackRecord extends FragmentTransaction implements BackStackEntr
         if (containerViewId == 0) {
             throw new IllegalArgumentException("Must use non-zero containerViewId");
         } else {
-            //最终都是调用的doaAdddop这个方法来完成操作的
+            //最终都是调用的 doAdddop 这个方法来完成操作的
             this.doAddOp(containerViewId, fragment, tag, 2);
             return this;
         }
@@ -265,7 +221,7 @@ final class BackStackRecord extends FragmentTransaction implements BackStackEntr
 
 ```
 
-最终其实就是将对应的fragment封装后，放进 backstackrecord 对象的一个 mOps（数组列表） 中，类似，add 和 remove 方法也是对这个mOps的一些操作。
+最终其实就是将对应的 fragment 及相关信息（containerViewId，opcmd）封装后，放进 backstackrecord 对象的一个 mOps（数组列表） 中，类似，add 和 remove 方法也是对这个mOps的一些操作。
 
 
 再来看看commit方法：
@@ -296,7 +252,7 @@ final class BackStackRecord extends FragmentTransaction implements BackStackEntr
             }
 
              // 这个对象就是 final FragmentManagerImpl mManager
-            // 我们在调用begin函数的时候传进去一个this指针 就是用来初始化它的
+            // 我们在调用begin函数的时候传进去一个this指针就是用来初始化它的
             this.mManager.enqueueAction(this, allowStateLoss);
             return this.mIndex;
         }
@@ -305,10 +261,9 @@ final class BackStackRecord extends FragmentTransaction implements BackStackEntr
 ```
 
 
-
 ```
      // 下面是 FragmentManagerImpl 的源码了
-    // 这个 mHost 前文介绍过 持有了activity的引用，所以这里你看就是用 activity 的 handler 去执行了 mExecCommit 
+    // 这个 mHost 前文介绍过持有了activity的引用，所以这里你看就是用 activity 的 handler 去执行了 mExecCommit 
     // 注意是在activity的主线程去执行的 mExecCommit
     public void enqueueAction(FragmentManagerImpl.OpGenerator action, boolean allowStateLoss) {
         if (!allowStateLoss) {
@@ -337,12 +292,11 @@ final class BackStackRecord extends FragmentTransaction implements BackStackEntr
                 this.mHost.getHandler().removeCallbacks(this.mExecCommit);
                 this.mHost.getHandler().post(this.mExecCommit);
             }
-
         }
     }
 
-    //这个线程执行的execPendingActions 就是这个方法 这个方法也是在FragmentManagerImpl 里的。并不在activity里。
-    //所以commit操作就是最终让activity的主线程去执行了FragmentManagerImpl execPendingActions方法
+    //这个线程执行的 execPendingActions 就是这个方法 这个方法也是在 FragmentManagerImpl 里的。并不在activity里。
+    //所以commit操作就是最终让activity的主线程去执行了 FragmentManagerImpl execPendingActions方法
     Runnable mExecCommit = new Runnable() {
         public void run() {
             FragmentManagerImpl.this.execPendingActions();
@@ -486,7 +440,7 @@ final class BackStackRecord extends FragmentTransaction implements BackStackEntr
             switch(op.cmd) {
             case 1:
                 f.setNextAnim(op.enterAnim);
-                this.mManager.addFragment(f, false);
+                this.mManager.addFragment(f, false);// 根据对应的 op.cmd, fragmentManager 来管理 fragment 的一些状态。
                 break;
             case 2:
             default:
@@ -536,9 +490,9 @@ final class BackStackRecord extends FragmentTransaction implements BackStackEntr
 到这里应该就差不多了，最终的线索就是 只要搞明白moveToState这个函数就可以了。
 
 ```
-     //下面代码来自于fragment
-    //我们先去看看这个函数的参数之一new state是什么
-   //其实new state 就是代表新的状态，总共他的值有7种 就全在这里了 预先都是定义好的
+     // 下面代码来自于fragment
+    // 我们先去看看这个函数的参数之一new state是什么
+   // 其实new state 就是代表新的状态
     static final int INITIALIZING = 0;
     static final int CREATED = 1;
     static final int ACTIVITY_CREATED = 2;
@@ -549,7 +503,7 @@ final class BackStackRecord extends FragmentTransaction implements BackStackEntr
    
 下面我们可以模拟一个流程 帮助大家理解这个状态到底是干嘛的,有什么用。
 
-比如我们先看看 fragmentactivity的源码，假设 我们想看看 activity 发生onResumne事件的时候对fragment有什么影响。
+比如我们先看看 fragmentactivity的源码，假设我们想看看 activity 发生 onResumne 事件的时候对 fragment 有什么影响。
 
 ```
     protected void onResume() {
@@ -584,7 +538,7 @@ final class BackStackRecord extends FragmentTransaction implements BackStackEntr
     }
 
     //下面的代码来自 FragmentManagerImpl
-    //一直追踪到这里就能明白 activity的声明周期 与fragment声明周期关联的时候就是通过 moveToState 这个函数来完成。
+    //一直追踪到这里就能明白 activity 的声明周期与 fragment 声明周期关联的时候就是通过 moveToState 这个函数来完成。
     private void dispatchStateChange(int nextState) {
         try {
             this.mExecutingActions = true;
@@ -597,24 +551,109 @@ final class BackStackRecord extends FragmentTransaction implements BackStackEntr
     }
 ```
 
+__一直追踪到这里就能明白 activity 的声明周期与 fragment 声明周期关联的时候就是通过 moveToState 这个函数来完成__
+
+
+
+# 再理一下相关类的关系吧
+
+## FragmentManager 是什么 ？
+
+FragmentActivity 中持有类 FragmentController 的一个对象 mFragments，而在 FragmentController 的 createController 方法中会传入 HostCallbacks（ 其为 FragmentActivity 的一个内部类）。
+而该 HostCallbacks（其为接口 FragmentHostCallback 的一个实现类） 在构造时会传入一个当前 activity（FragmentActivity）的引用。
+
+===>
+
+ 1 FragmentHostCallback 持有对 fragmentActivity，以及其对应的context和handler的引用
+
+ 2 FragmentController 通过 mHost 持有对 FragmentHostCallback的引用。
+
+
+而当我们调用 getSupportFragmentManager()，其实是 FragmentController 转给 FragmentHostCallback ，并调用其 getFragmentManagerImpl 方法来获取一个 FragmentManagerImpl 对象。
+
+===>
+ 
+ 1 __所以说 FragmentManager 其实就是 FragmentManagerImpl 的对象，其为 FragmentManager 的具体实现类__
+
+##  BackStackRecord 是什么
+
+当我们调用 FragmentManagerImpl 的 beginTransaction方法时，返回一个 BackStackRecord 的对象（该对象继承 FragmentTransaction，并持有对 FragmentManagerImpl 对象的引用）。
+此时我们可以通过对象 backStackRecord 来将 fragmentA 添加到指定的 container 中。添加 fragmentA 本质就是__将 fragment 和对应的操作（如：add remove replace）封装成一个Op对象，然后将该对象存储在一个数组列表中__。
+
+这里需要注意的是，containerId 为什么不存储 ？
+
+其实 containerId 已经存储到 fragmentA 中了！！！
+
+```
+      // BackStackRecord执行add操作时会执行如下代码：
+      fragment.mContainerId = fragment.mFragmentId = containerViewId;
+```
+
+backStackRecord 对象调用commit时又发生了什么呢？
+
+上面说过，backStackRecord 对象持有对 FragmentManagerImpl 对象的引用，而commit操作，其实就回调了 FragmentManagerImpl 对象的 enqueueAction 方法来对 backStackRecord 对象进行操作。
+到这里 backStackRecord 可以说暂时完成使命了。
+
+其实 BackStackRecord 可以理解为 BackStack + Record， Record为记录的意思，记录啥呢？ 其实就是我们要对fragment执行的一些操作。
+
+那么BackStack如何理解呢 ?
+
+## FragmentManagerImpl 到底做了些啥？
+
+我们将 BackStackRecord 对象中记录的一些对fragment的操作当做一个action。 那么当 backStackRecord 调用commit时，FragmentManagerImpl 对象如何处理这些 action 的呢？
+
+1 用一个数组列表（PendingActions）去存储这个 action，然后 post 一个runnable（mExecCommit），到主线程去执行。
+
+核心代码如下：
+
+```
+  public boolean execPendingActions() {
+        this.ensureExecReady(true);
+
+        boolean didSomething;
+        for(didSomething = false; this.generateOpsForPendingActions(this.mTmpRecords, this.mTmpIsPop); didSomething = true) {
+            this.mExecutingActions = true;
+
+            try {
+                this.removeRedundantOperationsAndExecute(this.mTmpRecords, this.mTmpIsPop);
+            } finally {
+                this.cleanupExec();
+            }
+        }
+
+        this.doPendingDeferredStart();
+        this.burpActive();
+        return didSomething;
+    }
+```
+该方法的执行，会调用到 BackStackRecord对象的 executeOps，这个方法就是根据不同的操作(所谓操作就是OP.CMD的那个值)来分发不同的事件，
+从而调用 FragmentManagerImpl 来转换 fragment 生命周期的方法！
+
+
+
 
 一直分析到这里，相信大家就对fragment的源码基础知识有一个不错的理解了，在这里就简单总结一下上面的分析：
 
+1. FragmentActivity 是具有支持 fragment 功能的最底层的 activity, 其他什么 AppCompatActivity 都是他的子类！
 
-1. FragmentActivity 是具有支持fragment功能的最底层的 activity。其他什么 AppCompatActivity 都是他的子类！
-
-2. FragmentActivity 主要负责就是生命周期的转发，比如 onCreate onResume onDestroy 等等，这就是为什么activity和fragment状态能统一的原因了！
+2. __FragmentActivity 主要负责就是生命周期的转发__，比如 onCreate onResume onDestroy 等等，这就是为什么 activity 和 fragment 状态能统一的原因了！
 
 当然了，分发的原因就是因为 fragmentActivity 对象持有一个 fragmentController 的实例！
 
-其实讲白了，fragmentController 就是因为它自己有一个 fragmentHostCallback，然后这个 fragmentHostCallback 还持有了 fragmentManagerImpl, 所以这个 controller 能分发 activity 的事件！
+其实讲白了，fragmentController 就是因为它自己有一个 fragmentHostCallback，然后这个 fragmentHostCallback 还持有了 fragmentManagerImpl,
+
+最终由 fragmentManagerImpl 的 moveToState 方法完成 fragment 生命周期的转换。
+
 
 3. fragementHostCallback 持有了 activity 的很多资源，context，handler 是其中最主要的2个。fragmentManagerImpl 就是因为拿到了 activty 的这2个资源，所以才能和 activty 互相通信的！
 
+   为什么 fragmentManagerImpl 可以拿到 activty 的 context 和 handler？
+
+   因为其为 fragementHostCallback 的内部类
+
 4. fragmentMangerImple 就是 fragmentManger 的具体实现类。moveToState方法就是在这个里面实现的 
 
-5. FragmentTransition 也是个抽象类，他主要就是提供对外的接口函数的 add replace move 这种。BackStackRecord 就是它的具体实现类。还额外实现了 OpGenerator 接口，该接口只有一个
-  generateOps(ArrayList<BackStackRecord> var1, ArrayList<Boolean> var2) 方法。
+5. FragmentTransition 也是个抽象类，他主要就是提供对外的接口函数的 add replace move 这种。BackStackRecord 就是它的具体实现类，还额外实现了 OpGenerator 接口。
 
 6. BackStackRecord 里面会有个 executeOps() 方法。这个方法就是根据不同的操作(所谓操作就是OP.CMD的那个值)来分发不同的事件，从而调用 fragmentManager的各种转换 fragment 生命周期的方法！
 

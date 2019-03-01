@@ -1,8 +1,8 @@
 
 ## 基本概念
 
-Fragment，简称碎片，是Android 3.0（API 11）提出的，为了兼容低版本，support-v4库中也开发了一套Fragment API，最低兼容Android 1.6。
-而如果要使用support库的Fragment，Activity必须要继承FragmentActivity（AppCompatActivity是FragmentActivity的子类）。
+Fragment，简称碎片，是 Android 3.0（API 11）提出的，为了兼容低版本，support-v4库中也开发了一套Fragment API，最低兼容Android 1.6。
+而如果要使用 support库的 Fragment，Activity 必须要继承 FragmentActivity（AppCompatActivity是FragmentActivity的子类）。
 
 * Fragment是依赖于Activity的，不能独立存在的。
 
@@ -33,14 +33,18 @@ Fragment，简称碎片，是Android 3.0（API 11）提出的，为了兼容低�
   FragmentManager栈视图如下：
 
 
-1. 对于宿主Activity，getSupportFragmentManager()获取的 FragmentActivity 的 FragmentManager 对象
-
-2. 对于Fragment，getFragmentManager()是获取的是父Fragment(如果没有，则是FragmentActivity)的FragmentManager对象
-
-3. getChildFragmentManager()是获取自己的FragmentManager对象。
+![](https://github.com/xianfeng92/android-code-read/blob/master/images/fragmentManager%E6%A0%88%E8%A7%86%E5%9B%BE.png)
 
 
-* FragmentTransaction：对Fragment的添加、删除等操作都需要通过事务方式进行。他是抽象类，具体的实现类是BackStackRecord。
+
+1. 对于宿主 fragmentActivity，getSupportFragmentManager()获取的 FragmentActivity 的 FragmentManager 对象
+
+2. 对于 Fragment，getFragmentManager()是获取的是父 Fragment(如果没有，则是FragmentActivity)的FragmentManager对象
+
+3. getChildFragmentManager()是获取自己的 FragmentManager 对象。
+
+
+* FragmentTransaction：对Fragment的添加、删除等操作都需要通过事务方式进行。它是抽象类，具体的实现类是BackStackRecord。
 
 * Nested Fragment（Fragment内部嵌套Fragment的能力）是Android 4.2提出的，support-fragment库可以兼容到1.6。通过getChildFragmentManager()能够获得管理子Fragment的FragmentManager，在子Fragment中可以通过getParentFragment()
 
@@ -48,7 +52,7 @@ Fragment，简称碎片，是Android 3.0（API 11）提出的，为了兼容低�
 
  getFragmentManager() // v4中，getSupportFragmentManager
 
-* 主要的操作都是FragmentTransaction的方法:
+* 主要的操作都是 FragmentTransaction 的方法:
 
 FragmentTransaction transaction = fm.benginTransatcion();//开启一个事务
 
@@ -57,7 +61,7 @@ FragmentTransaction transaction = fm.benginTransatcion();//开启一个事务
 Fragment必须是依存与Activity而存在的，因此Activity的生命周期会直接影响到Fragment的生命周期。官网这张图很好的说明了两者生命周期的关系：
 
 
-![]()
+![](https://github.com/xianfeng92/android-code-read/blob/master/images/2952813-0f4f821975d72317.png)
 
 
 解释如下：
@@ -93,13 +97,13 @@ FragmentTransaction有一些基本方法，下面给出调用这些方法时，F
 
 * remove(): onPause()->…->onDetach()
 
-* replace(): 相当于旧Fragment调用remove()，新Fragment调用add()
+* replace(): 相当于旧 Fragment 调用remove()，新Fragment调用add()
 
 * show(): 不调用任何生命周期方法，调用该方法的前提是要显示的 Fragment已经被添加到容器，只是纯粹把Fragment UI的setVisibility为true
 
 * hide(): 不调用任何生命周期方法，调用该方法的前提是要显示的Fragment已经被添加到容器，只是纯粹把Fragment UI的setVisibility为false
 
-* detach(): onPause()->onStop()->onDestroyView()。UI从布局中移除，但是仍然被FragmentManager管理
+* detach(): onPause()->onStop()->onDestroyView()。UI从布局中移除，但是仍然被 FragmentManager 管理
 
 * attach(): onCreateView()->onStart()->onResume()
 
@@ -312,7 +316,7 @@ commit()是异步的，即不是立即生效的，但是后面会看到整个过
 
 ### Fragment向Activity传递数据
 
-* 在Fragment中可以通过getActivity得到当前绑定的Activity的实例，然后进行操作。
+* 在 Fragment 中可以通过 getActivity 得到当前绑定的 Activity 的实例，然后进行操作。
 
 * 通过接口回调的方式。
 
