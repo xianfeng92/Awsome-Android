@@ -391,3 +391,4 @@ View的post()方法
 # 参考
 
 [Android异步消息处理机制完全解析，带你从源码的角度彻底理解](https://blog.csdn.net/guolin_blog/article/details/9991569)
+[你真应该再多了解些Handler机制](https://www.jianshu.com/p/8862bd2b6a29)
