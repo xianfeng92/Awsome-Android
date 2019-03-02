@@ -1,16 +1,47 @@
 
+## AIDL
+
+Android Interface Definition Language(AIDL), 即Android接口定义语言. 我们定义一些接口,服务端负责实现这些接口,而客户端是来调用这些接口的.当客户端和服务端不在一个进程
+中时,客户端如何跨进程调用服务端的服务呢?
+
+## 服务端实现 Binder 对象
+
+   在服务端实现一个特殊的对象(Binder对象),这个对象有两个特性：
+
+1. 一个是具有完成特定任务的能力,即服务
+
+2. 一个是具体跨进程传输的能力,即Binder类的对象
+
+Binder具有被跨进程传输的能力是因为它实现了 IBinder 接口。系统会为每个实现了该接口的对象提供跨进程传输，这是系统给我们的一个很大的福利。
+至于为什么IBindr可以跨进程传输,这个属于偏底层了,暂时不深究.Binder具有的 __完成特定任务的能力是通过它的 attachInterface 方法获得的__,
+我们可以简单理解为该方法会将（descriptor，"服务"）作为（ key,value ）对存入 Binder 对象中的一个 Map<String,IInterface> 对象中，
+Binder对象可通过attachInterface 方法持有一个 IInterface 对象的引用，并依靠它获得完成特定任务的能力。
+queryLocalInterface 方法可以认为是根据 key 值（即参数  descriptor ）查找相应的 IInterface 对象。
+
+这里我们可以将 descriptor 看作服务的唯一标识, “服务”是存储在Binder的一个Map<String,IInterface>,所以“服务”是要实现IInterface接口的.
 
 
+ps:为什么Binder的Map<String,IInterface>对象,存储一个 IInterface 而不是具体服务呢? 面向接口编程~~~~~~~~~
 
-![]()
+## AIDL调用流程
 
-
-
-
-
+![](https://github.com/xiahttps://www.jianshu.com/p/1eff5a13000dnfeng92/android-code-read/blob/master/images/aidl.png)
 
 
+假设客户端已经bind(服务端),并且客户端的已持有系统所提供的服务端的Binder对象(mRemote), 服务端提供 addBook 和 getBook 的服务.
 
+1. 当客户端想要调用服务端的addBook服务时, 是通过mRemote的transact方法将调用的服务(此处即addBook)和参数通过系统底层传给服务端.
+
+2. 服务端的onTransact方法接收到请求后,解析所要调用的方法和参数后,去调用服务端本地的服务,调用结束后,将返回值传给客户端.
+
+3. 上图中可以看到,当客户端发起一次服务端的调用请求时,客户端会挂起,直到服务端给出返回数据.所以如果一个远程方法是很耗时的，那么不能在UI线程中发起此远程请求.
+
+4. 服务端是通过线程池来处理客户端的请求, 所以AIDL调用是多线程的.
+
+
+## 代码实现和解析
+
+具体代码片段如下:
 
 客户端代码：
 
@@ -295,6 +326,12 @@ _data.recycle();
 }
 ```
 
+
+## 案例代码
+
+具体案例代码: 
+
+[Demo_AIDL](https://github.com/xianfeng92/Demo_AIDL)
 
 
 # 参考

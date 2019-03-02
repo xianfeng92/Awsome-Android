@@ -4,21 +4,18 @@
 
 Android中，一个应用程序的开始可以说就是从 ActivityThread.java 中的 main() 方法开始的。
 
-
-
 main()方法中主要做的事情有：
 
 1. 初始化主线程的Looper、主Handler。并使主线程进入等待接收Message消息的无限循环状态。
 
 
-
-2. 调用attach()方法，主要就是为了发送出初始化Application的消息。
+2. 调用attach()方法，主要就是为了发送出初始化 Application 的消息。
 
 
 ## 创建Application的消息是如何发送的呢？
 
 
-上面提到过，ActivityThread的attach()方法最终的目的是发送出一条创建Application的消息——H.BIND_APPLICATION，到主线程的主Handler中。那我们来看看attach()方法干了啥。
+上面提到过， ActivityThread 的attach()方法最终的目的是发送出一条创建Application的消息——H.BIND_APPLICATION，到主线程的主Handler中。那我们来看看attach()方法干了啥。
 attach()关键代码：
 
 ```
@@ -51,12 +48,11 @@ attach()关键代码：
 
 ```
 
-## IActivityManager mgr是个啥？
 
-当我们调用 ActivityManager.getService(); 获得的实际是一个代理类的实例——ActivityManagerProxy，这个东西实现了 IActivityManager 接口。
-打开源码你会发现，ActivityManagerProxy 是 ActivityManagerNative 的一个内部类。
+当我们调用 ActivityManager.getService(),获得的实际是一个代理类的实例 ActivityManagerProxy，这个东西实现了 IActivityManager 接口。
+打开源码会发现，ActivityManagerProxy 是 ActivityManagerNative 的一个内部类。
 
-1. 先看ActivityManagerProxy的构造函数：
+1. ActivityManagerProxy 的构造函数：
 
 ```
 public ActivityManagerProxy(IBinder remote) {
@@ -64,15 +60,11 @@ public ActivityManagerProxy(IBinder remote) {
 }
 ```
 
-这个构造函数非常的简单。首先它需要一个IBinder参数，然后赋值给mRemote变量。这个mRemote显然是ActivityManagerProxy的成员变量，
-对它的操作是由ActivityManagerProxy来代理间接进行的。这样设计的好处是保护了mRemote，并且能够在操作mRemote前执行一些别的事务，
+这个构造函数非常的简单。首先它需要一个IBinder参数，然后赋值给mRemote变量。这个mRemote显然是 ActivityManagerProxy 的成员变量，
+对它的操作是由 ActivityManagerProxy 来代理间接进行的。这样设计的好处是保护了mRemote，并且能够在操作mRemote前执行一些别的事务，
 并且我们是以IActivityManager的身份来进行这些操作的！这就非常巧妙了。
 
-
-获取IBinder的目的就是为了通过这个 IBinder 和 ActivityManager进行通讯，进而ActivityManager会调度发送H.BIND_APPLICATION即初始化Application的Message消息。
-
-
-## 再来看看attachApplication(mAppThread)方法
+## attachApplication(mAppThread)方法
 
 ```
 	public void attachApplication(IApplicationThread app){
@@ -82,13 +74,17 @@ public ActivityManagerProxy(IBinder remote) {
 	}
 
 ```
-这个方法中上面这一句是关键。调用了 IBinder 实例的 tansact() 方法，并且把参数app(这个参数稍后就会提到)放到了data中，最终传递给 ActivityManager。
 
-现在，我们已经基本知道了IActivityManager是个什么东东了。其实最重要的就是它的一个实现类ActivityManagerProxy，
-它主要代理了内核中与ActivityManager通讯的Binder实例。
+这个方法中上面这一句是关键。调用了 IBinder 实例的 tansact() 方法，并且把参数放到了data中，最终传递给 ActivityManagerService。
 
-## 再看看ApplicationThread mAppThread。
+现在，我们已经基本知道了 IActivityManager 是个什么东东了,其实最重要的就是它的一个实现类 ActivityManagerProxy，它主要代理了内核中与ActivityManagerService通讯的Binder实例。
 
+当调用 mRemote.transact(ATTACH_APPLICATION_TRANSACTION, data, reply, 0), 通过AIDL会远程调用 ActivityManagerService 的OnTransact方法, 该方法会
+
+调用 ApplicationThread 的 bindApplicatation 方法, ApplicationThread 会发送一条 BIND_APPLICATION 的 message.
+
+
+## ApplicationThread mAppThread
 
 
 ```
@@ -96,21 +92,18 @@ public ActivityManagerProxy(IBinder remote) {
 
 ```
 
-ApplicationThread是ActivityThread中的一个内部类，为什么没有单独出来写在别的地方呢？我觉得这也是对最小惊异原则的实践。因为ApplicationThread是专门在这里使用的对象。
+ApplicationThread 是 ActivityThread 中的一个内部类，为什么没有单独出来写在别的地方呢？我觉得这也是对最小惊异原则的实践。因为 ApplicationThread 是专门在这里使用的对象。
 
-那么很明显，ApplicationThread最终也是一个Binder！同时，由于实现了IApplicationThread接口，所以它也是一个 IApplicationThread。
+很明显，ApplicationThread 最终也是一个Binder！同时，由于实现了 IApplicationThread 接口，所以它也是一个 IApplicationThread。
 
-我们在ActivityThread中看到的ApplicationThread使用的构造函数是无参的，所以看上面无参构造函数都干了啥！
+我们终于知道attach()方法中出现的两个对象是啥了。ApplicationThread 作为 IApplicationThread 的一个实例，承担了最后发送Activity生命周期、及其它一些消息的任务。
 
-好，我们终于知道attach()方法中出现的两个对象是啥了。ApplicationThread 作为 IApplicationThread 的一个实例，承担了最后发送Activity生命周期、及其它一些消息的任务。
 也就是说，前面绕了一大圈，最后还是回到这个地方来发送消息！
 
 
+## ActivityManagerService 调度发送初始化消息
 
-## ActivityManagerService调度发送初始化消息
-
-经过上面的辗转，ApplicationThread终于到了ActivityManagerService中了。请在上图中找到对应位置！
-
+经过上面的辗转，ApplicationThread 终于到了 ActivityManagerService 中了。
 
 从上图中可以看到，ActivityManagerService中有一这样的方法：
 
@@ -124,6 +117,7 @@ ApplicationThread是ActivityThread中的一个内部类，为什么没有单独�
 	}
 
 ```
+
 ApplicationThread 以 IApplicationThread 的身份到了 ActivityManagerService 中，经过一系列的操作，最终被调用了自己的bindApplication()方法，发出初始化Applicationd的消息。
 
 ```
@@ -146,53 +140,65 @@ ApplicationThread 以 IApplicationThread 的身份到了 ActivityManagerService 
 
 但是，这个地方，我们只要知道最后发了一条 H.BIND_APPLICATION 消息，接着程序开始了。
 
+总结一下, 其实是这样子的:
 
-## 收到初始化消息之后的世界
+1. ActivityThread 的 attach方法中的 mgr.attachApplication(mAppThread, startSeq),是通过AIDL来调用 ActivityManagerService 中的 attachApplication.
 
-上面我们已经找到初始化Applicaitond的消息是在哪发送的了。现在，需要看一看收到消息后都发生了些什么。
+2. 而 ActivityManagerService 的 attachApplication 方法中,通过会 IApplicationThread 接口(这里也是一个AIDL)调用 ApplicationThread 的bindApplication 方法.
+
+3. ApplicationThread 为 ActivityThread 的一个内部类,其bindApplication方法会发送一条 BIND_APPLICATION 的 message. 当 ActivityThread 的内部Handler收到
+该message后,会 handleBindApplication,来完成application的创建.
 
 
-现在上图的H下面找到第一个消息：H.BIND_APPLICATION。一旦接收到这个消息就开始创建Application了。这个过程是在handleBindApplication()中完成的。看看这个方法。在上图中可以看到对应的方法。
+# 收到初始化消息之后的世界
+
+上面我们已经找到初始化 Applicaitond 的消息是在哪发送的了。现在，需要看一看收到消息后都发生了些什么。
+
+现在上图的H下面找到第一个消息：H.BIND_APPLICATION。一旦接收到这个消息就开始创建Application了。这个过程是在handleBindApplication()中完成的。
 
 ```
 private void handleBindApplication(AppBindData data) {
     ...
+    //通过反射初始化一个Instrumentation, 反射中用到的 className 来自于 ActivityManagerService 传过来的Binder
     mInstrumentation = (Instrumentation)
         cl.loadClass(data.instrumentationName.getClassName())
         .newInstance();
-    //通过反射初始化一个Instrumentation仪表。
     ...
+    //通过LoadedApp命令创建 Application 实例
     Application app = data.info.makeApplication(data.restrictedBackupMode, null);
-    //通过LoadedApp命令创建Application实例
     mInitialApplication = app;
     ...
+    // 回调 Application 的 onCreate() 方法
     mInstrumentation.callApplicationOnCreate(app);
-    //让仪器调用Application的onCreate()方法
     ...
 }
 
 ```
 
-## Instrumentation仪表，什么鬼？
+## Instrumentation
 
-Instrumentation会在应用程序的任何代码运行之前被实例化，它能够允许你监视应用程序和系统的所有交互。
+Instrumentation 会在应用程序的任何代码运行之前被实例化，它能够允许你监视应用程序和系统的所有交互。
 
-从上面的代码我们可以看出，Instrumentation确实是在Application初始化之前就被创建了。那么它是如何实现监视应用程序和系统交互的呢？
+上面的代码我们可以看出，Instrumentation 确实是在 Application 初始化之前就被创建了。
 
-打开这个类你可以发现，最终Apllication的创建，Activity的创建，以及生命周期都会经过这个对象去执行。
-简单点说，就是把这些操作包装了一层。通过操作Instrumentation进而实现上述的功能。
+那么它是如何实现监视应用程序和系统交互的呢？
 
+打开这个类你可以发现，最终 Apllication 的创建，Activity 的创建，以及生命周期都会经过这个对象去执行。
 
-那么这样做究竟有什么好处呢？仔细想想。Instrumentation作为抽象，当我们约定好需要实现的功能之后，我们只需要给Instrumentation仪表添加这些抽象功能，
-然后调用就好。剩下的，不管怎么实现这些功能，都交给Instrumentation仪器的实现对象就好。
-啊！这是多态的运用。啊！这是依赖抽象，不依赖具体的实践。啊！这是上层提出需求，底层定义接口，即依赖倒置原则的践行。呵！抽象不过如此。
+简单点说，就是把这些操作包装了一层。通过操作 Instrumentation 进而实现上述的功能。
 
 
-从代码中可以看到，这里实例化Instrumentation的方法是反射！而反射的ClassName是来自于从ActivityManagerService中传过来的Binder的。
+那么这样做究竟有什么好处呢？仔细想想。Instrumentation 作为抽象，当我们约定好需要实现的功能之后，我们只需要给 Instrumentation 添加这些抽象功能，
+然后调用就好。 __至于如何实现这些功能，都交给 Instrumentation 仪器的实现对象就好__。
+
+啊！这是多态的运用。啊！这是依赖抽象，不依赖具体的实践。__这是上层提出需求，底层定义接口，即依赖倒置原则的践行__。呵！抽象不过如此。
+
+
+从代码中可以看到，这里实例化 Instrumentation 的方法是反射！而反射的ClassName是来自于从 ActivityManagerService 中传过来的Binder的。
 
 套路太深！就是为了隐藏具体的实现对象。但是这样耦合性会很低。
 
-既然在说Instrumentation，那就看看最后调的 callApplicationOnCreate()方法。
+看看最后调的 callApplicationOnCreate()方法,来回调 application 对象的 onCreate 方法。
 
 ```
     public void callApplicationOnCreate(Application app) {
@@ -201,46 +207,47 @@ Instrumentation会在应用程序的任何代码运行之前被实例化，它�
 
 ```
 
-## LoadedApk就是data.info
+
+## makeApplication
 
 ```
 public Application makeApplication(boolean forceDefaultAppClass,
     Instrumentation instrumentation) {
     ...
-    String appClass = mApplicationInfo.className;
     //Application的类名。明显是要用反射了。
+    String appClass = mApplicationInfo.className;
     ...
+    //留意下Context
     ContextImpl appContext = ContextImpl.createAppContext(mActivityThread
         , this);
-    //留意下Context
+    //通过 Instrumentation 创建 Application
     app = mActivityThread.mInstrumentation
         .newApplication( cl, appClass, appContext);
-    //通过仪表创建Application
     ...
 }
 
 ```
-在这个方法中，我们需要知道的就是，在取得Application的实际类名之后，最终的创建工作还是交由Instrumentation去完成，就像前面所说的一样。
+
+在这个方法中，我们需要知道的就是，在取得 Application 的实际类名之后，最终的创建工作还是交由 Instrumentation 去完成，就像前面所说的一样。
 
 
-## 现在把目光移回Instrumentation
+## 现在把目光移回 Instrumentation
 
-看看newApplication()中是如何完成Application的创建的。
+看看 newApplication() 中是如何完成 Application 的创建的。
 
 ```
 static public Application newApplication(Class<?> clazz
     , Context context) throws InstantiationException
     , IllegalAccessException
     , ClassNotFoundException {
+    	 //反射创建，简单粗暴
         Application app = (Application)clazz.newInstance();
-        //反射创建，简单粗暴
-        app.attach(context);
-        //关注下这里，Application被创建后第一个调用的方法。
+         //关注下这里，Application被创建后第一个调用的方法
         //目的是为了绑定Context。
+        app.attach(context);
         return app;
     }
 ```
-
 
 
 # LaunchActivity
@@ -248,16 +255,9 @@ static public Application newApplication(Class<?> clazz
 当Application初始化完成后，系统会更具Manifests中的配置的启动Activity发送一个Intent去启动相应的Activity。
 
 
+Ps:Android 9.0 Activity启动流程会有所改变:
 
-
-
-
-
-
-
-
-
-* Activity：这个大家都熟悉，startActivity方法的真正实现在Activity中
+* Activity：startActivity方法的真正实现在Activity中
 
 * Instrumentation：用来辅助Activity完成启动Activity的过程
 
@@ -413,21 +413,12 @@ code：Instrumentation#execStartActivity
 
 然后调用 H 的sendMessage（） msg.what 为LAUNCH_ACTIVITY，紧接着 去执行performLaunchActivity（），performLaunchActivity里面的动作是 newActivity （真真正正的创建activity）
 
-然后创建application 再去 执行activity 的attach 函数，attach 里面创建了window对象。
-
-
-接下来我们要去看看 IApplicationThread，因为核心功能由其内部的 scheduleLaunchActivity 方法来完成，由于IApplicationThread是个接口，所以，我们需要找到它的实现类，
-它就是ActivityThread中的内部类ApplicationThread，看下它的继承关系：
-
-
-
-
-
-
 
 
 # 参考
 
 [Android源码分析-Activity的启动过程](https://blog.csdn.net/singwhatiwanna/article/details/18154335)
+
 [3分钟看懂Activity启动流程](https://www.jianshu.com/p/9ecea420eb52)
+
 [Android Launcher 启动 Activity 的工作过程](https://blog.csdn.net/qian520ao/article/details/78156214)
