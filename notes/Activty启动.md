@@ -489,7 +489,7 @@ system_server进程是系统进程，java framework框架的核心载体，里�
 这个两个服务都运行在system_server进程的不同线程中，由于ATP和AMS都是基于IBinder接口，都是binder线程，binder线程的创建与销毁都是由binder驱动来决定的。
 
 
-![](https://github.com/xianfeng92/android-code-read/blob/master/images/ActivityThread_MessageModule.jpg)
+ ![](https://github.com/xianfeng92/android-code-read/blob/master/images/ActivityThread_MessageModule.jpg)
 
 
 App进程则是我们常说的应用程序，主线程主要负责Activity/Service等组件的生命周期以及UI相关操作都运行在这个线程； 另外，每个App进程中至少会有两个binder线程
