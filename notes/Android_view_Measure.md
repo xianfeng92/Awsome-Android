@@ -379,12 +379,8 @@ resolveSizeAndState
 resolveSizeAndState除了返回最终尺寸信息还会有可能返回测量的state标志位信息。
 
 
-View的measure方法还是比较聪明的，知道如何偷懒利用以前测量过的数据，如果情况有变，那么就调用onMeasure方法进行实际的测量工作，在onMeasure中，View要根据父ViewGroup给其传递进来的
-widthMeasureSpec和heightMeasureSpec，并结合View自身想要的尺寸，综合考虑，计算出最终的测量的宽度和高度，并存储到相应的成员变量中，这才标志着该View测量有效的完成了，
-如果没有将值存入到成员变量中，View会抛出异常。在该成员变量中有可能也存储了测量过程中的state信息。由于View的measure已经实现了很多逻辑判断，所以我们在自定义View或ViewGroup时，
-都不应该重写measure方法，而应该重写onMeasure方法，在其中实现我们自己的测量逻辑。
+View的measure方法还是比较聪明的，知道如何偷懒利用以前测量过的数据，如果情况有变，那么就调用onMeasure方法进行实际的测量工作，在onMeasure中，View要根据父ViewGroup给其传递进来的.widthMeasureSpec和heightMeasureSpec，并结合View自身想要的尺寸，综合考虑，计算出最终的测量的宽度和高度，并存储到相应的成员变量中，这才标志着该View测量有效的完成了，如果没有将值存入到成员变量中，View会抛出异常。在该成员变量中有可能也存储了测量过程中的state信息。由于View的measure已经实现了很多逻辑判断，所以我们在自定义View或ViewGroup时，都不应该重写measure方法，而应该重写onMeasure方法，在其中实现我们自己的测量逻辑。
 
 
 # 参考
-
 [源码解析Android中View的measure测量过程](https://blog.csdn.net/iispring/article/details/49403315)
