@@ -1,12 +1,36 @@
 通过 LayoutInflater 可以获取到布局文件中的View，任何一个View都不可能凭空突然出现在屏幕上，它们都是要经过非常科学的绘制流程后才能显示出来的。
 每一个视图的绘制过程都必须经历三个最主要的阶段，即onMeasure()、onLayout()和onDraw()。
 
+## 关于Measure几个小结论:
+
+1. View 的 measureSpec 由其父容器的 measureSpec(mode和size) 及自身的 LayoutParams(具体值,wrapContent,matchParent) 共同决定. 对于        ViewRoot其测量模式为Exactly,大小为Window大小.
+
+2. 对于所有的控件,如果在布局中指定了具体数值的高和宽时,系统就会给它指定数值的高和宽的空间.至于屏幕上有没有那么多空间给这些控件那是另外一回事,其实如果我    们尝试在LinearLayout中,将Button A的布局宽度设置为屏幕宽度的1/2,将Button B的布局宽度设置为整个屏幕的宽.假设在系统measure,先测量的Button A,    那么运行时会发现Button B的宽度只会显示出其宽度的1/2.
+
+3. 当一个控件的布局宽度设置为match_parant时,此时传给它的 measureSize 就是其父控件可用的布局宽度值,它的 measureMode为 Exactly.那么该控件实际显    示的宽度还要看其自身 OnMeasure 中在 mode 为 Exactly 时的实现.
+
+4. 当一个控件的布局宽度设置为wrap_content时,如果其父View为Exactly,那么其mode为At_Most,size为父View可用的布局宽度值.如果其父View的mode为        At_most,那么传给子View的mode为At_most,size为父View可用的布局宽度值.
+
+5. 对View进行测量的目的是让View的父控件知道View想要多大的尺寸.当我们的子View在布局文件中,设置具体的布局大小时,其实就是在直接告诉父View,我想要这么    大的布局空间.当我们的子View在布局文件中为match_parent时,其实就是在告诉父View,你有多大布局空间就给我多大的布局空间,贪婪呀~~~~ .当我们的子View    在布局文件中为wrap_content时,其实是在告诉父View,我不贪,我只要够我用的布局空间就可以了.此时父View传给子View的size其实还是父view的可用空间.
+
+
+## View的MeasureSpec的创建规则
+
+   ![](https://github.com/xianfeng92/android-code-read/blob/master/images/view_measureSpec.png)
+
+   父View传给子View的mode = 父View + 子view的布局参数的设定
+   
+   我们在布局文件中设置一个View的布局宽高时,有三种选择:具体数值(dp),match_parent,wrap_content,而对于ViewRoot其mode为Exactly,所有一般
+   我们只需要考虑mode为Exactly和At_most两种情况.当布局为一个很大的View树时,从根View开始,父View传给子View的一般都是Exactly或At_most.
+   
+   所有说,我们在自定义View的时候,重点需要考虑,当该View在布局文件中是match_parent 或 wrap_content 时,我们希望它以何种大小显示(这是我们要根据我们    的需要来决定的)
+   
+   
 ## onMeasures
 
 __对View进行测量的目的是让View的父控件知道View想要多大的尺寸__。
 
-整个应用测量的起点是 ViewRootImpl 类，从它开始依次对子 View 进行测量，如果子View是一个 ViewGroup，那么又会遍历该 ViewGroup 的子 View 依次进行测量。
-也就是说，测量会从 View 树的根结点，纵向递归进行，从而实现自上而下对View树进行测量，直至完成对叶子节点View的测量。
+整个应用测量的起点是 ViewRootImpl 类，从它开始依次对子 View 进行测量，如果子View是一个 ViewGroup，那么又会遍历该 ViewGroup 的子 View 依次进行测量。 __也就是说，测量会从 View 树的根结点，纵向递归进行，从而实现自上而下对View树进行测量，直至完成对叶子节点View的测量__。
 
 那么到底如何对一个View进行测量呢？
 
