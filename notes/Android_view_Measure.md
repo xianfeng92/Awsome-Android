@@ -1,7 +1,24 @@
 通过 LayoutInflater 可以获取到布局文件中的View，任何一个View都不可能凭空突然出现在屏幕上，它们都是要经过非常科学的绘制流程后才能显示出来的。
 每一个视图的绘制过程都必须经历三个最主要的阶段，即onMeasure()、onLayout()和onDraw()。
 
-## onMeasure()
+## onMeasures
+
+__对View进行测量的目的是让View的父控件知道View想要多大的尺寸__。
+
+整个应用测量的起点是 ViewRootImpl 类，从它开始依次对子 View 进行测量，如果子View是一个 ViewGroup，那么又会遍历该 ViewGroup 的子 View 依次进行测量。
+也就是说，测量会从 View 树的根结点，纵向递归进行，从而实现自上而下对View树进行测量，直至完成对叶子节点View的测量。
+
+那么到底如何对一个View进行测量呢？
+
+Android通过调用View的measure()方法对View进行测量，让该View的父控件知道该View想要多大的尺寸空间。
+
+具体来说，View 的父控件 ViewGroup 会调用 View 的 measure 方法，ViewGroup 会将一些宽度和高度的限制条件传递给 View 的 measure 方法。
+
+在View的measure方法会首先从成员变量中读取以前缓存过的测量结果，如果能找到该缓存值，那么就基本完事了，如果没有找到缓存值，那么measure方法会执行onMeasure回调方法，
+measure方法会将上述的宽度和高度的限制条件依次传递给onMeasure方法。onMeasure方法会完成具体的测量工作，并将测量的结果通过调用 View 的 setMeasuredDimension
+方法保存到 View 的成员变量 mMeasuredWidth 和 mMeasuredHeight 中。
+
+测量完成之后，View的父控件就可以通过调用 getMeasuredWidth、getMeasuredState、getMeasuredWidthAndState 这三个方法获取View的测量结果。
 
 specMode 一共有三种类型，如下所示：
 
@@ -17,10 +34,8 @@ specMode 一共有三种类型，如下所示：
    
    该值表示View的父ViewGroup没有给View在尺寸上设置限制条件，这种情况下View可以忽略measureSpec中的size，View可以取自己想要的值作为测量的尺寸。
 
-
-
 widthMeasureSpec和heightMeasureSpec这两个值又是从哪里得到的呢？通常情况下，这两个值都是由父视图经过计算后传递给子视图的，说明父视图会在一定程度上决定子视图的大小。
-但是最外层的根视图，它的widthMeasureSpec和heightMeasureSpec又是从哪里得到的呢？这就需要去分析ViewRoot中的源码了，观察performTraversals()方法可以发现如下代码：
+但是最外层的根视图，它的 widthMeasureSpec 和 heightMeasureSpec 又是从哪里得到的呢？ 这就需要去分析ViewRoot中的源码了，观察performTraversals()方法可以发现如下代码：
 
 ```
 childWidthMeasureSpec = getRootMeasureSpec(desiredWindowWidth, lp.width);
@@ -28,7 +43,7 @@ childHeightMeasureSpec = getRootMeasureSpec(desiredWindowHeight, lp.height);
 
 ```
 
-可以看到，这里调用了getRootMeasureSpec()方法去获取widthMeasureSpec和heightMeasureSpec的值，注意方法中传入的参数，其中lp.width和lp.height在创建ViewGroup实例的时候就被赋值了，
+可以看到，这里调用了getRootMeasureSpec()方法去获取 widthMeasureSpec 和 heightMeasureSpec 的值，注意方法中传入的参数，其中lp.width和lp.height在创建ViewGroup实例的时候就被赋值了，
 它们都等于MATCH_PARENT。
 
 ```
@@ -53,7 +68,7 @@ childHeightMeasureSpec = getRootMeasureSpec(desiredWindowHeight, lp.height);
     }
 ```
 
-可以看到，这里使用了MeasureSpec.makeMeasureSpec()方法来组装一个MeasureSpec，当rootDimension参数等于MATCH_PARENT的时候，MeasureSpec的specMode就等于EXACTLY，
+可以看到，这里使用了 MeasureSpec.makeMeasureSpec() 方法来组装一个 MeasureSpec，当 rootDimension 参数等于 MATCH_PARENT 的时候，MeasureSpec 的 specMode 就等于 EXACTLY，
 当rootDimension等于WRAP_CONTENT的时候，MeasureSpec的specMode就等于AT_MOST。并且MATCH_PARENT和WRAP_CONTENT时的specSize都是等于windowSize的，
 也就意味着根视图总是会充满全屏的。
 
@@ -169,7 +184,7 @@ view中的measure方法：
    如果能找到，那么就简单调用一下setMeasuredDimensionRaw方法，将从缓存中读到的测量结果保存到成员变量mMeasuredWidth和mMeasuredHeight中。
 
 4. 如果不能从mMeasureCache中读到缓存过的测量结果，那么这次View就真的不能再偷懒了，只能乖乖地调用onMeasure方法去完成实际的测量工作，并且将尺寸限制条件widthMeasureSpec和
-    heightMeasureSpec传递给onMeasure方法。关于onMeasure方法。
+    heightMeasureSpec传递给onMeasure方法。
 
 5. 不论上面代码走了哪个判断的分支，最终View都会得到测量的结果，并且将结果缓存到成员变量mMeasureCache中，以便下次执行measure方法时能够从其中读取缓存值。
 

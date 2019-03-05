@@ -2,7 +2,7 @@
 
 LayoutInflater 主要是用于加载布局的。在Activity onCreate中调用的 setContentView() 其实也是用 LayoutInflater 来加载布局的。
 
-先来看一下LayoutInflater的基本用法吧，它的用法非常简单，首先需要获取到LayoutInflater的实例，有两种方法可以获取到，第一种写法如下：
+先来看一下LayoutInflater的基本用法吧，它的用法非常简单，首先需要获取到 LayoutInflater 的实例，有两种方法可以获取到，第一种写法如下：
 
 ```
 LayoutInflater layoutInflater = LayoutInflater.from(context);
@@ -140,18 +140,18 @@ inflate()方法一般接收两个参数，第一个参数就是要加载的布�
 对于每个View的layout_width和layout_height是__设置该控件在View布局中的大小__。也就是说，首先View必须存在于一个布局中，之后如果将layout_width
 设置成match_parent表示让View的宽度填充满布局。
 
-而对于平时在Activity中指定布局文件的时候，最外层的那个布局是可以指定大小的呀，layout_width和layout_height都是有作用的。确实，这主要是因为，
-在setContentView()方法中，Android会自动在布局文件的最外层再嵌套一个 FrameLayout，所以layout_width和layout_height属性才会有效果。
+而对于平时在 Activity 中指定布局文件的时候，最外层的那个布局是可以指定大小，layout_width和layout_height都是有作用的。确实，这主要是因为，
+在 setContentView()方法中，Android 会自动在布局文件的最外层再嵌套一个 FrameLayout，所以 layout_width 和 layout_height 属性才会有效果。
 
 
 任何一个Activity中显示的界面其实主要都由两部分组成，标题栏和内容布局。标题栏就是在很多界面顶部显示的那部分内容，比如刚刚我们的那个例子当中就有标题栏，
-可以在代码中控制让它是否显示。而内容布局就是一个FrameLayout，这个布局的id叫作content，我们调用setContentView()方法时所传入的布局其实就是放到这个FrameLayout中的，
-这也是为什么这个方法名叫作setContentView()，而不是叫setView()。
+可以在代码中控制让它是否显示。而内容布局就是一个 FrameLayout，这个布局的id叫作content，我们调用setContentView()方法时所传入的布局其实就是放到这个 FrameLayout 中的，
+这也是为什么这个方法名叫作 setContentView()，而不是叫 setView()。
 
 
 附上一张Activity窗口的组成图：
 
-
+![](https://github.com/xianfeng92/android-code-read/blob/master/images/activity_window.png)
 
 
 
