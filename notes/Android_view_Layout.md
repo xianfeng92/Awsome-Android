@@ -1,9 +1,9 @@
 # layout
 
-__对View进行布局的目的是计算出View的尺寸以及在其父控件中的位置__，具体来说就是计算出View的四条边界分别到其父控件左边界、上边界的距离，
-即计算View的left、top、right、bottom的值。
+Layout的作用是 ViewGroup 用来确定子元素的位置，__当 ViewGroup 的位置被确认之后，他的 layout 就会去遍历所有子元素并且调用 onLayout 方法__
+，在layout方法中 onLayou 又被调用。__layout 方法确定了 View 本身的位置，而 onLayout 方法则会确定所有子元素的位置。__
 
-## layout
+先看 View 的layout方法，如下所示：
 
 ```
  public void layout(int l, int t, int r, int b) {
@@ -106,20 +106,6 @@ __对View进行布局的目的是计算出View的尺寸以及在其父控件中�
     }
 
 ```
-在layout()方法内部刚开始执行的时候，首先会根据 mPrivateFlags3 变量是否具有标志位 PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT 判断是否需要执行View的 onMeasure()方法。
-如果具有标志位 PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT，则执行onMeasure()方法，从而对View进行测量，测量的结果会保存到View的成员变量中。
-测量完成后就会将mPrivateFlags3低位字节的第4位重置为0，移除掉标签 PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT。
-
-如果 isLayoutModeOptical()返回true，那么就会执行setOpticalFrame()方法，否则会执行setFrame()方法。并且setOpticalFrame()内部会调用setFrame()，
-所以无论如何都会执行setFrame()方法。setFrame()方法会将View新的left、top、right、bottom存储到View的成员变量中，并且返回一个boolean值，
-如果返回true表示View的位置或尺寸发生了变化，否则表示未发生变化。
-
-如果View的布局发生了变化，或者 mPrivateFlags 有需要LAYOUT的标签 PFLAG_LAYOUT_REQUIRED，就会触发onLayout方法的执行，View中默认的 onLayout 方法是个空方法。
-不过继承自ViewGroup的类都需要实现onLayout方法，从而在onLayout方法中依次循环子View，并调用子View的layout方法。在执行完onLayout方法之后，
-从 mPrivateFlags 中移除标签 PFLAG_LAYOUT_REQUIRED。然后会遍历注册的Layout Change事件监听器，依次调用其onLayoutChange方法，这样Layout事件监听器就得到了响应。
-
-最后，从mPrivateFlags中移除强制Layout的标签PFLAG_FORCE_LAYOUT，向mPrivateFlags3中加入Layout完成的标签PFLAG3_IS_LAID_OUT。
-
 
 ### setFrame
 
@@ -201,53 +187,41 @@ protected boolean setFrame(int left, int top, int right, int bottom) {
 
 ```
 
-在该方法中，会将新旧left、right、top、bottom进行对比，只要不完全相同就说明View的布局发生了变化，则将changed变量设置为true。然后比较View的新旧尺寸是否相同，如果尺寸发生了变化，
-并将其保存到变量sizeChanged中。如果尺寸发生了变化，那么sizeChanged的值为true。
+layout的方法的大致流程如下：
 
-然后将新的left、top、right、bottom存储到View的成员变量中保存下来。并执行mRenderNode.setLeftTopRightBottom()方法,其会调用 RenderNode 中原生方法的 nSetLeftTopRightBottom()方法，
-该方法会根据 left、top、right、bottom 更新用于渲染的显示列表。
+1. 首先会通过一个 setFrame 方法来设定 View 的四个顶点的位置，即初始化 mLeft,mTop,mRight,mBottom 这四个值。
 
-如果View的尺寸和之前相比发生了变化，那么就执行sizeChange()方法，该方法中又会调用onSizeChanged()方法，并将View的新旧尺寸传递进去。
+2. View的四个顶点一旦确定，那么View在父容器的位置也就确定了，接下来会调用 onLayout 方法，这个方法的用途是调用父容器确定子元素的位置，和onMeasure类似。
 
-如果View处于可见状态，那么会调用 invalidate 和 invalidateParentCaches 方法。invalidateParentCaches()方法会移除其父控件的 PFLAG_INVALIDATED 标签，这样其父控件就会重建用于渲染的显示列表。
+3. onLayout的具体位置实现同样和具体布局有关，所有 View 和 ViewGroup 均没有真正的实现onLayout方法。
 
 
-## sizeChange
 
-sizeChange方法会在View的尺寸发生变化时调用，在setFrame()方法中就可能会调用sizeChange()方法。当然，在View的setLeft()、setTop()、setRight()、setBottom()
-等其他改变View尺寸的方法中也会调用sizeChange()方法，其源码如下所示：
+
+View的测量宽高和最终宽高有什么区别，即 View的 getMeasureWidth 和 getWidth 这两个方法有什么区别？
+
+
+在View的默认实现中，View的测量宽高和最终的是一样的，只不过一个是measure过程，一个是layout过程。而最终形成的是layout过程，即两者的赋值时机不同，测量宽高的赋值时机，
+稍微早一些。因此，在日常开发中，我们可用认为他们是相等的
+
+
+但是还是有些不相同的，我们可用重写View的layout方法：
+
 
 ```
-   private void sizeChange(int newWidth, int newHeight, int oldWidth, int oldHeight) {
-        //将View的新旧尺寸传递给onSizeChanged()方法
-        onSizeChanged(newWidth, newHeight, oldWidth, oldHeight);
-        if (mOverlay != null) {
-            mOverlay.getOverlayView().setRight(newWidth);
-            mOverlay.getOverlayView().setBottom(newHeight);
-        }
-        rebuildOutline();
+  public void layout(int l,int t,int r, int b){
+        super.layout(l,t,t+100,b+100);
     }
-```
-在该方法中其主要将 View 的新旧尺寸传递给 onSizeChanged() 方法使其执行。
-
-
-## onSizeChanged
-
-onSizeChanged()方法是个空方法，代码如下所示：
 
 ```
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 
-    }
-```
+上述代码会导致在任何平台下 View 的最终宽高总是比测量大于100px,虽然这样这样会导致View显示不正常和没什么意义，但是这证明了测量不等于最终。
+另一种情况是在某种情况下，View 需要多次 measure 才能确定自己的测量宽高，在前几次的测量过程中，其得出的测量宽高可能和最终宽高是不一致的。
 
 
-# 总结
 
-layout方法总的调用过程主线如下所示：
-
-layout() -> onMeasure() -> setFrame() -> sizeChange() -> onSizeChanged() -> onLayout() ->遍历执行OnLayoutChangeListener.onLayoutChange()
-
+# 参考
 
 
 [源码解析Android中View的layout布局过程](https://blog.csdn.net/iispring/article/details/50366021)
+[Android艺术开发探索第四章——View的工作原理]
