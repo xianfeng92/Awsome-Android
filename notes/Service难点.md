@@ -137,14 +137,19 @@ PS: 注意这里的 MyService 和 Activity 是在同一个进程中!!!!
 ```
 public int onStartCommand(Intent intent, int flags, int startId)
 ```
+
 需要关注的是这个方法有一个整型的返回值，它有以下选项:
 
 ```
 START_STICKY_COMPATIBILITY
+
 START_STICKY
+
 START_NOT_STICKY
+
 START_REDELIVER_INTENT
 ```
+
 它们将影响服务异常终止情况下重启服务时的行为，默认情况下，当我们的服务因为系统内存吃紧或者其他原因被异常终止时，
 系统会尝试在某个时刻重新启动服务.
 
@@ -161,8 +166,7 @@ START_REDELIVER_INTENT
 
 3. START_REDELIVER_INTENT
 
-如果系统在onStartCommand()方法返回后杀死了这个服务，系统就会重新创建了这个服务，并且用发送给这个服务的最后的Intent对象调用了onStartCommand()方法。
-任意等待中的Intent对象会依次被发送。这适用于那些应该立即恢复正在执行的工作的服务，如下载文件。
+如果系统在onStartCommand()方法返回后杀死了这个服务，系统就会重新创建了这个服务，并且用发送给这个服务的最后的Intent对象调用了onStartCommand()方法。任意等待中的Intent对象会依次被发送。这适用于那些应该立即恢复正在执行的工作的服务，如下载文件。
 
 
 
