@@ -123,12 +123,14 @@ PS: 注意这里的 MyService 和 Activity 是在同一个进程中!!!!
 2. bindService 开启服务以后，与 activity 存在关联，退出 activity 时必须调用 unbindService 方法，否则会报 ServiceConnection 泄漏的错误。
 
 ```
-2019-03-10 11:03:49.074 21687-21687/com.xforg.demo_service E/ActivityThread: Activity com.xforg.demo_service.MainActivity has leaked ServiceConnection com.xforg.demo_service.MainActivity$MyServerConnec@ac35cd1 that was originally bound here
+2019-03-10 11:03:49.074 21687-21687/com.xforg.demo_service E/ActivityThread: Activity com.xforg.demo_service.MainActivity 
+has leaked ServiceConnection com.xforg.demo_service.MainActivity$MyServerConnec@ac35cd1 that was originally bound here
     android.app.ServiceConnectionLeaked: Activity com.xforg.demo_service.MainActivity has leaked ServiceConnection com.xforg.demo_service.MainActivity$MyServerConnec@ac35cd1 that was originally bound here
         at android.app.LoadedApk$ServiceDispatcher.<init>(LoadedApk.java:1610)
 ```
 当同一个服务用 startService 和 bindService 两种方式一同开启，没有先后顺序的要求，MyService 的 onCreate 只会执行一次。关闭服务需要 stopService 和 unbindService 都被调用，
-也没有先后顺序的影响，MyService的 onDestroy 也只执行一次。但是如果只用一种方式关闭服务，不论是哪种关闭方式，onDestroy都不会被执行，服务也不会被关闭。
+也没有先后顺序的影响，MyService的 onDestroy 也只执行一次。但是如果只用一种方式关闭服务，不论是哪种关闭方式，onDestroy都不会被执行，
+服务也不会被关闭。
 
 ## Service: onStartCommand 的返回值
 
@@ -148,13 +150,14 @@ public int onStartCommand(Intent intent, int flags, int startId)
 
 2. START_STICKY(系统的默认策略)
 
-如果系统在onStartCommand()返回后杀死了这个服务，系统就会重新创建这个服务并且调用onStartCommand()方法，但是它不会重新传递最后的Intent对象，
-系统会用一个null的Intent对象来调用onStartCommand()方法，在这个情况下，除非有一些被发送的Intent对象在等待启动服务。
-这适用于不执行命令的媒体播放器（或类似的服务），它只是无限期的运行着并等待工作的到来。
+如果系统在onStartCommand()返回后杀死了这个服务，系统就会重新创建这个服务并且调用onStartCommand()方法，但是它不会重新传递
+最后的Intent对象，系统会用一个null的Intent对象来调用onStartCommand()方法，在这个情况下，除非有一些被发送的Intent对象在
+等待启动服务。这适用于不执行命令的媒体播放器（或类似的服务），它只是无限期的运行着并等待工作的到来。
 
 3. START_REDELIVER_INTENT
 
-如果系统在onStartCommand()方法返回后杀死了这个服务，系统就会重新创建了这个服务，并且用发送给这个服务的最后的Intent对象调用了onStartCommand()方法。任意等待中的Intent对象会依次被发送。这适用于那些应该立即恢复正在执行的工作的服务，如下载文件。
+如果系统在onStartCommand()方法返回后杀死了这个服务，系统就会重新创建了这个服务，并且用发送给这个服务的最后的Intent对象调用了
+onStartCommand()方法。任意等待中的Intent对象会依次被发送。这适用于那些应该立即恢复正在执行的工作的服务，如下载文件。
 
 
 
