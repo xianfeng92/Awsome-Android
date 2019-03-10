@@ -131,6 +131,10 @@ has leaked ServiceConnection com.xforg.demo_service.MainActivity$MyServerConnec@
 当同一个服务用 startService 和 bindService 两种方式一同开启，没有先后顺序的要求，MyService 的 onCreate 只会执行一次。关闭服务需要 stopService 和 unbindService 都被调用，
 也没有先后顺序的影响，MyService的 onDestroy 也只执行一次。但是如果只用一种方式关闭服务，不论是哪种关闭方式，onDestroy都不会被执行，
 服务也不会被关闭。
+   
+ ps:
+ 
+  Service的onCreate、onStartCommand、onDestory等全部生命周期方法都运行在UI线程，ServiceConnection里面的回调方法也是运行在UI线程
 
 ## Service: onStartCommand 的返回值
 
