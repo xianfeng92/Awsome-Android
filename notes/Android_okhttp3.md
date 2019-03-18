@@ -1,444 +1,428 @@
 
+# okhttp3
 
+## 一个简单的okhttp请求
 
-```
-  Response getResponseWithInterceptorChain() throws IOException {
-    // Build a full stack of interceptors.
-    List<Interceptor> interceptors = new ArrayList<>();
-    interceptors.addAll(client.interceptors());
-    interceptors.add(retryAndFollowUpInterceptor);
-    interceptors.add(new BridgeInterceptor(client.cookieJar()));
-    interceptors.add(new CacheInterceptor(client.internalCache()));
-    interceptors.add(new ConnectInterceptor(client));
-    if (!forWebSocket) {
-      interceptors.addAll(client.networkInterceptors());
-    }
-    interceptors.add(new CallServerInterceptor(forWebSocket));
+我们用OkHttp3发起一个网络请求一般是这样：
 
-    Interceptor.Chain chain = new RealInterceptorChain(interceptors, null, null, null, 0,
-        originalRequest, this, eventListener, client.connectTimeoutMillis(),
-        client.readTimeoutMillis(), client.writeTimeoutMillis());
-
-    return chain.proceed(originalRequest);
-  }
-```
-
-getResponseWithInterceptorChain 中文意思就是使用拦截器链获取响应,该方法做了一下几件事:
-
-1. 用一个 List 存储所有的 interceptor,主要有如下几种:
-
-* client.interceptors() 为 在配置 OkHttpClient 时设置的 interceptors
-
-* retryAndFollowUpInterceptor 负责失败重试以及重定向
-
-* BridgeInterceptor(桥接器) 负责把用户构造的请求转换为发送到服务器的请求、把服务器返回的响应转换为用户友好的响应
-
-* CacheInterceptor 负责读取缓存直接返回、更新缓存
-
-* ConnectInterceptor 负责和服务器建立连接
-
-* client.networkInterceptors() 配置 OkHttpClient 时设置的 networkInterceptors
-
-* CallServerInterceptor 负责向服务器发送请求数据以及从服务器读取响应数据
-
-2. new RealInterceptorChain 对象, 该对象是啥?
+1. 首先要构建一个OkHttpClient：
 
 ```
-/**
- * A concrete interceptor chain that carries the entire interceptor chain: all application
- * interceptors, the OkHttp core, all network interceptors, and finally the network caller.
- */
-public final class RealInterceptorChain implements Interceptor.Chain {
+        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                .connectTimeout(15, TimeUnit.SECONDS)
+                .readTimeout(15,TimeUnit.SECONDS)
+                .writeTimeout(15,TimeUnit.SECONDS)
+                .build();
+```
+
+2. 然后构建一个 Request
+
+```
+        Request request = new Request.Builder()
+                .url("https://www.baidu.com/")
+                .build();
+```
+
+
+3. 发起请求
+
+```
+// 同步请求
+okHttpClient.newCall(request).execute();
+
+// 异步请求
+okHttpClient.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+
+                }
+            });
 
 ```
 
-RealInterceptorChain 名字直译就是真正的拦截器链,其承载整个拦截器链的具体拦截器链：所有应用程序拦截器、OKHTTP核心、所有网络拦截器，最后是网络调用者。其构造方法中传入了所有的
-interceptor,originalRequest,eventListener以及client的读写以及连接的超时时间.这里值得注意的是,RealInterceptorChain构造方法中第五个参数传入的为0.
+以上是简略的用OkHttp3请求网络的步骤，下面我们来通过源码分析下。
 
+## 源码分析
 
-3. 返回一个 chain.proceed(originalRequest), 其实就是一个 Response.
-
-经过以上分析,重点应该就在 chain.proceed(originalRequest) 了,看一看该方法:
+我们先来看看OkHttp的newCall方法：
 
 ```
-public Response proceed(Request request, StreamAllocation streamAllocation, HttpCodec httpCodec,
-      RealConnection connection) throws IOException {
-    if (index >= interceptors.size()) throw new AssertionError();
-
-    calls++;
-
-    // If we already have a stream, confirm that the incoming request will use it.
-    // 如果我们已经有一个stream, 确定即将到来的request会使用它
-    if (this.httpCodec != null && !this.connection.supportsUrl(request.url())) {
-      throw new IllegalStateException("network interceptor " + interceptors.get(index - 1)
-          + " must retain the same host and port");
-    }
-
-    // If we already have a stream, confirm that this is the only call to chain.proceed().
-    // 如果我们已经有一个stream, 确定这是 chain.proceed() 所处理的唯一的call
-    if (this.httpCodec != null && calls > 1) {
-      throw new IllegalStateException("network interceptor " + interceptors.get(index - 1)
-          + " must call proceed() exactly once");
-    }
-
-    // Call the next interceptor in the chain.
-    // 调用链的下一个拦截器
-    RealInterceptorChain next = new RealInterceptorChain(interceptors, streamAllocation, httpCodec,
-        connection, index + 1, request, call, eventListener, connectTimeout, readTimeout,
-        writeTimeout);
-    Interceptor interceptor = interceptors.get(index);
-    Response response = interceptor.intercept(next);
-
-    // Confirm that the next interceptor made its required call to chain.proceed().
-    if (httpCodec != null && index + 1 < interceptors.size() && next.calls != 1) {
-      throw new IllegalStateException("network interceptor " + interceptor
-          + " must call proceed() exactly once");
-    }
-
-    // Confirm that the intercepted response isn't null.
-    if (response == null) {
-      throw new NullPointerException("interceptor " + interceptor + " returned null");
-    }
-
-    if (response.body() == null) {
-      throw new IllegalStateException(
-          "interceptor " + interceptor + " returned a response with no body");
-    }
-
-    return response;
-  }
-```
-
-代码很多，但是主要是进行一些判断，主要的代码在这:
-
-```
- // 调用链的下一个拦截器
-    RealInterceptorChain next = new RealInterceptorChain(interceptors, streamAllocation, httpCodec,
-        connection, index + 1, request, call, eventListener, connectTimeout, readTimeout,
-        writeTimeout);
-    Interceptor interceptor = interceptors.get(index);
-    Response response = interceptor.intercept(next);
-```
-
-上面的代码主要做了如下几件事:
-
-1. 再次实例化一个 RealInterceptorChain 对象,注意这次实例化时,第五个参数传入的是 index + 1.
-
-2. interceptor 列表中获取 index 位置的 interceptor.如果在client中自己没有设置的 interceptor,那么这个 index 为0所对应 interceptor 就是 retryAndFollowUpInterceptor.
-
-3. interceptor.intercept(next), 将 RealInterceptorChain 对象传入 retryAndFollowUpInterceptor, 并调用 retryAndFollowUpInterceptor 的 intercept 方法
-
-
-通过上面的分析可知: response 就是 retryAndFollowUpInterceptor 对象调用 intercept 方法后的返回值.
-
-
-重点又来到了 retryAndFollowUpInterceptor 的 intercept 方法:
-
-```
-@Override public Response intercept(Chain chain) throws IOException {
-    Request request = chain.request();
-    RealInterceptorChain realChain = (RealInterceptorChain) chain;
-    Call call = realChain.call();
-    EventListener eventListener = realChain.eventListener();
-
-    streamAllocation = new StreamAllocation(client.connectionPool(), createAddress(request.url()),
-        call, eventListener, callStackTrace);
-
-    int followUpCount = 0;
-    Response priorResponse = null;
-    while (true) {
-      if (canceled) {
-        streamAllocation.release();
-        throw new IOException("Canceled");
-      }
-
-      Response response;
-      boolean releaseConnection = true;
-      try {
-        response = realChain.proceed(request, streamAllocation, null, null);
-        releaseConnection = false;
-      } catch (RouteException e) {
-        // The attempt to connect via a route failed. The request will not have been sent.
-        // 如果是通过路由连接失败，请求将不会再发送
-        if (!recover(e.getLastConnectException(), false, request)) {
-          throw e.getLastConnectException();
-        }
-        releaseConnection = false;
-        continue;
-      } catch (IOException e) {
-        // An attempt to communicate with a server failed. The request may have been sent.
-        // 与服务器尝试通信失败,请求不会再发送。
-        boolean requestSendStarted = !(e instanceof ConnectionShutdownException);
-        if (!recover(e, requestSendStarted, request)) throw e;
-        releaseConnection = false;
-        continue;
-      } finally {
-        // We're throwing an unchecked exception. Release any resources.
-        // 抛出未检查的异常，释放资源
-        if (releaseConnection) {
-          streamAllocation.streamFailed(null);
-          streamAllocation.release();
-        }
-      }
-
-      // Attach the prior response if it exists. Such responses never have a body.
-      if (priorResponse != null) {
-        response = response.newBuilder()
-            .priorResponse(priorResponse.newBuilder()
-                    .body(null)
-                    .build())
-            .build();
-      }
-
-      Request followUp = followUpRequest(response);
-
-      if (followUp == null) {
-        if (!forWebSocket) {
-          streamAllocation.release();
-        }
-        return response;
-      }
-
-      closeQuietly(response.body());
-
-      if (++followUpCount > MAX_FOLLOW_UPS) {
-        streamAllocation.release();
-        throw new ProtocolException("Too many follow-up requests: " + followUpCount);
-      }
-
-      if (followUp.body() instanceof UnrepeatableRequestBody) {
-        streamAllocation.release();
-        throw new HttpRetryException("Cannot retry streamed HTTP body", response.code());
-      }
-
-      if (!sameConnection(response, followUp.url())) {
-        streamAllocation.release();
-        streamAllocation = new StreamAllocation(client.connectionPool(),
-            createAddress(followUp.url()), call, eventListener, callStackTrace);
-      } else if (streamAllocation.codec() != null) {
-        throw new IllegalStateException("Closing the body of " + response
-            + " didn't close its backing stream. Bad interceptor?");
-      }
-
-      request = followUp;
-      priorResponse = response;
-    }
+  /**
+   * Prepares the {@code request} to be executed at some point in the future.
+   */
+  @Override public Call newCall(Request request) {
+    return RealCall.newRealCall(this, request, false /* for web socket */);
   }
 
 ```
-
-
-上面代码的关键在 response = realChain.proceed(request, streamAllocation, null, null), 这里又调用了 RealInterceptorChain 的 proceed.只不过这里的
-
-RealInterceptorChain在构造时的index值已经增为1.所以在 proceed 方法中 interceptors.get(index) 获取到的已经是 BridgeInterceptor 了.
-
-然后重点又来到了 BridgeInterceptor 的 intercept 方法:
+可以看见返回的 RealCall，所以我们发起请求无论是调用 execute方法还是 enqueue 方法，实际上调用的都是 RealCall 内部的方法。
 
 ```
-@Override public Response intercept(Chain chain) throws IOException {
-    Request userRequest = chain.request();
-    Request.Builder requestBuilder = userRequest.newBuilder();
-    // 将用户的request转换为发送到server的请求
-    RequestBody body = userRequest.body();
-    if (body != null) {
-      MediaType contentType = body.contentType();
-      if (contentType != null) {
-        requestBuilder.header("Content-Type", contentType.toString());
-      }
-
-      long contentLength = body.contentLength();
-      if (contentLength != -1) {
-        requestBuilder.header("Content-Length", Long.toString(contentLength));
-        requestBuilder.removeHeader("Transfer-Encoding");
-      } else {
-        requestBuilder.header("Transfer-Encoding", "chunked");
-        requestBuilder.removeHeader("Content-Length");
-      }
+  @Override public Response execute() throws IOException {
+    synchronized (this) {
+      if (executed) throw new IllegalStateException("Already Executed");
+      executed = true;
     }
-
-    if (userRequest.header("Host") == null) {
-      requestBuilder.header("Host", hostHeader(userRequest.url(), false));
-    }
-
-    if (userRequest.header("Connection") == null) {
-      requestBuilder.header("Connection", "Keep-Alive");
-    }
-
-    // If we add an "Accept-Encoding: gzip" header field we're responsible for also decompressing
-    // the transfer stream.
-    // GZIP压缩
-    boolean transparentGzip = false;
-    if (userRequest.header("Accept-Encoding") == null && userRequest.header("Range") == null) {
-      transparentGzip = true;
-      requestBuilder.header("Accept-Encoding", "gzip");
-    }
-
-    List<Cookie> cookies = cookieJar.loadForRequest(userRequest.url());
-    if (!cookies.isEmpty()) {
-      requestBuilder.header("Cookie", cookieHeader(cookies));
-    }
-
-    if (userRequest.header("User-Agent") == null) {
-      requestBuilder.header("User-Agent", Version.userAgent());
-    }
-
-    Response networkResponse = chain.proceed(requestBuilder.build());
-
-    HttpHeaders.receiveHeaders(cookieJar, userRequest.url(), networkResponse.headers());
-
-    Response.Builder responseBuilder = networkResponse.newBuilder()
-        .request(userRequest);
-
-    if (transparentGzip
-        && "gzip".equalsIgnoreCase(networkResponse.header("Content-Encoding"))
-        && HttpHeaders.hasBody(networkResponse)) {
-      GzipSource responseBody = new GzipSource(networkResponse.body().source());
-      Headers strippedHeaders = networkResponse.headers().newBuilder()
-          .removeAll("Content-Encoding")
-          .removeAll("Content-Length")
-          .build();
-      responseBuilder.headers(strippedHeaders);
-      String contentType = networkResponse.header("Content-Type");
-      responseBuilder.body(new RealResponseBody(contentType, -1L, Okio.buffer(responseBody)));
-    }
-
-    return responseBuilder.build();
-  }
-
-```
-
-上面代码主要做了如下几件事:
-
-1. BridgeInterceptor对于 request 的格式进行检查，并构建了一个新的request
-
-2. 调用下一个 interceptor 来得到 response
-
-3. 对得到的response进行一些判断操作，最后将结果返回
-
-
-到这里我们知道 response 还是要靠下一个 interceptor 来获取,下一个对应index为2,即是 CacheInterceptor
-
-然后重点又来到了 CacheInterceptor 的 intercept 方法:
-
-```
-@Override public Response intercept(Chain chain) throws IOException {
-    Response cacheCandidate = cache != null
-        ? cache.get(chain.request())
-        : null;// 检查是否已缓存过 request 所对应的response
-
-    long now = System.currentTimeMillis();
-
-    CacheStrategy strategy = new CacheStrategy.Factory(now, chain.request(), cacheCandidate).get();
-    Request networkRequest = strategy.networkRequest;
-    Response cacheResponse = strategy.cacheResponse;
-
-    if (cache != null) {
-      cache.trackResponse(strategy);
-    }
-
-    if (cacheCandidate != null && cacheResponse == null) {
-      closeQuietly(cacheCandidate.body()); // The cache candidate wasn't applicable. Close it. 缓存候选不适用,关闭它。
-    }
-
-    // If we're forbidden from using the network and the cache is insufficient, fail.
-    // 如果我们禁止使用网络，且缓存为null，失败
-    if (networkRequest == null && cacheResponse == null) {
-      return new Response.Builder()
-          .request(chain.request())
-          .protocol(Protocol.HTTP_1_1)
-          .code(504)//网关超时
-          .message("Unsatisfiable Request (only-if-cached)")
-          .body(Util.EMPTY_RESPONSE)
-          .sentRequestAtMillis(-1L)
-          .receivedResponseAtMillis(System.currentTimeMillis())
-          .build();
-    }
-
-    // If we don't need the network, we're done.
-    // 没有网络请求，则返回缓存
-    if (networkRequest == null) {
-      return cacheResponse.newBuilder()
-          .cacheResponse(stripBody(cacheResponse))
-          .build();
-    }
-
-    Response networkResponse = null;
+    transmitter.timeoutEnter();
+    transmitter.callStart();
     try {
-      networkResponse = chain.proceed(networkRequest);
+      client.dispatcher().executed(this);
+      return getResponseWithInterceptorChain();
     } finally {
-      // If we're crashing on I/O or otherwise, don't leak the cache body.
-      if (networkResponse == null && cacheCandidate != null) {
-        closeQuietly(cacheCandidate.body());
-      }
+      client.dispatcher().finished(this);
+    }
+  }
+
+  @Override public void enqueue(Callback responseCallback) {
+    synchronized (this) {
+      if (executed) throw new IllegalStateException("Already Executed");
+      executed = true;
+    }
+    transmitter.callStart();
+    client.dispatcher().enqueue(new AsyncCall(responseCallback));
+  }
+```
+
+在 RealCall 内部的 enqueue 方法和 execute 方法中，都是通过 OkHttpClient 的任务调度器 Dispatcher 来完成。这里的 Dispatcher
+为一个任务调度器，通过它来调度请求。
+
+
+## 任务调度器 Dispatcher
+
+Dispatcher中有一些重要的变量:
+
+```
+//最大并发请求数
+private int maxRequests = 64;
+//每个主机的最大请求数
+private int maxRequestsPerHost = 5;
+
+//这个是线程池，采用懒加载的模式，在第一次请求的时候才会初始化
+private @Nullable ExecutorService executorService;
+
+//将要运行的异步请求任务队列
+private final Deque<AsyncCall> readyAsyncCalls = new ArrayDeque<>();
+
+//正在运行的异步请求任务队列
+private final Deque<AsyncCall> runningAsyncCalls = new ArrayDeque<>();
+
+//正在运行的同步请求队列
+private final Deque<RealCall> runningSyncCalls = new ArrayDeque<>();
+```
+1. Dispatcher 中使用队列这个数据结构来存储请求任务，所以对于最先发起的请求会最先被执行
+
+2. executorService 用来执行异步请求
+
+
+我们再看看 Dispatcher 的构造方法:
+
+```
+  public Dispatcher(ExecutorService executorService) {
+    this.executorService = executorService;
+  }
+
+  public Dispatcher() {
+  }
+
+  public synchronized ExecutorService executorService() {
+    if (executorService == null) {
+      executorService = new ThreadPoolExecutor(0, Integer.MAX_VALUE, 60, TimeUnit.SECONDS,
+          new SynchronousQueue<>(), Util.threadFactory("OkHttp Dispatcher", false));
+    }
+    return executorService;
+  }
+```
+
+1. 可以看到 Dispatcher 有 2 个构造方法，我们如果需要用自己的线程池，可以调用带有线程池参数的构造方法。
+
+2. Dispatcher 中的默认构造方法是个空实现，线程池的加载方式采用的是懒加载，也就是在第一次调用请求的时候初始化。
+
+3. Dispatcher采用的线程池类似于CacheThreadPool，没有核心线程，非核心线程数很大，比较适合执行大量的耗时较少的任务。
+
+4. 当然我们可以通过 setMaxRequests 和 setMaxRequestsPerHost 来修改最大并发请求数和每个主机的最大请求数
+
+
+先来分析一下同步请求流程：
+
+### 同步请求流程分析
+
+我们通过 okHttpClient.newCall(request).execute() 来发起同步请求，这里实际上调用的是RealCall内部的execute方法：
+
+```
+  @Override public Response execute() throws IOException {
+    synchronized (this) {
+      if (executed) throw new IllegalStateException("Already Executed");
+      executed = true;
+    }
+    transmitter.timeoutEnter();
+    transmitter.callStart();
+    try {
+      client.dispatcher().executed(this);
+      return getResponseWithInterceptorChain();
+    } finally {
+      client.dispatcher().finished(this);
+    }
+  }
+```
+
+RealCall内部的 execute 方法主要做了3件事：
+
+1. 执行 Dispacther 的 executed 方法，将任务添加到同步任务队列中：
+
+```
+  /** Used by {@code Call#execute} to signal it is in-flight. */
+  synchronized void executed(RealCall call) {
+    runningSyncCalls.add(call);
+  }
+```
+
+2. 调用RealCall的 getResponseWithInterceptorChain 方法请求网络，并返回 response。
+   从这里可以看到，真正“完成”请求任务的为 getResponseWithInterceptorChain 方法。
+
+3. 无论请求的结果如何，最后都会调用Dispatcher的finished方法，将当前的任务移出同步队列
+
+```
+/** Used by {@code AsyncCall#run} to signal completion. */
+  void finished(AsyncCall call) {
+    call.callsPerHost().decrementAndGet();
+    finished(runningAsyncCalls, call);
+  }
+
+  /** Used by {@code Call#execute} to signal completion. */
+  void finished(RealCall call) {
+    finished(runningSyncCalls, call);
+  }
+
+  private <T> void finished(Deque<T> calls, T call) {
+    Runnable idleCallback;
+    synchronized (this) {
+      // 将请求移出队列
+      if (!calls.remove(call)) throw new AssertionError("Call wasn't in-flight!");
+      idleCallback = this.idleCallback;
     }
 
-    // If we have a cache response too, then we're doing a conditional get.
-    if (cacheResponse != null) {
-      if (networkResponse.code() == HTTP_NOT_MODIFIED) {
-        Response response = cacheResponse.newBuilder()
-            .headers(combine(cacheResponse.headers(), networkResponse.headers()))
-            .sentRequestAtMillis(networkResponse.sentRequestAtMillis())
-            .receivedResponseAtMillis(networkResponse.receivedResponseAtMillis())
-            .cacheResponse(stripBody(cacheResponse))
-            .networkResponse(stripBody(networkResponse))
-            .build();
-        networkResponse.body().close();
+    boolean isRunning = promoteAndExecute();
 
-        // Update the cache after combining headers but before stripping the
-        // Content-Encoding header (as performed by initContentStream()).
-        cache.trackConditionalCacheHit();
-        cache.update(cacheResponse, response);
-        return response;
-      } else {
-        closeQuietly(cacheResponse.body());
-      }
+    if (!isRunning && idleCallback != null) {
+      idleCallback.run();
+    }
+  }
+```
+
+值得关注的一点是，在 finished 一个 runningSyncCalls 时，还会调用 promoteAndExecute 方法，而 promoteAndExecute 主要是对 runningAsyncCalls 的操作。
+
+这里设计的很细致：当同步请求和异步请求数之和达到了最大并发请求数时，当执行完一个同步请求任务时，如果异步请求队列中还有等待执行的任务，
+此时就会去取出一个异步任务并执行。除此之外，当 Dispatcher 的 MaxRequests 以及 MaxRequestsPerHost 被改变时，也是会去调用 promoteAndExecute 方法。
+
+
+#### runningSyncCalls
+     
+     我们知道 runningSyncCalls 为一个列表，其主要存储客户端发出的所以同步请求（SyncCall），不管是往队列中添加或者移除，都是需要主要状态的同步操作。
+其实从相关方法上也可以看到都是 synchronized。
+
+
+#### 小结
+
+综上流程分析来看，同步请求只是利用了 Dispatcher 的任务队列管理，没有利用 Dispatcher 的线程池，所以 executed 方法是在请求发起的线程中运行的。
+所以我们不能直接在 UI 线程中调用 OkHttpClient 的同步请求，否则会报 “NetworkOnMainThread” 错误。
+
+
+再来看看异步请求的流程吧～
+
+
+### 异步请求流程分析
+
+我们通过 okHttpClient.newCall(request).enqueue 可以发起一个异步请求，实际上调用的是 RealCall 中的 enqueue 方法。
+
+```
+    @Override public void enqueue(Callback responseCallback) {
+    synchronized (this) {
+      if (executed) throw new IllegalStateException("Already Executed");
+      executed = true;
+    }
+    transmitter.callStart();
+    client.dispatcher().enqueue(new AsyncCall(responseCallback));
+  }
+```
+RealCall 中的 enqueue 方法主要调用 Dispatcher 中的 enqueue 方法，并将传入的 responseCallback 适配成一个 AsyncCall，AsyncCall 可在线程池
+中被执行，这里用到了适配器模式。下面通过源码看看 AsyncCall 里主要做了啥：
+
+```
+  final class AsyncCall extends NamedRunnable {
+    private final Callback responseCallback;
+    private volatile AtomicInteger callsPerHost = new AtomicInteger(0);
+
+    AsyncCall(Callback responseCallback) {
+      super("OkHttp %s", redactedUrl());
+      this.responseCallback = responseCallback;
     }
 
-    Response response = networkResponse.newBuilder()
-        .cacheResponse(stripBody(cacheResponse))
-        .networkResponse(stripBody(networkResponse))
-        .build();
+    AtomicInteger callsPerHost() {
+      return callsPerHost;
+    }
 
-    if (cache != null) {
-      if (HttpHeaders.hasBody(response) && CacheStrategy.isCacheable(response, networkRequest)) {
-        // Offer this request to the cache.
-        CacheRequest cacheRequest = cache.put(response);
-        return cacheWritingResponse(cacheRequest, response);
-      }
+    void reuseCallsPerHostFrom(AsyncCall other) {
+      this.callsPerHost = other.callsPerHost;
+    }
 
-      if (HttpMethod.invalidatesCache(networkRequest.method())) {
-        try {
-          cache.remove(networkRequest);
-        } catch (IOException ignored) {
-          // The cache cannot be written.
+    String host() {
+      return originalRequest.url().host();
+    }
+
+    Request request() {
+      return originalRequest;
+    }
+
+    RealCall get() {
+      return RealCall.this;
+    }
+
+    /**
+     * Attempt to enqueue this async call on {@code executorService}. This will attempt to clean up
+     * if the executor has been shut down by reporting the call as failed.
+     */
+    void executeOn(ExecutorService executorService) {
+      assert (!Thread.holdsLock(client.dispatcher()));
+      boolean success = false;
+      try {
+        executorService.execute(this);
+        success = true;
+      } catch (RejectedExecutionException e) {
+        InterruptedIOException ioException = new InterruptedIOException("executor rejected");
+        ioException.initCause(e);
+        transmitter.noMoreExchanges(ioException);
+        responseCallback.onFailure(RealCall.this, ioException);
+      } finally {
+        if (!success) {
+          client.dispatcher().finished(this); // This call is no longer running!
         }
       }
     }
 
-    return response;
+    @Override protected void execute() {
+      boolean signalledCallback = false;
+      transmitter.timeoutEnter();
+      try {
+        Response response = getResponseWithInterceptorChain();
+        signalledCallback = true;
+        responseCallback.onResponse(RealCall.this, response);
+      } catch (IOException e) {
+        if (signalledCallback) {
+          // Do not signal the callback twice!
+          Platform.get().log(INFO, "Callback failure for " + toLoggableString(), e);
+        } else {
+          responseCallback.onFailure(RealCall.this, e);
+        }
+      } finally {
+        client.dispatcher().finished(this);
+      }
+    }
   }
 ```
 
+1. AsyncCall 继承自 NamedRunnable，而NamedRunnable实现了Runnable接口，在run方法中会调用execute方法，所以当线程池执行AsyncCall时，
+   AsyncCall 的 execute 方法就会被调用。
 
-1. 首先，根据request来判断cache中是否有缓存的response，如果有，得到这个response，然后进行判断当前response是否有效，没有将cacheCandate赋值为空。
+2. AtomicInteger 记录每个 host 的请求数。使用 AtomicInteger，可以确保多线程的情况下（在线程池中执行异步请求），callsPerHost变量（增减操作）的安全性。
 
-2. 根据request判断缓存的策略，是否要使用了网络，缓存 或 两者都使用
+3. AsyncCall的 execute 方法通过 getResponseWithInterceptorChain 方法请求网络得到 Response，并将 response 和 RealCall 回调给 responseCallback。
+   以上这些方法都是运行在线程池（ExecutorService）中的，不能直接更新UI。
 
-3. 调用下一个拦截器，决定从网络上来得到response
+4. AsyncCall的 execute 方法无论请求结果如何，最后都会调用 Dispatcher的finished方法，即将该请求从 runningAsyncCalls 队列中移除。
 
-4. 如果本地已经存在cacheResponse，那么让它和网络得到的networkResponse做比较，决定是否来更新缓存的cacheResponse
+下面再看看 Dispatcher#finished 具体做了些啥：
 
-5. 缓存未经缓存过的response
+```
+  void finished(AsyncCall call) {
+    call.callsPerHost().decrementAndGet();
+    finished(runningAsyncCalls, call);
+  }
 
-networkResponse = chain.proceed(networkRequest);
+  private <T> void finished(Deque<T> calls, T call) {
+    Runnable idleCallback;
+    synchronized (this) {
+      if (!calls.remove(call)) throw new AssertionError("Call wasn't in-flight!");
+      idleCallback = this.idleCallback;
+    }
+
+    boolean isRunning = promoteAndExecute();
+
+    if (!isRunning && idleCallback != null) {
+      idleCallback.run();
+    }
+  }
+   */
+  private boolean promoteAndExecute() {
+    assert (!Thread.holdsLock(this));
+
+    List<AsyncCall> executableCalls = new ArrayList<>();
+    boolean isRunning;
+    synchronized (this) {
+      for (Iterator<AsyncCall> i = readyAsyncCalls.iterator(); i.hasNext(); ) {
+        AsyncCall asyncCall = i.next();
+
+        if (runningAsyncCalls.size() >= maxRequests) break; // Max capacity.
+        if (asyncCall.callsPerHost().get() >= maxRequestsPerHost) continue; // Host max capacity.
+        // 如果当前的请求没有超出每个主机的最大请求数
+        i.remove();
+        asyncCall.callsPerHost().incrementAndGet();
+        executableCalls.add(asyncCall);
+        runningAsyncCalls.add(asyncCall);
+      }
+      isRunning = runningCallsCount() > 0;
+    }
+
+    for (int i = 0, size = executableCalls.size(); i < size; i++) {
+      AsyncCall asyncCall = executableCalls.get(i);
+      asyncCall.executeOn(executorService());
+    }
+
+    return isRunning;
+  }
+
+```
+1. 每次调用finish时，callsPerHost().decrementAndGet()，即每个host的请求数会减一。
+
+2. 将该 asyncCall 添加到 executableCalls 队列中（executableCalls 为 promoteAndExecute 方法内维护的一个队列），然后放到线程池中（executorService）执行。
+
+所以在异步请求中，当达到最大并发请求数时，每执行完（finish）一个任务，就会自动去从待执行的任务队列取出任务来执行。
+
+#### runningAsyncCalls 和 readyAsyncCalls
+     
+     由于异步请求有最大并发请求数的限制，所以我们需要两个队列来维护异步请求，readyAsyncCalls 为将要运行的异步请求任务队列，而 runningAsyncCalls 为正在运行的异步请求
+任务队列，默认情况下，runningAsyncCalls 队列的容量的最大值为64。当有异步请求被处理完成或者并发请求数被修改时，我们需要同时更新 readyAsyncCalls 和 runningAsyncCalls 两个队列的状态。
+当然对这两个队列的操作也是需要考虑同步的。
+
+
+## 小结
+
+1. 综上，异步请求利用了 Dispatcher 的线程池来处理请求。当我们发起一个异步请求时，首先会将我们的请求包装成一个AsyncCall，并加入到 Dispatcher 管理的异步任务队列中，
+   如果没有达到最大的请求数量限制(默认值为64)，就会立即调用线程池执行请求。
+
+2. AsyncCall 执行的请求回调方法都是在线程池中调用的，如果想要进行更新UI，可以在回调方法中用 Handler 来切换线程
+
+
+到了这里，应该对 okhttp 的同步和异步请求流程有了很清晰的认识了，我们知道无论是同步还是异步请求，都是通过 RealCall 内部的
+ getResponseWithInterceptorChain 方法来处理具体的网络请求和响应。
+
+那么问题来了，getResponseWithInterceptorChain 是如何处理具体的网络请求和响应的呢？
 
 
 
 
 
 
-# 参考
 
-[OKHttp源码解析](https://www.jianshu.com/p/27c1554b7fee)
-[拆 OkHttp](https://blog.piasy.com/2016/07/11/Understand-OkHttp/index.html)
+
+
+
+
+
+
+
 
