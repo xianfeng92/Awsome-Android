@@ -1,5 +1,11 @@
 # CacheInterceptor
 
+RealCall#getResponseWithInterceptorChain中会创建一个CacheInterceptor：
+
+```
+interceptors.add(new CacheInterceptor(client.internalCache()));
+
+```
 
 首先我们看 CacheInterceptor 的构造函数：
 
@@ -12,118 +18,25 @@ public final class CacheInterceptor implements Interceptor {
   }
 ```
 
-通过在 RealCall 内部添加 CacheInterceptor 拦截器的方式可知，CacheInterceptor中的InternalCache来自OkHttpClient中:
-
-
-```
-public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory {
-
-  ...
-
-  final @Nullable Cache cache;
-  final @Nullable InternalCache internalCache;
- 
-  public OkHttpClient() {
-    this(new Builder());
-  }
-  public static final class Builder {
-   
-    ...
-    /** Sets the response cache to be used to read and write cached responses. */
-    public Builder cache(@Nullable Cache cache) {
-      this.cache = cache;
-      this.internalCache = null;
-      return this;
-    }
-    ...
-}
+再看看 client.internalCache()：
 
 ```
-
-1. OkHttpClient 中有2个跟缓存有关的变量，一个是Cache，一个是internalCache。其中我们可以通过 Builder 来设置Cache，但是不能设置internalCache。
-   默认Cache和internalCache都是null，也就是OkHttpClient没有默认的缓存实现。
-
-2. 缓存拦截器CacheInterceptor中的internalCache来自OkHttpClient的Cache，因为OkHttpClient中的internalCache一直是null，我们没法从外界设置，
-   所以如果我们没有为OkHttpClient设置Cache，那么缓存拦截器中的internalCache就也为null了，也就没法提供缓存功能。
-
-从上面的源码中我们还发现，internalCache 虽然不能从外界设置，但是它却是cache的一个内部变量。下面我们来具体看看缓存Cache的实现。
-
-```
-public final class Cache implements Closeable, Flushable {
-
-   ...
-  // internalCache的方法内部调用的都是Cache的方法
-  final InternalCache internalCache = new InternalCache() {
-    @Override public @Nullable Response get(Request request) throws IOException {
-      return Cache.this.get(request);
-    }
-
-    @Override public @Nullable CacheRequest put(Response response) throws IOException {
-      return Cache.this.put(response);
-    }
-
-    @Override public void remove(Request request) throws IOException {
-      Cache.this.remove(request);
-    }
-
-    @Override public void update(Response cached, Response network) {
-      Cache.this.update(cached, network);
-    }
-
-    @Override public void trackConditionalCacheHit() {
-      Cache.this.trackConditionalCacheHit();
-    }
-
-    @Override public void trackResponse(CacheStrategy cacheStrategy) {
-      Cache.this.trackResponse(cacheStrategy);
-    }
-  };
-  // 缓存是用DiskLruCache实现的
-  final DiskLruCache cache;
-  ...
-
-  // 缓存为key-value形式，其中key为请求的URL的md5值
-  public static String key(HttpUrl url) {
-    return ByteString.encodeUtf8(url.toString()).md5().hex();
+  // 这里的cache来自于构建 OkHttpClient 时设置的 cache，默认是为 null 
+  @Nullable InternalCache internalCache() {
+    return cache != null ? cache.internalCache : internalCache;
   }
 
-  @Nullable Response get(Request request) {
-    String key = key(request.url());
-    DiskLruCache.Snapshot snapshot;
-    Entry entry;
-    try {
-      snapshot = cache.get(key);
-      if (snapshot == null) {
-        return null;
-      }
-    } catch (IOException e) {
-      // Give up because the cache cannot be read.
-      return null;
-    }
-
-    try {
-      entry = new Entry(snapshot.getSource(ENTRY_METADATA));
-    } catch (IOException e) {
-      Util.closeQuietly(snapshot);
-      return null;
-    }
-
-    Response response = entry.response(snapshot);
-
-    if (!entry.matches(request, response)) {
-      Util.closeQuietly(response.body());
-      return null;
-    }
-
-    return response;
-  }
-}
-
 ```
 
-这一看我们就明白了，internalCache 的确是 Cache 的一个内部变量，我们设置了Cache也就有了internalCache。而实际上，internalCache是一个接口类型的变量，它的一系列get、put方法，
-都是调用的Cache的方法，这也是外观模式的一种典型应用。当然这里internalCache从名字也可以看出是给内部其他对象调用的，所以internalCache和Cache的职责很明确，
-Cache供外部设置，而internalCache供内部调用。同时我们看到Cache内部是通过DiskLruCache来实现缓存的，缓存的key就是request的URL的md5值，缓存的值就是Response。我们设置自己的缓存时，可以通过Cache的构造函数传入我们想要存放缓存的文件路径以及缓存文件大小即可。比如：
+1. OkHttpClient 中有2个跟缓存有关的变量，一个是 Cache，一个是 internalCache，其默认初始值都为null
+
+2. internalCache 是 Cache 的一个内部变量，我们设置了 Cache 也就有了 internalCache。internalCache 中的
+   它的一系列get、put方法，都是调用的 Cache 的方法
+
+3. 当我们在构建 OkHttpClient 时，没有设置 Cache，即不需要缓存功能，则 request 经过 CacheInterceptor 时会直接传给下一个拦截器
+
+
+在构建 OkHttpClient 时，通过Cache的构造函数传入我们想要存放缓存的文件路径以及缓存文件大小即可。比如：
 
 ```
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
@@ -134,7 +47,7 @@ Cache供外部设置，而internalCache供内部调用。同时我们看到Cache
                 .build();
 ```
 
-下面我们回到缓存拦截器CacheInterceptor中，看看具体的缓存逻辑。主要的逻辑都在 intercept 方法中。
+下面我们回到缓存拦截器 CacheInterceptor 中，看看具体的缓存逻辑。主要的逻辑都在 intercept 方法中。
 
 ```
 @Override public Response intercept(Chain chain) throws IOException {
@@ -153,6 +66,7 @@ Cache供外部设置，而internalCache供内部调用。同时我们看到Cache
     return response;
   }
 ```
+
 可以看到 intercept 方法中会调用缓存策略工厂的get方法获取缓存策略 CacheStrategy。我们进入CacheStrategy看看:
 
 ```
@@ -181,7 +95,7 @@ public final class CacheStrategy {
 
     // 根据不同的情况返回CacheStrategy
     private CacheStrategy getCandidate() {
-      // 如果缓存中的Response为null
+      // 如果缓存中的 Response 为null
       if (cacheResponse == null) {
         return new CacheStrategy(request, null);
       }
@@ -191,7 +105,7 @@ public final class CacheStrategy {
         return new CacheStrategy(request, null);
       }
 
-      // 根据request和response是否能被缓存来生成CacheStrategy
+      // 根据 request 和 response 是否能被缓存来生成CacheStrategy
       if (!isCacheable(cacheResponse, request)) {
         return new CacheStrategy(request, null);
       }
@@ -217,17 +131,17 @@ public final class CacheStrategy {
       }
       ...
 }
-
 ```
 
-可以看到在CacheStrategy的内部工厂类Factory中有一个getCandidate方法，会根据具体的情况生成CacheStrategy类返回，是个典型的简单工厂模式。
-生成的CacheStrategy中有2个变量，networkRequest和cacheResponse，如果networkRequest为null，则表示不进行网络请求。
-而如果cacheResponse为null，则表示没有有效的缓存。当我们没有设置缓存Cache时，显然 cacheResponse 始终都会为null。
+可以看到在 CacheStrategy 的内部工厂类 Factory 中有一个 getCandidate 方法，会根据具体的情况生成 CacheStrategy 类返回，是个典型的简单工厂模式。
+生成的 CacheStrategy 中有2个变量， networkRequest 和 cacheResponse，如果 networkRequest 为 null，则表示不进行网络请求。
+而如果 cacheResponse 为 null，则表示没有有效的缓存。
 
-下面我们继续看intercept中的方法。
+
+下面我们继续看 intercept 中的方法。
 
 ```
-//如果networkRequest和cacheResponse都为null，则表示不请求网络而缓存又为null，那就返回504，请求失败
+//如果 networkRequest 和 cacheResponse 都为 null，则表示不请求网络而缓存又为null，那就返回504，请求失败
 if (networkRequest == null && cacheResponse == null) {
   return new Response.Builder()
       .request(chain.request())
@@ -268,3 +182,9 @@ try {
    而这些规则都是根据请求的Request和缓存的Response的header头部信息来生成的，比如是否有noCache标志位，是否是immutable不可变的，以及缓存是否过期等。
 
 3. CacheInterceptor会根据CacheStrategy中的networkRequest和cacheResponse是否为空，来判断是请求网络还是直接使用缓存。
+
+
+
+
+
+
