@@ -1,7 +1,9 @@
 # android-code-read
 Read The Fucking Source Code
 
-# List
+----------------------------------------------
+
+# Android
 
 * [Handler](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Handler%E5%88%86%E6%9E%90.md)
 
@@ -24,5 +26,31 @@ Read The Fucking Source Code
 * ContentProvider
 
 * RemoteViews
+
+* Window ViewRootImpl
+
+
+------------------------------------------
+
+# RxJava
+
+-----------------------------------------
+
+# Retrofit
+
+--------------------------------------
+
+# Okhttp
+
+
+----------------------------------------
+# Glide
+
+
+
+
+
+
+
 
 
