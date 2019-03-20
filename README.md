@@ -3,7 +3,7 @@ Read The Fucking Source Code
 
 # List
 
-* [Handler-Message-Looper](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Handler%E5%88%86%E6%9E%90.md)
+* [Handler](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Handler%E5%88%86%E6%9E%90.md)
 
 * [Activity](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Activty%E5%90%AF%E5%8A%A8.md)
 
@@ -20,3 +20,9 @@ Read The Fucking Source Code
 * Context
 
 * [Binder](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/AIDL%E5%88%86%E6%9E%90.md)
+
+* ContentProvider
+
+* RemoteViews
+
+
