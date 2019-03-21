@@ -5,6 +5,7 @@
   而每个重要的对外服务也都用一个小型上下文封装。这些小型上下文都容身到一个Android大平台上，并由Android统一调度管理，形成一个统一的整体。
 
 
+
 # Context的行为
 
   Context体现到代码上来说，是个抽象类，其主要表达的行为列表如下:
@@ -52,11 +53,10 @@ Context行为分类         常用函数
 __Activity、Service、Application内部都含有自己的ContextImpl，每当自己需要访问应用资源或系统服务时，无非是把请求委托给内部的ContextImpl而已__。
 
 
+## ContextWrapper
 
-# ContextWrapper
-
- 上图中还有个ContextWrapper，该类是用于表示Context的包装类，它在做和上下文相关的动作时，基本上都是委托给内部mBase域记录的Context去做的。
- 如果我们希望子类化上下文的某些行为，可以有针对性地重写ContextWrapper的一些成员函数。
+上图中还有个ContextWrapper，该类是用于表示Context的包装类，它在做和上下文相关的动作时，基本上都是委托给内部mBase域记录的Context(即ContextIml)去做的。
+如果我们希望子类化上下文的某些行为，可以有针对性地重写ContextWrapper的一些成员函数。
 
  ContextWrapper的代码截选如下：
 
@@ -152,135 +152,121 @@ ContextImpl里的另一个重要方面是关于资源的访问。这就涉及到
 并记入ContextImpl的mResources成员变量，以便以后使用。
 
 
-另外，为了便于访问 Android 提供的系统服务，ContextImpl 里还构造了一个小cache，记在 mServiceCache 成员变量里：
+## 什么时候创建Context实例 
+
+
+###  创建Application对象的时机
+  
+ 每个应用程序在第一次启动时，都会首先创建Application对象。如果对应用程序启动一个Activity(startActivity)流程比较清楚的话，创建Application 的时机在创建handleBindApplication()方法中，该函数位于 ActivityThread.java类中 ，如下:
 
 ```
-final Object[] mServiceCache = SystemServiceRegistry.createServiceCache();
+ //创建Application时同时创建的ContextIml实例
+private final void handleBindApplication(AppBindData data){
+    ...
+    ///创建Application对象
+    Application app = data.info.makeApplication(data.restrictedBackupMode, null);
+    ...
+}
+ 
+public Application makeApplication(boolean forceDefaultAppClass, Instrumentation instrumentation) {
+    ...
+    try {
+        java.lang.ClassLoader cl = getClassLoader();
+        ContextImpl appContext = new ContextImpl();    //创建一个ContextImpl对象实例
+        appContext.init(this, null, mActivityThread);  //初始化该ContextIml实例的相关属性
+        ///新建一个Application对象 
+        app = mActivityThread.mInstrumentation.newApplication(
+                cl, appClass, appContext);
+       appContext.setOuterContext(app);  //将该Application实例传递给该ContextImpl实例         
+    } 
+    ...
+}
 ```
 
-SystemServiceRegistry是个辅助类，其createServiceCache()函数的代码很简单，只是new了一个Object数组并返回之。也就是说，一开始这个mServiceCache数组，里面是没有内容的。
-日后，当我们需要访问系统服务时，会在运行期填写这个数组的某些子项。那么我们很容易想到，一个应用里启动的不同Activity，其内部的ContextImpl所含有的mServiceCache数组内容，
-常常也是不同的，而且一般情况下这个数组还是比较稀疏的，也就是说含有许多null。
 
-大家在写代码时，常常会写下类似下面的句子：
+### 创建Activity对象的时机
 
-```
-ActivityManager am = (ActivityManager)getSystemService(Context.ACTIVITY_SERVICE);
-```
-
-该函数最终会调用到ContextImpl的同名函数，函数代码如下：
+通过startActivity()或startActivityForResult()请求启动一个Activity时，如果系统检测需要新建一个Activity对象时，就会回调handleLaunchActivity()方法，该方法继而调用performLaunchActivity()方法，去创建一个Activity实例，并且回调onCreate()，onStart()方法等， 函数都位于 ActivityThread.java类 ，如下:
 
 ```
-【frameworks/base/core/java/android/app/ContextImpl.java】
-
-    @Override
-    public Object getSystemService(String name) {
-        return SystemServiceRegistry.getSystemService(this, name);
+//创建一个Activity实例时同时创建ContextIml实例
+private final void handleLaunchActivity(ActivityRecord r, Intent customIntent) {
+    ...
+    Activity a = performLaunchActivity(r, customIntent);  //启动一个Activity
+}
+private final Activity performLaunchActivity(ActivityRecord r, Intent customIntent) {
+    ...
+    Activity activity = null;
+    try {
+        //创建一个Activity对象实例
+        java.lang.ClassLoader cl = r.packageInfo.getClassLoader();
+        activity = mInstrumentation.newActivity(cl, component.getClassName(), r.intent);
     }
-```
-
-继续使用着辅助类SystemServiceRegistry。
-
-```
-【frameworks/base/core/java/android/app/SystemServiceRegistry.java】
-
-    public static Object getSystemService(ContextImpl ctx, String name) {
-        ServiceFetcher<?> fetcher = SYSTEM_SERVICE_FETCHERS.get(name);
-        return fetcher != null ? fetcher.getService(ctx) : null;
+    if (activity != null) {
+        ContextImpl appContext = new ContextImpl();      //创建一个Activity实例
+        appContext.init(r.packageInfo, r.token, this);   //初始化该ContextIml实例的相关属性
+        appContext.setOuterContext(activity);            //将该Activity信息传递给该ContextImpl实例
+        ...
     }
-```
-其中用到的SYSTEM_SERVICE_FETCHERS是SystemServiceRegistry类提供的一张静态哈希表：
-
-```
-【frameworks/base/core/java/android/app/SystemServiceRegistry.java】
-
-final class SystemServiceRegistry {
-    . . . . . .
-    private static final HashMap<String, ServiceFetcher<?>> SYSTEM_SERVICE_FETCHERS =
-            new HashMap<String, ServiceFetcher<?>>();
-    private static int sServiceCacheSize;
+    ...    
+}
 ```
 
-可以看到，这张哈希表的value部分必须实现ServiceFetcher<?>接口，对SystemServiceRegistry而言，应该是个CachedServiceFetcher<T>派生类对象。
-CachedServiceFetcher类已经默认实现了getService()函数：
+###  创建Service对象的时机
+    
+通过startService或者bindService时，如果系统检测到需要新创建一个Service实例，就会回调handleCreateService()方法，完成相关数据操作。handleCreateService()函数位于 ActivityThread.java类，如下:
 
 ```
-【frameworks/base/core/java/android/app/SystemServiceRegistry.java】
-
-    public final T getService(ContextImpl ctx) {
-        final Object[] cache = ctx.mServiceCache; // 终于看到ContextImpl的mServiceCache了
-        synchronized (cache) {
-            Object service = cache[mCacheIndex];
-            if (service == null) {
-                service = createService(ctx); // 如果cache里没有，则调用createService()
-                cache[mCacheIndex] = service;
-            }
-            return (T)service;
-        }
+//创建一个Service实例时同时创建ContextIml实例
+private final void handleCreateService(CreateServiceData data){
+    ...
+    //创建一个Service实例
+    Service service = null;
+    try {
+        java.lang.ClassLoader cl = packageInfo.getClassLoader();
+        service = (Service) cl.loadClass(data.info.name).newInstance();
+    } catch (Exception e) {
     }
+    ...
+    ContextImpl context = new ContextImpl(); //创建一个ContextImpl对象实例
+    context.init(packageInfo, null, this);   //初始化该ContextIml实例的相关属性
+    //获得我们之前创建的Application对象信息
+    Application app = packageInfo.makeApplication(false, mInstrumentation);
+    //将该Service信息传递给该ContextImpl实例
+    context.setOuterContext(service);
+    ...
+}
 ```
 
-简单地说，就是每当getService()时，会优先从ContextImpl的mServiceCache缓存数组中获取，如果缓存里没有，才会进一步createService()，并记入缓存。
-而每个不同的CachedServiceFetcher<T>派生类都会实现自己独有的createService()函数，这样就能在缓存里创建多姿多彩的“系统服务访问类”了。
+需要强调一点的是,ContextImp 的分析可知，其方法的大多数操作都是直接调用其属性mPackageInfo(该属性类型为PackageInfo)的相关方法而来。这说明 ContextImp 是一种轻量级类，而PackageInfo 才是真正重量级的类。而一个App 的所有ContextIml 实例，都对应同一个packageInfo对象。
 
-SYSTEM_SERVICE_FETCHERS哈希表会在SystemServiceRegistry类的静态块中初始化，代码截选如下：
+所有ContextIml实例，都对应同一个packageInfo对象。
 
-```
-    . . . . . .
-    static {
-        registerService(Context.ACCESSIBILITY_SERVICE, AccessibilityManager.class,
-                new CachedServiceFetcher<AccessibilityManager>() {
-            @Override
-            public AccessibilityManager createService(ContextImpl ctx) {
-                return AccessibilityManager.getInstance(ctx);
-            }});
-        . . . . . .
-        registerService(Context.ACTIVITY_SERVICE, ActivityManager.class,
-                new CachedServiceFetcher<ActivityManager>() {
-            @Override
-            public ActivityManager createService(ContextImpl ctx) {
-                return new ActivityManager(ctx.getOuterContext(), 
-                       ctx.mMainThread.getHandler());
-            }});
-```
 
-这里所谓的registerService()动作，其实主要就是向静态哈希表里插入新创建的CachedServiceFetcher对象：
+## Application中的Context和Activity中的Context的区别 
 
-```
-    private static <T> void registerService(String serviceName, Class<T> serviceClass,
-            ServiceFetcher<T> serviceFetcher) {
-        SYSTEM_SERVICE_NAMES.put(serviceClass, serviceName);
-        SYSTEM_SERVICE_FETCHERS.put(serviceName, serviceFetcher);
-    }
-```
+在需要传递Context参数的时候，如果是在Activity中，我们可以传递this（这里的this指的是Activity.this，是当前Activity的上下文）或者Activity.this。这个时候如果我们传入getApplicationContext()，我们会发现这样也是可以用的。可是大家有没有想过传入Activity.this和传入getApplicationContext()的区别呢？首先Activity.this和getApplicationContext()返回的不是同一个对象，一个是当前Activity的实例，一个是项目的Application的实例，这两者的生命周期是不同的，它们各自的使用场景不同，this.getApplicationContext()取的是这个应用程序的Context，它的生命周期伴随应用程序的存在而存在；而Activity.this取的是当前Activity的Context，它的生命周期则只能存活于当前Activity，这两者的生命周期是不同的。getApplicationContext() 生命周期是整个应用，当应用程序摧毁的时候，它才会摧毁；Activity.this的context是属于当前Activity的，当前Activity摧毁的时候，它就摧毁。
 
-现在，我们画一张示意图，以一个Activity的ContextImpl为例：
+Activity Context 和Application Context两者的使用范围存在着差异，具体如下图所示:
 
-![ContextImpl]()
+![ContextDiff]()
+
+我们就只看Activity和Application，可以看到前三个操作不在 Application 中出现，也就是Show a Dialog、Start an Activity和Layout Inflation。开发的过程中，我们主要记住一点，凡是跟UI相关的，都用Activity做为Context来处理。
 
 
 
+##  Context数量 
+
+在创建Activity、Service、Application时都会自动创建Context，它们各自维护着自己的上下文。在Android系统中Context类的继承结构里面我们讲到Context一共有Application、Activity和Service三种类型，因此如果要统计一个app中Context数量，我们可以这样来表示：
+
+Context数量 = Activity数量 + Service数量 + 1
 
 
+这里要解释一下，上面的1表示Application数量。一个应用程序中可以有多个Activity和多个Service，但只有一个Application。可能有人会说一个应用程序里面可以有多个Application啊，我的理解是：一个应用程序里面可以有多个Application，可是在配置文件AndroidManifest.xml中只能注册一个，只有注册的这个Application才是真正的Application，才会调用到全部的生命周期，所以Application的数量是1。
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+## 参考
 
 
 [认识一下Android里的Context](https://my.oschina.net/youranhongcha/blog/1807189)
-
+[Android Application中的Context和Activity中的Context的异同](https://www.cnblogs.com/ganchuanpu/p/6445251.html)
