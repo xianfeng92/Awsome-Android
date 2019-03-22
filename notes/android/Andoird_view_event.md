@@ -101,7 +101,7 @@ dispatchTouchEvent方法内部调用，用来判断是否拦截某个事件，�
 
 ## 事件分发的源码解析
 
-### 事件从Activity到 ViewGroup
+### 事件从 Activity到 ViewGroup
 
 点击事件用 MotionEvent 来表示，当一个点击操作发生的时候，事件最先传递给 Activity，由 Activity 的 dispatchTouchEvent 来进行事件的派发。
 具体的工作是由内部的 window 来完成的，window 会将事件传递给 DecorView , DecorView 是当前界面的底层容器（setContentView 所设置的父容器），
@@ -130,7 +130,6 @@ dispatchTouchEvent方法内部调用，用来判断是否拦截某个事件，�
 public abstract boolean superDispatchTouchEvent(MotionEvent event);
 
 ```
-
 那么 window 的实现类是什么呢？就是 phoneWindow，这点源码中有一段注释就说明了，意思大概就是 winodw 类控制顶级的 View 的外观和行为机制。
 
 由于 Window 的唯一实现是 PhoneWindow，因此接下来看一下 PhoneWindow 是如何处理点击事件。
@@ -180,6 +179,10 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker {
 
 3. DecorView 是 FrameLayout 的一个子类，DecorView 接收到事件后，直接将事件传给其父类（super.dispatchTouchEvent(event)）。
    到此事件传递到了 ViewGroup 的 dispatchTouchEvent 方法中了。下面就是 ViewGroup 来操作了。
+
+
+
+__这里的ViewGroup可以看做我们的布局文件的根布局,所以接下来，事件将从根部局开始往子布局传递__
 
 
 ### ViewGroup 来分发事件

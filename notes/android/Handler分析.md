@@ -23,7 +23,6 @@
 
   Handler会将runnable封装成一个msg对象，并将runnable赋值给msg的一个callback变量。在dispatchMessage，此时检查到callback不为null，会调用callback.run()方法，即runnable的run方法被调用。
   
-
 # Android的消息机制概述
    
    从开发的角度来说，Handler 是 Android 消息机制的上层接口，这使得开发过程只需要和 Handler 交互即可。__Handler 的使用过程很简单，通过它可以轻松将一个任务切换到 Handler 所在线程去执行__。
@@ -56,7 +55,6 @@ Handler 创建完毕后,这个时候其内部的 Lopper 以及 MeaasgeQueue 就�
 
   
   ![](https://github.com/xianfeng92/android-code-read/blob/master/images/20130817090611984.png)
-
 
 
 # Android的消息机制分析
@@ -872,6 +870,90 @@ Android 的主线程就是 ActivityThread，主线程的入口为 main，在 mai
 ActivityThread 通过 ApplicationThread 和 AMS 进程进程间通信，AMS 以进程间通信的方法完成 ActivityThread 的请求后回调 ApplicationThread 
 的 Binder 方法，然后通过 H 发送消息。H 收到消息后将 ApplicationThread 中的逻辑切换到 ActivityThread 去执行，这就是切换到主线程去执行，
 这个过程就是主线程的消息循环模型。
+
+
+#  Looper 死循环为什么不会导致应用卡死？
+
+线程默认没有 Looper 的，如果需要使用 Handler 就必须为线程创建 Looper。我们经常提到的主线程，也叫UI线程，它就是 ActivityThread，ActivityThread
+被创建时就会初始化 Looper，这也是在主线程中默认可以使用 Handler 的原因。
+
+我们知道 Looper.loop() 里面维护了一个死循环方法，也就是说循环在Looper.prepare()与Looper.loop()之间。在子线程中，如果手动为其创建了Looper，
+那么在所有的事情完成以后应该调用 quit 方法来终止消息循环，否则这个子线程就会一直处于等待（阻塞）状态，而如果退出Looper以后，
+这个线程就会立刻（执行所有方法并）终止，因此建议不需要的时候终止Looper。
+
+
+这时候如果了解了 ActivityThread，并且在 main 方法中我们会看到主线程也是通过 Looper 方式来维持一个消息循环。
+
+```
+public static void main(String[] args) {
+
+        ``````
+        Looper.prepareMainLooper();//创建Looper和MessageQueue对象，用于处理主线程的消息
+
+        ActivityThread thread = new ActivityThread();
+        thread.attach(false);//建立Binder通道 (创建新线程)
+
+        if (sMainThreadHandler == null) {
+            sMainThreadHandler = thread.getHandler();
+        }
+
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        Looper.loop();
+
+        //如果能执行下面方法，说明应用崩溃或者是退出了...
+        throw new RuntimeException("Main thread loop unexpectedly exited");
+    }
+```
+
+那么回到我们的问题上，这个死循环会不会导致应用卡死，即使不会的话，它会慢慢的消耗越来越多的资源吗？ 
+
+对于线程即是一段可执行的代码，当可执行代码执行完成后，线程生命周期便该终止了，线程退出。而对于主线程，我们是绝不希望会被运行一段时间，自己就退出。
+
+那么如何保证能一直存活呢？
+
+简单做法就是可执行代码是能一直执行下去的，死循环便能保证不会被退出，例如，binder线程也是采用死循环的方法，通过循环方式不同与Binder驱动进行读写操作，当然并非简单地死循环，
+无消息时会休眠。但这里可能又引发了另一个问题，既然是死循环又如何去处理其他事务呢？通过创建新线程的方式。真正会卡死主线程的操作是在回调方法onCreate/onStart/onResume等操作时间过长，
+会导致掉帧，甚至发生ANR，looper.loop本身不会导致应用卡死。
+
+
+主线程的死循环一直运行是不是特别消耗CPU资源呢？ 
+
+其实不然，这里就涉及到Linux pipe/epoll机制，简单说就是在主线程的MessageQueue没有消息时，便阻塞在loop的queue.next()中的nativePollOnce()方法里，此时主线程会释放CPU资源进入休眠状态，
+直到下个消息到达或者有事务发生，通过往pipe管道写端写入数据来唤醒主线程工作。这里采用的epoll机制，是一种IO多路复用机制，可以同时监控多个描述符，当某个描述符就绪(读或写就绪)，
+则立刻通知相应程序进行读或写操作，本质同步I/O，即读写是阻塞的。 所以说，主线程大多数时候都是处于休眠状态，并不会消耗大量CPU资源。
+
+
+##  Handler 是如何能够线程切换
+
+线程间是共享资源的。所以Handler处理不同线程问题就只要注意异步情况即可。__Handler创建的时候会采用当前线程的Looper来构造消息循环系统，Looper在哪个线程创建，就跟哪个线程绑定__，
+并且__Handler是在它关联的Looper对应的线程中处理消息的__。
+
+那么Handler内部如何获取到当前线程的Looper呢—–ThreadLocal。ThreadLocal可以在不同的线程中互不干扰的存储并提供数据，通过ThreadLocal可以轻松获取每个线程的Looper。
+
+当然需要注意的是:
+
+1. 线程是默认没有Looper的，如果需要使用Handler，就必须为线程创建Looper。我们经常提到的主线程，也叫UI线程，它就是 ActivityThread
+
+2. ActivityThread 被创建时就会初始化Looper，这也是在主线程中默认可以使用Handler的原因
+
+
+
+## 如何处理Handler 使用不当导致的内存泄露？
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # 参考
