@@ -1,4 +1,5 @@
 # android-code-read
+
 Read The Fucking Source Code
 
 ----------------------------------------------
@@ -34,6 +35,14 @@ Read The Fucking Source Code
 
 ## RxJava
 
+* [Rxjava基本使用](https://github.com/xianfeng92/android-code-read/blob/master/notes/Rxjava/Rxjava.md)
+
+* [Rxjava 源码解读](https://github.com/xianfeng92/android-code-read/blob/master/notes/Rxjava/Rxjava_Code.md)
+
+* [Rxjava 中的线程调度](https://github.com/xianfeng92/android-code-read/blob/master/notes/Rxjava/Rxjava_Scheduler.md)
+
+* [Rxjava](https://github.com/xianfeng92/android-code-read/blob/master/notes/Rxjava/Rxjava_design.md)
+
 -----------------------------------------
 
 ## Retrofit
@@ -42,10 +51,15 @@ Read The Fucking Source Code
 
 ## Okhttp
 
-
 ----------------------------------------
 
 ## Glide
+
+-----------------------------------------
+
+## LeakCanary
+
+
 
 
 
