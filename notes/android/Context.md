@@ -5,7 +5,6 @@
   而每个重要的对外服务也都用一个小型上下文封装。这些小型上下文都容身到一个Android大平台上，并由Android统一调度管理，形成一个统一的整体。
 
 
-
 # Context的行为
 
   Context体现到代码上来说，是个抽象类，其主要表达的行为列表如下:
@@ -46,12 +45,11 @@ Context行为分类         常用函数
 既然是抽象类，最终就总得需要实际的派生类才行。在Android上，我们可以画出如下的Context继承示意图：
 
 
-![Context]()
+![Context](https://github.com/xianfeng92/android-code-read/blob/master/images/context.jpg)
 
 我们可以琢磨一下这张图，很明显，在Android平台上，Activity和Service在本质上都是个Context，而代表应用程序的Application对象，也是个Context，
 这个对象对应的就是AndroidManifest.xml里的<Application>部分。因为上下文访问应用资源或系统服务的动作是一样的，所以这部分动作被统一封装进一个ContextImpl辅助类里。
 __Activity、Service、Application内部都含有自己的ContextImpl，每当自己需要访问应用资源或系统服务时，无非是把请求委托给内部的ContextImpl而已__。
-
 
 ## ContextWrapper
 
@@ -249,7 +247,7 @@ private final void handleCreateService(CreateServiceData data){
 
 Activity Context 和Application Context两者的使用范围存在着差异，具体如下图所示:
 
-![ContextDiff]()
+![ContextDiff](https://github.com/xianfeng92/android-code-read/blob/master/images/contextDiff.png)
 
 我们就只看Activity和Application，可以看到前三个操作不在 Application 中出现，也就是Show a Dialog、Start an Activity和Layout Inflation。开发的过程中，我们主要记住一点，凡是跟UI相关的，都用Activity做为Context来处理。
 
