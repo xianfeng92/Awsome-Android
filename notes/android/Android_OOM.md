@@ -32,12 +32,12 @@ Bitmap是一个极容易消耗内存的大胖子, 减小创建出来的Bitmap的
 
 大多数对象的复用，最终实施的方案都是利用对象池技术,要么是在编写代码的时候显式的在程序里面去创建对象池，然后处理好复用的实现逻辑，\,要么就是利用系统框架既有的某些复用特性达到减少对象的重复创建,从而减少内存的分配与回收。   
 
-![android_perf_2_object_pool]()
+![android_perf_2_object_pool](https://github.com/xianfeng92/android-code-read/blob/master/images/android_perf_2_object_pool.png)
 
 
 在Android上面最常用的一个缓存算法是LRU(Least Recently Use)，简要操作原理如下图所示:
 
-![android_perf_2_lru_mode]()
+![android_perf_2_lru_mode](https://github.com/xianfeng92/android-code-read/blob/master/images/android_perf_2_lru_mode.png)
 
 1. 复用系统自带的资源
 
@@ -46,7 +46,7 @@ Android系统本身内置了很多的资源,例如字符串/颜色/图片/动画
 
 2. 注意在ListView/GridView等出现大量重复子组件的视图里面对ConvertView的复用
 
-![android_perf_oom_listview_recycle]()
+![android_perf_oom_listview_recycle](https://github.com/xianfeng92/android-code-read/blob/master/images/android_perf_oom_listview_recycle.png)
 
 
 3. Bitmap对象的复用
@@ -67,7 +67,7 @@ Android系统本身内置了很多的资源,例如字符串/颜色/图片/动画
 
 内存对象的泄漏,会导致一些不再使用的对象无法及时释放,这样一方面占用了宝贵的内存空间,很容易导致后续需要分配内存的时候,空闲空间不足而出现OOM。显然,这还使得每级Generation的内存区域可用空间变小,gc就会更容易被触发,容易出现内存抖动,从而引起性能问题。
 
-![android_perf_3_leak]()
+![android_perf_3_leak](https://github.com/xianfeng92/android-code-read/blob/master/images/android_perf_3_leak.png)
 
 
 #### 注意Activity的泄漏
@@ -95,7 +95,7 @@ Android系统本身内置了很多的资源,例如字符串/颜色/图片/动画
 
 需要特别留意的是Bitmap类里面提供的createBitmap()方法:
 
-![android_perf_oom_create_bitmap]()
+![android_perf_oom_create_bitmap](https://github.com/xianfeng92/android-code-read/blob/master/images/android_perf_oom_create_bitmap.png)
 
 这个函数返回的bitmap有可能和source bitmap是同一个,在回收的时候,需要特别检查source bitmap与return bitmap的引用是否相同,只有在不等的情况下,才能够执行source bitmap的recycle方法。
 
@@ -122,7 +122,7 @@ Android系统本身内置了很多的资源,例如字符串/颜色/图片/动画
 Android用户可以随意在不同的应用之间进行快速切换。为了让background的应用能够迅速的切换到forground,每一个background的应用都会占用一定的内存。Android系统会根据当前的系统的内存使用情况,决定回收部分background的应用内存。如果background的应用从暂停状态直接被恢复到forground,能够获得较快的恢复体验.如果background应用是从Kill的状态进行恢复,相比之下就显得稍微有点慢。
 
 
-![android_perf_3_memory_bg_2_for]()
+![android_perf_3_memory_bg_2_for](https://github.com/xianfeng92/android-code-read/blob/master/images/android_perf_3_memory_bg_2_for.png)
 
 * onLowMemory()：Android系统提供了一些回调来通知当前应用的内存使用情况,通常来说,当所有的background应用都被kill掉的时候,forground应用会收到onLowMemory()的回调。在这种情况下,需要尽快释放当前应用的非必须的内存资源,从而确保系统能够继续稳定运行。
 
@@ -136,7 +136,7 @@ Android用户可以随意在不同的应用之间进行快速切换。为了让b
 
 因为static的生命周期过长,和应用的进程保持一致,使用不当很可能导致对象泄漏,在Android中应该谨慎使用static对象。
 
-![android_perf_3_leak_static]()
+![android_perf_3_leak_static](https://github.com/xianfeng92/android-code-read/blob/master/images/android_perf_3_leak_static.png)
 
 5. 特别留意单例对象中不合理的持有
 
