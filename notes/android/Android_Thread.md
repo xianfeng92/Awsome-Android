@@ -40,8 +40,6 @@ Android 沿用了 Java 的线程模式，其中的线程也分为主线程和子
 从Android3.0开始系统要求网络访问必须在子线程中，这是避免主线程由于耗时操作所阻塞出现 ANR 现象。
 
 
-
-
 ## Android中的线程形态
 
 
@@ -143,9 +141,6 @@ class DownloadTask extends AsyncTask<URL,Integer,Long>{
 
 4. 在Android1.6之前，AsyncTask 是串行执行任务，之后采用线程池并行处理，但是从 Android3.0 开始，为了避免 AsyncTask 所带来的并发错误，AsyncTask 又采用一个线程来串行任务，
    尽管如此，在 Android3.0 以及以后的版本中，我们也可以通过 AsyncTask 的 executeOnExecutor 方法来并行的执行任务。
-
-
-
 
 ### AsyncTask 的工作原理
 
@@ -342,8 +337,6 @@ case R.id.btnAsync:
 ```
 
 其执行结果为每隔 3s 执行一个AsyncTask。
-
-
 
 ### HandlerThread
 
@@ -695,9 +688,6 @@ Android 中常见的四类具有不同功能特性的线程池，它们都直接
 							ExecutorService single = Executors.newSingleThreadExecutor();
 							single.execute(common);
 					```
-
-
-
 
 
 

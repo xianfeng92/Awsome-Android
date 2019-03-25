@@ -4,30 +4,28 @@
 
 Android系统通过下面几种方式来实现共享内存:
 
-* Android应用的进程都是从一个叫做Zygote的进程fork出来的。Zygote进程在系统启动并且载入通用的framework的代码与资源之后开始启动。为了启动一个新的程序进程，系统会fork Zygote进程生成一个新的进程，然后在新的进程中加载并运行应用程序的代码。这使得大多数的RAM pages被用来分配给framework的代码，同时使得RAM资源能够在应用的所有进程之间进行共享。
+* Android应用的进程都是从一个叫做Zygote的进程fork出来的。Zygote进程在系统启动并且载入通用的framework的代码与资源之后开始启动。为了启动一个新的程序进程，系统会fork Zygote进程生成一个新的进程，
+  然后在新的进程中加载并运行应用程序的代码。这使得大多数的RAM pages被用来分配给framework的代码，同时使得RAM资源能够在应用的所有进程之间进行共享。
 
 * 大多数static的数据被mmapped到一个进程中。这不仅仅使得同样的数据能够在进程间进行共享，而且使得它能够在需要的时候被paged out。常见的static数据包括Dalvik Code，app resources，so文件等。
 
-
 ### 分配与回收内存
 
-* 每一个进程的Dalvik heap都反映了使用内存的占用范围。这就是通常逻辑意义上提到的Dalvik Heap Size，它可以随着需要进行增长，但是增长行为会有一个系统为它设定的上限。
+* 每一个进程的 Dalvik heap 都反映了使用内存的占用范围。这就是通常逻辑意义上提到的 Dalvik Heap Size，它可以随着需要进行增长，但是增长行为会有一个系统为它设定的上限。
 
 * Android系统并不会对Heap中空闲内存区域做碎片整理。系统仅仅会在新的内存分配之前判断Heap的尾端剩余空间是否足够，如果空间不够会触发gc操作，从而腾出更多空闲的内存空间。
-  在Android的高级系统版本里面针对Heap空间有一个Generational Heap Memory的模型，最近分配的对象会存放在 Young Generation
-  区域,当这个对象在这个区域停留的时间达到一定程度，它会被移动到 Old Generation, 最后累积一定时间再移动到 Permanent Generation 区域。系统会根据内存中不同的内存数据类型分别执行不同的 gc 操作。例如,刚分配到 Young Generation 区域的对象通常更容易被销毁回收，同时在 Young Generation 区域的 gc 操作速度会比 Old Generation 区域的 gc 操作速度更快。如下图所示:
+  在Android的高级系统版本里面针对Heap空间有一个Generational Heap Memory的模型，最近分配的对象会存放在 Young Generation区域,当这个对象在这个区域停留的时间达到一定程度，它会被移动到
+  Old Generation, 最后累积一定时间再移动到 Permanent Generation 区域。系统会根据内存中不同的内存数据类型分别执行不同的 gc 操作。例如,刚分配到 Young Generation 区域的对象通常更容易被销毁回收，
+  同时在 Young Generation 区域的 gc 操作速度会比 Old Generation 区域的 gc 操作速度更快。如下图所示:
 
- 
 ![android_memory_gc_mode]()
 
 每一个Generation的内存区域都有固定的大小,随着新的对象陆续被分配到此区域,当这些对象总的大小快达到这一级别内存区域的阀值时,会触发GC的操作,以便腾出空间来存放其他新的对象。
 如下图所示: 
 
-
 ![gc_threshold]()
 
 通常情况下，GC发生的时候，所有的线程都是会被暂停的。执行GC所占用的时间和它发生在哪一个Generation也有关系,Young Generation中的每次GC操作时间是最短的，Old Generation其次,Permanent Generation最长。执行时间的长短也和当前Generation中的对象数量有关遍历树结构查找20000个对象比起遍历50个对象自然是要慢很多的。
-
 
 
 ### 限制应用的内存
@@ -40,7 +38,7 @@ Android系统通过下面几种方式来实现共享内存:
 
 ### 应用切换操作
 
-* Android系统并不会在用户切换应用的时候做交换内存的操作。Android 会把那些不包含 Foreground 组件的应用进程放到LRU Cache 中。例如,当用户开始启动了一个应用,系统会为它创建了一个
+* Android系统并不会在用户切换应用的时候做交换内存的操作。Android 会把那些不包含 Foreground 组件的应用进程放到 LRU Cache 中。例如,当用户开始启动了一个应用,系统会为它创建了一个
   进程但是当用户离开这个应用，此进程并不会立即被销毁，而是会被放到系统的Cache当中，如果用户后来再切换回到这个应用，此进程就能够被马上完整的恢复，从而实现应用的快速切换。
   
 * 如果你的应用中有一个被缓存的进程，这个进程会占用一定的内存空间，它会对系统的整体性能有影响。因此当系统开始进入LowMemory的状态时，它会由系统根据LRU的规则与应用的优先级，内存占用
@@ -89,7 +87,6 @@ final ArraySet<ReceiverList> receivers = new ArraySet<>();
 final ArrayMap<String, ContentProviderRecord> pubProviders = new ArrayMap<>();
 // All ContentProviderRecord process is using
 final ArrayList<ContentProviderConnection> conProviders = new ArrayList<>();
-
 
 这里的:
 
