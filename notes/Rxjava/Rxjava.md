@@ -144,8 +144,9 @@ PS：
 
 ### flatMap
 
-它可以把一个发射器 Observable 通过某种方法转换为多个 Observables，然后再把这些分散的 Observables 装进一个单一的发射器 Observable。
+transform the items emitted by an Observable into Observables, then flatten the emissions from those into a single Observable
 
+它可以把一个发射器 Observable 通过某种方法转换为多个 Observables，然后再把这些分散的 Observables 装进一个单一的发射器 Observable。
 
 ```
 public class Course {
@@ -231,7 +232,7 @@ flatMap() 和 map() 有一个相同点: 它也是把传入的参数转化之后�
  2. 并不发送这个 ObservableSource, 而是将它激活，于是它开始发送事件
 
  3. 每一个创建出来的 ObservableSource 发送的事件，都被汇入同一个 Observable ，而这个 Observable 负责将这些事件统一交给 Subscriber 
-    的回调方法。这三个步骤，把事件拆成了两级，通过一组新创建的 Observable 将初始的对象『铺平』之后通过统一路径分发了下去。而这个『铺平』就是 flatMap() 所谓的 flat。
+    的回调方法。这三个步骤，把事件拆成了两级，通过一组新创建的 Observable 将初始的对象『铺平』之后通过统一路径分发了下去。而这个『铺平』就是           flatMap() 所谓的 flat。
 
 
 
