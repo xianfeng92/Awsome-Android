@@ -23,7 +23,7 @@ Read The Fucking Source Code
 
 #### Service相关
 
-* [Service]
+* [Service](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Service.md)
 
 * ContentProvider
 
@@ -33,9 +33,11 @@ Read The Fucking Source Code
 
 #### View相关
 
-*  View
+* View
 
 * RemoteViews
+
+* [Android_window](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Android_window.md)
 
 #### 事件
 
@@ -43,9 +45,17 @@ Read The Fucking Source Code
 
 ### Android 内存
 
+* [Android_MemoryManager](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Android_MemoryManager.md)
+
+* [Android_OOM](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Android_OOM.md)
+
+* [Android_memoryLeak](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Android_memoryLeak.md)
+
+* [Android_GC](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Android_GC.md)
+
 ### Android 异步
 
-* AsyncTask
+* [AsyncTask](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/AsyncTask%E5%88%86%E6%9E%90.md)
 
 * handlerThread
 
@@ -80,6 +90,11 @@ Read The Fucking Source Code
 -----------------------------------------
 
 ## LeakCanary
+
+-------------------------------------------
+
+## Web
+
 
 
 
