@@ -59,12 +59,11 @@ Service是个抽象类，它间接继承于Context，其继承关系如下图所
 
 我们对图中的ApplicationThread并不陌生，它记录在ActivityThread中mAppThread域中。每当系统新fork一个用户进程后，就会自动执行ActivityThread的attach()动作，里面会调用：
 
-```
 final IActivityManager mgr = ActivityManagerNative.getDefault();
 . . . . . .
     mgr.attachApplication(mAppThread);
 . . . . . .
-```
+
 
 将ApplicationThread对象远程“传递”给AMS，从而让AMS得到一个合法的代理端。__而当系统要求用户进程创建service时，就会通过这个合法的代理端向用户进程传递明确的语义__。
 
@@ -163,13 +162,11 @@ public final void scheduleCreateService(IBinder token,
 它发出的CREATE_SERVICE消息，会由ActivityThread的内嵌类H处理，H继承于Handler，而且是在UI主线程里处理消息的。可以看到，处理CREATE_SERVICE消息的函数是handleCreateService()：
 
 
-```
 case CREATE_SERVICE:
     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "serviceCreate");
     handleCreateService((CreateServiceData)msg.obj);
     Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     break;
-```
 
 另外，请大家注意realStartServiceLocked()传给scheduleCreateService()函数的第一个参数就是ServiceRecord类型的r，而ServiceRecord本身是个Binder实体噢。
 待“传到”应用进程时，这个Binder实体对应的Binder代理被称作token，记在了CreateServiceData对象的token域中。现在CreateServiceData对象又经由msg.obj传递到消息处理函数里，
@@ -319,37 +316,5 @@ public final IServiceConnection getServiceDispatcher(ServiceConnection c,
 ```
 也就是说，先尝试在LoadedApk的mServices表中查询ServiceDispatcher对象，如果查不到，就重新创建一个。ServiceDispatcher对象会记录下从用户处传来的ServiceConnection引用。
 而且，ServiceDispatcher对象内部还含有一个binder实体，现在我们可以通过调用sd.getIServiceConnection()一句，返回这个内部的binder实体。
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 [Android Service演义](https://my.oschina.net/youranhongcha/blog/710046)
