@@ -19,7 +19,7 @@
 
  一个日历应用程序可能允许用户在特定时间为事件设置提醒,用户希望在正确的时间看到提醒通知。还有一些情况,应用程序不要求任务在特定的时间运行,只需要任务可以满足一些条件,比如“任务A必须先运行，然后是任务B，然后是任务C”。
 
-[bg-job-choose]()
+![bg-job-choose](https://github.com/xianfeng92/android-code-read/blob/master/images/bg-job-choose.svg)
 
 
 ### WorkManager
@@ -43,5 +43,4 @@ DownloadManager 将在后台进行下载，处理HTTP交互，并在失败后或
 
 
 [Guide to background processing](https://developer.android.google.cn/guide/background/)
-
 
