@@ -35,7 +35,7 @@ Activity 主要有四种状态：
 
 下图显示了 Activity 的重要状态路径。方形矩形表示当 Activity 在状态之间转移时会回调的方法。彩色椭圆是 Activity 所处的状态。
 
-![activity_lifecycle.png]()
+![activity_lifecycle.png](https://github.com/xianfeng92/android-code-read/blob/master/images/activity_lifecycle.png)
 
 
 There are three key loops you may be interested in monitoring within your activity:
@@ -148,72 +148,6 @@ Activity 类还提供用于管理与 Activity 关联的内部持久状态的API�
 
 使用 getPreferences（int）管理 Activity 持久状态，允许检索和修改与 Activity 关联的一组 name/value pairs。要使用跨多个应用程序组件（活动，接收器，服务，提供程序）共享的首选项，
 可以使用基础Context＃getSharedPreferences方法检索以特定名称存储的首选项对象。 （请注意，无法跨应用程序包共享设置数据 - 因此您需要内容提供程序。）
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
