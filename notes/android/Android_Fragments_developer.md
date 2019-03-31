@@ -22,7 +22,7 @@ onPause（）和onStop（）。事实上, 如果想要将现有的Android应用�
 系统调用此方法作为用户离开 Fragment 的第一个指示（尽管它并不总是意味着 Fragment 正在被销毁). 该方法通常会将一些需要持久化的用户数据进行保存。
 
 
-[fragment_lifecycle](https://github.com/xianfeng92/android-code-read/blob/master/images/fragment_lifecycle.png)
+![fragment_lifecycle](https://github.com/xianfeng92/android-code-read/blob/master/images/fragment_lifecycle.png)
 
 
 如下是一些 Fragment 的子类, 我们可以直接继承这些子类来实现特定的需求:
@@ -372,7 +372,7 @@ Caution: If you need a Context object within your Fragment, you can call getCont
  Called when the fragment is being disassociated from the activity.
 
 
-[activity_fragment_lifecycle](https://github.com/xianfeng92/android-code-read/blob/master/images/activity_fragment_lifecycle.png)
+![activity_fragment_lifecycle](https://github.com/xianfeng92/android-code-read/blob/master/images/activity_fragment_lifecycle.png)
 
 
 The flow of a fragment's lifecycle, as it is affected by its host activity, is illustrated by figure 3. In this figure, you can see how each successive state of the activity determines which callback methods a fragment may receive. For example, when the activity has received its onCreate() callback, a fragment in the activity receives no more than the onActivityCreated() callback.
