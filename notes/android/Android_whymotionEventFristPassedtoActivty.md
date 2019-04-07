@@ -1,4 +1,4 @@
-## 事件如何传递到Activity中
+## 事件如何传递到 Activity 中
 
    当一个点击操作发生的时候，事件最先传递给 Activity，由 Activity 的 dispatchTouchEvent 来进行事件的派发。
 

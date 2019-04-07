@@ -1,22 +1,18 @@
 
-
 # 一切从main()方法开始
 
-Android中，一个应用程序的开始可以说就是从 ActivityThread.java 中的 main() 方法开始的。
+Android中，一个应用程序的开始可以说就是从  ActivityThread.java  中的 main() 方法开始的。
 
 main()方法中主要做的事情有：
 
 1. 初始化主线程的Looper、主Handler。并使主线程进入等待接收Message消息的无限循环状态。
 
-
 2. 调用attach()方法，主要就是为了发送出初始化 Application 的消息。
-
 
 ## 创建Application的消息是如何发送的呢？
 
-
-上面提到过， ActivityThread 的attach()方法最终的目的是发送出一条创建Application的消息——H.BIND_APPLICATION，到主线程的主Handler中。那我们来看看attach()方法干了啥。
-attach()关键代码：
+上面提到过， ActivityThread 的attach()方法最终的目的是发送出一条创建 Application 的消息——H.BIND_APPLICATION，到主线程的主Handler中。那我们来看看attach()方法干了啥。
+attach()关键代码:
 
 ```
     private void attach(boolean system, long startSeq) {
@@ -45,11 +41,10 @@ attach()关键代码：
                     return am;
                 }
             };
-
 ```
 
 
-当我们调用 ActivityManager.getService(),获得的实际是一个代理类的实例 ActivityManagerProxy，这个东西实现了 IActivityManager 接口。
+当我们调用 ActivityManager.getService(), 获得的实际是一个代理类的实例 ActivityManagerProxy，这个东西实现了 IActivityManager 接口。
 打开源码会发现，ActivityManagerProxy 是 ActivityManagerNative 的一个内部类。
 
 1. ActivityManagerProxy 的构造函数：
@@ -60,7 +55,7 @@ public ActivityManagerProxy(IBinder remote) {
 }
 ```
 
-这个构造函数非常的简单。首先它需要一个IBinder参数，然后赋值给mRemote变量。这个mRemote显然是 ActivityManagerProxy 的成员变量，
+这个构造函数非常的简单。首先它需要一个 IBinder 参数，然后赋值给 mRemote 变量。这个mRemote显然是 ActivityManagerProxy 的成员变量，
 对它的操作是由 ActivityManagerProxy 来代理间接进行的。这样设计的好处是保护了mRemote，并且能够在操作mRemote前执行一些别的事务，
 并且我们是以IActivityManager的身份来进行这些操作的！这就非常巧妙了。
 
@@ -86,18 +81,13 @@ public ActivityManagerProxy(IBinder remote) {
 
 ## ApplicationThread mAppThread
 
-
 ```
 	private class ApplicationThread extends IApplicationThread.Stub
 
 ```
-
 ApplicationThread 是 ActivityThread 中的一个内部类，为什么没有单独出来写在别的地方呢？我觉得这也是对最小惊异原则的实践。因为 ApplicationThread 是专门在这里使用的对象。
-
 很明显，ApplicationThread 最终也是一个Binder！同时，由于实现了 IApplicationThread 接口，所以它也是一个 IApplicationThread。
-
 我们终于知道attach()方法中出现的两个对象是啥了。ApplicationThread 作为 IApplicationThread 的一个实例，承担了最后发送Activity生命周期、及其它一些消息的任务。
-
 也就是说，前面绕了一大圈，最后还是回到这个地方来发送消息！
 
 
@@ -214,10 +204,10 @@ Instrumentation 会在应用程序的任何代码运行之前被实例化，它�
 public Application makeApplication(boolean forceDefaultAppClass,
     Instrumentation instrumentation) {
     ...
-    //Application的类名。明显是要用反射了。
+    //Application 的类名, 明显是要用反射了。
     String appClass = mApplicationInfo.className;
     ...
-    //留意下Context
+    //留意下 Context
     ContextImpl appContext = ContextImpl.createAppContext(mActivityThread
         , this);
     //通过 Instrumentation 创建 Application
@@ -387,7 +377,6 @@ code：Instrumentation#execStartActivity
 再说一下这个方法checkStartActivityResult，它也专业抛异常的，看代码，相信大家对下面的异常信息不陌生吧，就是它干的，
 其中最熟悉的非 Unable to find explicit activity class 莫属了，如果你在xml中没有注册目标activity，此异常将会抛出。
 
-
 再来看看  ActivityManager.getService() 得到的是啥？
 
 ```
@@ -407,13 +396,11 @@ code：Instrumentation#execStartActivity
 
 ```
 
-通过上面代码可知得到的是一个 IActivityManager，其为 ActivityManagerService 的远程Binder对象。通过远程Binder对象调用 ActivityManagerService 的 startActivity 方法。
+通过上面代码可知得到的是一个 IActivityManager，其为 ActivityManagerService 的远程 Binder 对象。通过远程Binder对象调用 ActivityManagerService 的 startActivity 方法。
 
 接着startActivity 这个调用了很多层级的函数。。这里省略 。。。到后面调用了一个 Ibind 的接口回到到 app 进程中 ApplicationThread 类的 handleLaunchActivity 方法。
 
 然后调用 H 的sendMessage（） msg.what 为LAUNCH_ACTIVITY，紧接着 去执行performLaunchActivity（），performLaunchActivity里面的动作是 newActivity （真真正正的创建activity）
-
-
 
 补充：
 
@@ -430,7 +417,6 @@ code：Instrumentation#execStartActivity
    并没有本质的区别，都是一个task_struct结构体，__在CPU看来进程或线程无非就是一段可执行的代码，CPU采用CFS调度算法，保证每个task都尽可能公平的享有CPU时间片__。
 
 
-
 对于线程既然是一段可执行的代码，当可执行代码执行完成后，线程生命周期便该终止了，线程退出。而对于主线程，我们是绝不希望会被运行一段时间，自己就退出，
 那么如何保证能一直存活呢？简单做法就是可执行代码是能一直执行下去的，死循环便能保证不会被退出。
 
@@ -441,10 +427,9 @@ code：Instrumentation#execStartActivity
 真正会卡死主线程的操作是在回调方法onCreate/onStart/onResume等操作时间过长，会导致掉帧，甚至发生ANR。looper.loop本身不会导致应用卡死。
 
 
-
 ### 在哪里为这个死循环准备了一个新线程去运转？
 
-事实上，会在进入死循环之前便创建了新binder线程，在代码ActivityThread.main()中：
+事实上，会在进入死循环之前便创建了新 binder 线程，在代码 ActivityThread.main() 中：
 
 ```
 public static void main(String[] args) {
@@ -484,13 +469,10 @@ ActivityThread的内部类H继承于Handler，通过handler消息机制，简单
 Activity的生命周期都是依靠主线程的Looper.loop，当收到不同Message时则采用相应措施。
 在H.handleMessage(msg)方法中，根据接收到不同的msg，执行相应的生命周期。
 
-
 system_server进程是系统进程，java framework框架的核心载体，里面运行了大量的系统服务，比如这里提供ApplicationThreadProxy（简称ATP），ActivityManagerService（简称AMS），
 这个两个服务都运行在system_server进程的不同线程中，由于ATP和AMS都是基于IBinder接口，都是binder线程，binder线程的创建与销毁都是由binder驱动来决定的。
 
-
  ![](https://github.com/xianfeng92/android-code-read/blob/master/images/ActivityThread_MessageModule.jpg)
-
 
 App进程则是我们常说的应用程序，主线程主要负责Activity/Service等组件的生命周期以及UI相关操作都运行在这个线程； 另外，每个App进程中至少会有两个binder线程
 ApplicationThread(简称AT)和ActivityManagerProxy（简称AMP）。Binder用于不同进程之间通信，由一个进程的Binder客户端向另一个进程的服务端发送事务，比如图中线程2向线程4发送事务；
@@ -504,6 +486,8 @@ ApplicationThread(简称AT)和ActivityManagerProxy（简称AMP）。Binder用于
 
 * 主线程在looper.loop()中循环遍历消息，当收到暂停Activity的消息时，便将消息分发给ActivityThread.H.handleMessage()方法，再经过方法的调用，
   最后便会调用到Activity.onPause()，当onPause()处理完后，继续循环loop下去。
+
+
 
 
 # 参考

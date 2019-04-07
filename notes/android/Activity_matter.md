@@ -1,11 +1,10 @@
 
-##  setResult的调用时机:
+##  setResult 的调用时机:
 
 1. Activity 返回 result 是在被 finish 的时候，也就是说调用 setResult() 方法必须在finish()之前.
  
 2. onActivityResult 是在前一个 Activity onRestart 时被调用,所以想要在前一个 Activity 中获取当前 Activty 的Result,
    必须在前一个Activity的 onRestart 方法调用之前,已经设置了 result.
-   
 
 ### 实际应用中,可以这么调用
 

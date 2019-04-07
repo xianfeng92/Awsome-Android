@@ -15,9 +15,13 @@ Read The Fucking Source Code
 
 #### Activity相关
 
-* [Activity](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Activty%E5%90%AF%E5%8A%A8.md)
+* [Activity启动流程](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Activty%E5%90%AF%E5%8A%A8.md)
+
+* [Activty 中的一些重要知识点](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Activity_matter.md)
 
 * [Fragment](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Fragment%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90.md)
+
+* [Context基本使用]()
 
 * [Context](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Context.md)
 
@@ -81,7 +85,6 @@ Read The Fucking Source Code
 * [Rxjava 设计模式](https://github.com/xianfeng92/android-code-read/blob/master/notes/Rxjava/Rxjava_design.md)
 
 -----------------------------------------
-
 ## Retrofit
 
 --------------------------------------

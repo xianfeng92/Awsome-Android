@@ -77,7 +77,6 @@ Intent　的　ComponentName　字段可以使用目标组件的完全限定类�
 
 也称为共享 intent，当用户想向其他应用程序（例如电子邮件应用程序或社交共享应用程序）共享的某些数据时，应该在 startActivity（）的 intent 中使用此 ACTION_SEND。
 
-
 可以使用 setAction（）或Intent构造函数为intent指定 Action。
 
 如果定义自己的Action，请确保使用应用程序的包名称作为前缀，如以下示例所示：

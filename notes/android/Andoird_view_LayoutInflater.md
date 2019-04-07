@@ -159,7 +159,6 @@ inflate()方法一般接收两个参数，第一个参数就是要加载的布�
 树这个结构去查找和获取的。
 
 
-
 # 参考
 
 [Android LayoutInflater原理分析](https://blog.csdn.net/guolin_blog/article/details/12921889)

@@ -222,6 +222,5 @@ View的测量宽高和最终宽高有什么区别，即 View的 getMeasureWidth 
 
 # 参考
 
-
 [源码解析Android中View的layout布局过程](https://blog.csdn.net/iispring/article/details/50366021)
 [Android艺术开发探索第四章——View的工作原理]

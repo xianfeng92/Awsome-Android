@@ -8,9 +8,7 @@
 所以说邮件应用程序当中的编写邮件Activity就应该被打开。当邮件发送出去之后，仍然还是会回到你的应用程序当中，这让用户看起来好像刚才那个编写邮件的Activity就是你的应用程序当中的一部分。
 所以说，__即使有很多个Activity分别都是来自于不同应用程序的，Android系统仍然可以将它们无缝地结合到一起，之所以能实现这一点，就是因为这些Activity都是存在于一个相同的任务(Task)当中的__。
 
-
 任务是一个Activity的集合，它使用栈的方式来管理其中的Activity，这个栈又被称为返回栈(back stack)，栈中Activity的顺序就是按照它们被打开的顺序依次存放的。
-
 
 手机的Home界面是大多数任务开始的地方，当用户在Home界面上点击了一个应用的图标时，这个应用的任务就会被转移到前台。如果这个应用目前并没有任何一个任务的话(说明这个应用最近没有被启动过)，
 系统就会去创建一个新的任务，并且将该应用的主Activity放入到返回栈当中。
@@ -19,18 +17,14 @@
 栈中最顶端的Activity会被移除掉，然后前一个Activity则会得重新回到最顶端的位置。返回栈中的Activity的顺序永远都不会发生改变，我们只能向栈顶添加Activity，或者将栈顶的Activity移除掉。
 因此，返回栈是一个典型的后进先出(last in, first out)的数据结构。下图通过时间线的方式非常清晰地向我们展示了多个Activity在返回栈当中的状态变化：
 
-
-![backStack_1]()
-
+![backStack_1](https://github.com/xianfeng92/android-code-read/blob/master/images/backStack_1.png)
 
 如果用户一直地按Back键，这样返回栈中的Activity会一个个地被移除，直到最终返回到主屏幕。当返回栈中所有的Activity都被移除掉的时候，对应的任务也就不存在了。
-
 
 任务除了可以被转移到前台之外，当然也是可以被转移到后台的。当用户开启了一个新的任务，或者点击Home键回到主屏幕的时候，之前任务就会被转移到后台了。当任务处于后台状态的时候，
 返回栈中所有的Activity都会进入停止状态，但这些Activity在栈中的顺序都会原封不动地保留着，如下图所示：
 
-![foreandBackGroundTask.png]()
-
+![foreandBackGroundTask.png](https://github.com/xianfeng92/android-code-read/blob/master/images/foreandBackGroundTask.png)
 
 
 这个时候，用户还可以将任意后台的任务切换到前台，这样用户应该就会看到之前离开这个任务时处于最顶端的那个Activity。
@@ -45,9 +39,7 @@
 由于返回栈中的Activity的顺序永远都不会发生改变，所以如果你的应用程序中允许有多个入口都可以启动同一个Activity，那么每次启动的时候就都会创建该Activity的一个新的实例，
 而不是将下面的Activity移动到栈顶。这样的话就容易导致一个问题的产生，即同一个Activity有可能会被实例化很多次，如下图所示：
 
-
-![back_stack]()
-
+![back_stack](https://github.com/xianfeng92/android-code-read/blob/master/images/back_stack.png)
 
 但是呢，如果你不希望同一个Activity可以被多次实例化，那当然也是可以的，马上我们就将开始讨论如果实现这一功能，现在我们先把默认的任务和Activity的行为简单概括一下：
 
@@ -96,9 +88,7 @@ Android系统管理任务和返回栈的方式，正如上面所描述的一样�
 
 下面我们就将开始讨论，如何通过manifest参数，以及Intent flag来改变Activity在任务中的默认行为。
 
-
 ## 定义启动模式
-
 
 __启动模式允许你去定义如何将一个Activity的实例和当前的任务进行关联__，你可以通过以下两种不同的方式来定义启动模式：
 
@@ -155,8 +145,7 @@ standard是默认的启动模式，即如果不指定launchMode属性，则自�
 并且启动的是另外一个应用程序中的Activity，这个时候当发现该Activity正好处于一个后台任务当中的话，就会直接将这整个后台任务一起切换到前台。此时按下返回键会优先将目前最前台的任务(刚刚从后台切换到最前台)
 进行回退，下图比较形象地展示了这种情况：
 
-![Activity_backStack.png]()
-
+![Activity_backStack.png](https://github.com/xianfeng92/android-code-read/blob/master/images/Activity_backStack.png)
 
 
 ### 使用Intent flags
@@ -235,30 +224,5 @@ affinity主要有以下两种应用场景：
 
 这个属性和clearTaskOnLaunch是比较类似的，不过它不是作用于整个任务上的，而是作用于单个Activity上。如果某个Activity将这个属性设置成true，那么用户一旦离开了当前任务，再次返回时这个Activity就会被清除掉。
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+ 
 [Android任务和返回栈完全解析，细数那些你所不知道的细节](https://blog.csdn.net/guolin_blog/article/details/41087993)

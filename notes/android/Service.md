@@ -240,7 +240,7 @@ public final void attach(
 
 最后，新创建出的Service对象还会记录进ActivityThread的mServices表格去，于是我们可以在前文示意图的基础上，再画一张新图：
 
-![fullStartService]()
+![fullStartService](https://github.com/xianfeng92/android-code-read/blob/master/images/fullStartService.png)
 
 
 是startService()启动服务的大体过程。上图并没有绘制“调用startService()的用户进程”，因为当Service启动后，它基本上就和发起方没什么关系了。

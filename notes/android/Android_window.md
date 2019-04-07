@@ -299,11 +299,5 @@ public static final int ID_ANDROID_CONTENT = com.android.internal.R.id.content;
 到这里，window的创建过程就已经分析完了
 
 
-
-
-
-
-
-
 [Android开发艺术探索]
 
