@@ -9,6 +9,8 @@ Read The Fucking Source Code
 
 * [Handler](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Handler%E5%88%86%E6%9E%90.md)
 
+* [MainThreadMessageLooper](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/MainThreadMessageLooper.md)
+
 * [Binder](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/AIDL%E5%88%86%E6%9E%90.md)
 
 ### 四大组件
@@ -17,31 +19,43 @@ Read The Fucking Source Code
 
 * [Activity启动流程](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Activty%E5%90%AF%E5%8A%A8.md)
 
+* [Task And BackStack](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Android_Activity_Task.md)
+
 * [Activty 中的一些重要知识点](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Activity_matter.md)
 
 * [Fragment](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Fragment%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90.md)
 
-* [Context基本使用]()
+* [Android Fragments developer](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Android_Fragments_developer.md)
 
-* [Context](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Context.md)
+* [Context基本使用](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/ContextBaseUse.md)
+
+* [Context分析](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Context.md)
 
 #### Service相关
 
 * [Service](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Service.md)
 
-* ContentProvider
+* [Android_Service_Demo](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Android_Service_Demo.md)
 
-* BroadCastRecevier
+* [Service 中的一些重要知识点](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Service_matter.md)
+
+* [BroadCastRecevier](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Android_Broadcasts.md)
 
 ### View 事件体系
 
 #### View相关
 
-* View
+* [Andoird_view_LayoutInflater](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Andoird_view_LayoutInflater.md)
 
-* RemoteViews
+* [Android_view_Measure](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Android_view_Measure.md)
+
+* [Android_view_Layout](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Android_view_Layout.md)
+
+* [Android_view_Draw](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Android_view_Draw.md)
 
 * [Android_window](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Android_window.md)
+
+* [Android_view_customView](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Android_view_customView.md)
 
 #### 事件
 
@@ -59,15 +73,36 @@ Read The Fucking Source Code
 
 ### Android 异步
 
+* [Android_ThreadBase](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Android_ThreadBase.md)
+
+* [Android_Demo_Thread](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Android_Demo_Thread.md)
+
+* [Android_Guide_background_processing](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Android_Guide_background_processing.md)
+
+* [Android_ManagerForMultipleThreads](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Android_ManagerForMultipleThreads.md)
+
+* [Android_Communicate_with_UIThread](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Android_Communicate_with_UIThread.md)
+
+* [Android_RunCode_Threadpool](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Android_RunCode_Threadpool.md)
+
+* [MultiThread_start](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/MultiThread_start.md)
+
 * [AsyncTask](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/AsyncTask%E5%88%86%E6%9E%90.md)
 
 * handlerThread
 
 * intentService
 
-* hanlder
-
 ------------------------------------------
+
+## Design Patterns
+
+* [Adapter](https://github.com/xianfeng92/android-code-read/blob/master/notes/Patterns/Adapter.md)
+
+
+
+
+-------------------------------------------
 ## Jetpack
 
 
