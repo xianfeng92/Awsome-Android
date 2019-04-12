@@ -797,7 +797,6 @@ View 的 LONG_CLICKABLE 属性默认为 false，而 CLICKABLE 属性是否为fal
    activity，让其 onTouchEvent 来处理该事件，到这里整个事件已经分发和处理结束。
 
 
-
 ## 参考
 
 * Android开发艺术探索
