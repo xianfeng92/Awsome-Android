@@ -19,7 +19,7 @@ public class Person {
     @Inject
     Car car;
 
-    public void goShopping(){
+    public void goDongbei(){
         car.run();
     }
 }

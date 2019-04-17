@@ -154,7 +154,7 @@ public class CarModule {
 public interface ManComponent {
     void injectMan(Man man);
 
-    SonComponent.Builder sonComponent();    // 在 parentComponent 中通过 Builder 来创建 Subcomponent。
+    SonComponent.Builder sonComponent(); // 在 parentComponent 中通过 Builder 来创建 Subcomponent。
 }
 ```
 
