@@ -15,10 +15,6 @@
 通过　@Inject　来标注 Person　中需要使用 Car：
 
 ```
-/**
- * Created By zhongxianfeng on 19-4-17
- * github: https://github.com/xianfeng92
- */
 public class Person {
     @Inject
     Car car;
