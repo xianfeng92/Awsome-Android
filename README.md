@@ -115,15 +115,15 @@ Read The Fucking Source Code
 
 ----------------------------------------
 # DAGGER
-*[DAGGER基础](https://github.com/xianfeng92/android-code-read/blob/master/notes/Dagger2/Dagger_base.md)
+* [DAGGER基础](https://github.com/xianfeng92/android-code-read/blob/master/notes/Dagger2/Dagger_base.md)
 
-*[使用 @Inject 注入过程分析](https://github.com/xianfeng92/android-code-read/blob/master/notes/Dagger2/Dagger_Analysis_Inject.md)
+* [使用 @Inject 注入过程分析](https://github.com/xianfeng92/android-code-read/blob/master/notes/Dagger2/Dagger_Analysis_Inject.md)
 
-*[使用 @Provides 注入过程分析](https://github.com/xianfeng92/android-code-read/blob/master/notes/Dagger2/Dagger_Analysis_Provider.md)
+* [使用 @Provides 注入过程分析](https://github.com/xianfeng92/android-code-read/blob/master/notes/Dagger2/Dagger_Analysis_Provider.md)
 
-*[Dagger中的构建者模式](https://github.com/xianfeng92/android-code-read/blob/master/notes/Dagger2/Pattern_BuilderInDagger.md)
+* [Dagger中的构建者模式](https://github.com/xianfeng92/android-code-read/blob/master/notes/Dagger2/Pattern_BuilderInDagger.md)
 
-*[Dagger中的简单工厂模式](https://github.com/xianfeng92/android-code-read/blob/master/notes/Dagger2/Pattern_ProviderInDagger.md)
+* [Dagger中的简单工厂模式](https://github.com/xianfeng92/android-code-read/blob/master/notes/Dagger2/Pattern_ProviderInDagger.md)
 
 -----------------------------------------
 ## Retrofit
