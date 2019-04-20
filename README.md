@@ -101,12 +101,6 @@ Read The Fucking Source Code
 
 
 
-
--------------------------------------------
-## Jetpack
-
-
-
 -------------------------------------------
 
 ## RxJava
@@ -118,6 +112,18 @@ Read The Fucking Source Code
 * [Rxjava 线程调度](https://github.com/xianfeng92/android-code-read/blob/master/notes/Rxjava/Rxjava_Scheduler.md)
 
 * [Rxjava 设计模式](https://github.com/xianfeng92/android-code-read/blob/master/notes/Rxjava/Rxjava_design.md)
+
+----------------------------------------
+# DAGGER
+*[DAGGER基础](https://github.com/xianfeng92/android-code-read/blob/master/notes/Dagger2/Dagger_base.md)
+
+*[使用 @Inject 注入过程分析](https://github.com/xianfeng92/android-code-read/blob/master/notes/Dagger2/Dagger_Analysis_Inject.md)
+
+*[使用 @Provides 注入过程分析](https://github.com/xianfeng92/android-code-read/blob/master/notes/Dagger2/Dagger_Analysis_Provider.md)
+
+*[Dagger中的构建者模式](https://github.com/xianfeng92/android-code-read/blob/master/notes/Dagger2/Pattern_BuilderInDagger.md)
+
+*[Dagger中的简单工厂模式](https://github.com/xianfeng92/android-code-read/blob/master/notes/Dagger2/Pattern_ProviderInDagger.md)
 
 -----------------------------------------
 ## Retrofit
@@ -137,6 +143,10 @@ Read The Fucking Source Code
 -------------------------------------------
 
 ## Web
+
+
+-------------------------------------------
+## Jetpack
 
 
 
