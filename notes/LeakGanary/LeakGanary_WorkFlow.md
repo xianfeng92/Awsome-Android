@@ -1,6 +1,6 @@
 # LeakGanary Work Flow
 
-![leakcanary]()
+![leakcanary](https://github.com/xianfeng92/android-code-read/blob/master/images/leakcanary.png)
 
 ###  RefWatcher.watch() creates a KeyedWeakReference to the watched object.
          
