@@ -95,13 +95,14 @@ Read The Fucking Source Code
 
 ------------------------------------------
 
-## Design Patterns
+# Java
 
-* [Adapter](https://github.com/xianfeng92/android-code-read/blob/master/notes/Patterns/Adapter.md)
+* [强引用、弱引用、软引用、虚引用](https://www.jianshu.com/p/1fc5d1cbb2d4)
+* [ReferenceQueue的使用](https://www.jianshu.com/p/73260a46291c)
 
+------------------------------------------
 
-
--------------------------------------------
+# Open Source
 
 ## RxJava
 
@@ -140,10 +141,6 @@ Read The Fucking Source Code
 
 ## LeakCanary
 
--------------------------------------------
-
-## Web
-
 
 -------------------------------------------
 ## fastjson
@@ -152,7 +149,9 @@ Read The Fucking Source Code
 
 * [JSON最佳实践](http://kimmking.github.io/2017/06/06/json-best-practice/)
 
+## Design Patterns
 
+* [Adapter](https://github.com/xianfeng92/android-code-read/blob/master/notes/Patterns/Adapter.md)
 
 
 

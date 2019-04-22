@@ -35,4 +35,4 @@ HeapAnalyzer 计算 到 GC roots 的最短强引用路径，并确定是否是�
 
 ### 7 The result is passed back to DisplayLeakService in the app process, and the leak notification is shown.
 
- 内存泄漏信息送回给 DisplayLeakService，它是运行在 app 进程里的一个服务。然后在设备通知栏显示内存泄漏信息。
+内存泄漏信息送回给 DisplayLeakService，它是运行在 app 进程里的一个服务。然后在设备通知栏显示内存泄漏信息。

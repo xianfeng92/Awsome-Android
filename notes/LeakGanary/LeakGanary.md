@@ -88,7 +88,6 @@ LeakCanay 是在 onActivityDestroyed 方法实现监控的, 即只要我们的ap
 * Watches the provided references and checks if it can be GCed. This method is non blocking,
 * the check is done on the {@link WatchExecutor} this {@link RefWatcher} has been constructed
 * with.
-*
 * @param referenceName An logical identifier for the watched object.
 */
 public void watch(Object watchedReference, String referenceName) {
@@ -108,22 +107,26 @@ new KeyedWeakReference(watchedReference, key, referenceName, queue);
 ensureGoneAsync(watchStartNanoTime, reference);
 }
 ```
+
 其中:
+
 ```
 final KeyedWeakReference reference =
 new KeyedWeakReference(watchedReference, key, referenceName, queue);
 ```
+
 主要做了如下三件事:
 
-1.  生成一个弱引用( WeakReference) 指向被监测的对象 (watchedReference)
+1. 生成一个弱引用( WeakReference) 指向被监测的对象 (watchedReference)
 
 2. 用唯一的 Id (key) 来标识被监测的对象 (watchedReference). 所有的 key 都会被存储在一个 retainedKeys 集合中.
 
 3. 将生成的弱引用注册(registered)到 ReferenceQueue 中
     注意,这里并不是将弱引用存入到 ReferenceQueue, 只有当一个对象变成弱可达时,才会将其存入 ReferenceQueue 中. 简单的说,ReferenceQueue 中存储的
-    对象都是可被 GC 回收的.
-    
-监测机制利用了Java 的 WeakReference 和 ReferenceQueue，将每个被监测的对象(activity 和 fragment )都包装成一个  KeyedWeakReference . 
+    对象都是可被 GC 回收的。
+
+
+PS:弱引用可以和一个引用队列（ReferenceQueue）联合使用时，如果弱引用所引用的对象被垃圾回收器回收，Java虚拟机就会把这个弱引用加入到与之关联的引用队列中。
 
 ```
 private void ensureGoneAsync(final long watchStartNanoTime, final KeyedWeakReference reference) {

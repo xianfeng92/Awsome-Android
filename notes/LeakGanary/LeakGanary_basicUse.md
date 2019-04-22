@@ -56,7 +56,7 @@ Debug.dumpHprofData(heapDumpFile.getAbsolutePath());
 
 ### 如何使用 HandlerThread
 
-可以参阅AndroidWatchExecutor.java的代码，特别是关于 Handler, Loop 的使用。
+可以参阅 AndroidWatchExecutor.java的代码，特别是关于 Handler, Loop 的使用。
 
 ### 怎么知道某个变量已经被 GC 回收
 
