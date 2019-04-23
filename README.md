@@ -89,10 +89,9 @@ Read The Fucking Source Code
 
 * [AsyncTask](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/AsyncTask%E5%88%86%E6%9E%90.md)
 
-* [handlerThread:看看LeakGananry 中怎么使用它](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/LeakGanary/LeakGanary_AndroidWatchExecutor.md)
+* [handlerThread:看看在 LeakGananry 中的使用](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/LeakGanary/LeakGanary_AndroidWatchExecutor.md)
 
-* intentService
-
+* [intentService:看看在 LeakGananry 中的使用](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/LeakGanary/LeakGanary_HeapAnalyzerService.md)
 ------------------------------------------
 
 # Java
