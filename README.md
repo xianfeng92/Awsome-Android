@@ -71,6 +71,8 @@ Read The Fucking Source Code
 
 * [Android_GC](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Android_GC.md)
 
+* [内存溢出和内存泄漏的区别、产生原因以及解决方案](https://www.cnblogs.com/Sharley/p/5285045.html)
+
 ### Android 异步
 
 * [Android_ThreadBase](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Android_ThreadBase.md)
