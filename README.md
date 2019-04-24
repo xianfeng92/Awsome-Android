@@ -154,6 +154,11 @@ Read The Fucking Source Code
 
 * [LeakGanary_PatternDesign](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/LeakGanary/LeakGanary_PatternDesign.md)
 
+-----------------------------------------
+
+## EventBus
+
+
 
 
 -------------------------------------------
