@@ -142,6 +142,19 @@ Read The Fucking Source Code
 
 ## LeakCanary
 
+* [LeakGanary_basicUse](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/LeakGanary/LeakGanary_basicUse.md)
+
+* [LeakGanary](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/LeakGanary/LeakGanary.md)
+
+* [LeakGanary_WorkFlow](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/LeakGanary/LeakGanary_WorkFlow.md)
+
+* [LeakGanary_FragmentRefWatcher](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/LeakGanary/LeakGanary_FragmentRefWatcher.md)
+
+* [LeakGanary_HeapAnalyzerService](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/LeakGanary/LeakGanary_HeapAnalyzerService.md)
+
+* [LeakGanary_PatternDesign](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/LeakGanary/LeakGanary_PatternDesign.md)
+
+
 
 -------------------------------------------
 ## fastjson
