@@ -1,5 +1,7 @@
 # Awsome-Android
 
+![funny](https://github.com/xianfeng92/Awsome-Android/blob/master/images/funny.gif)
+
 ----------------------------------------------
 ## Android
 
