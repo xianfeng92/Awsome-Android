@@ -142,6 +142,8 @@
 
 ## LeakCanary
 
+* [用 LeakCanary 检测内存泄漏](https://academy.realm.io/cn/posts/droidcon-ricau-memory-leaks-leakcanary/)
+
 * [LeakGanary_basicUse](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/LeakGanary/LeakGanary_basicUse.md)
 
 * [LeakGanary](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/LeakGanary/LeakGanary.md)
