@@ -5,15 +5,15 @@
 ----------------------------------------------
 ## SOLID
 
-* [单一职责原则]()
+* [单一职责原则](https://github.com/xianfeng92/Awsome-Android/blob/master/SOLID/SingleResponsibilityPrinciple.md)
 
-* [开-闭原则]()
+* [开-闭原则](https://github.com/xianfeng92/Awsome-Android/blob/master/SOLID/OpenClosedPrinciple.md)
 
-* [里氏替换原则]()
+* [里氏替换原则](https://github.com/xianfeng92/Awsome-Android/blob/master/SOLID/LiskovSubstitutionPrinciple.md)
 
-* [接口隔离原则]()
+* [接口隔离原则](https://github.com/xianfeng92/Awsome-Android/blob/master/SOLID/InterfaceSegregationPrinciple.md)
 
-* [依赖倒置原则]()
+* [依赖倒置原则](https://github.com/xianfeng92/Awsome-Android/blob/master/SOLID/DependencyInversionPrinciple.md)
 
 ---------------------------------------------
 ## Android
