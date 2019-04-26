@@ -1,7 +1,7 @@
 
 ## checkForLeak
 
-使用 referenceKey 从 heapDump 中找到对应 KeyedWeakReference引用所指向的实例,即存在内存泄露的对象。
+使用 referenceKey 从 heapDump 中找到对应 KeyedWeakReference 引用所指向的实例,即存在内存泄露的对象。
 
 ```
   /**
@@ -44,18 +44,23 @@
   }
 ```
 
+使用 haha 解析得到的 Snapshot 会罗列出内存中各个对象，它通过对象之间的引用链关系构成了一棵树，在这个树中可以查询到各个对象的信息，包括它的Class对象信息、
+内存地址、持有的引用及被持有的引用关系等。得到 Snapshot 对象后，根据 referenceKey 在 Snapshot 中搜索（__findLeakingReference__）出内存泄露对象的位置。
+
 ## findLeakingReference
 
 从 snapshot 中找到 key 所对应的内存泄露对象。
 
 ```
   private Instance findLeakingReference(String key, Snapshot snapshot) {
+    // 从 snapshot 中找出 KeyedWeakReference Class
     ClassObj refClass = snapshot.findClass(KeyedWeakReference.class.getName());
     if (refClass == null) {
       throw new IllegalStateException(
           "Could not find the " + KeyedWeakReference.class.getName() + " class in the heap dump.");
     }
     List<String> keysFound = new ArrayList<>();
+    // 遍历 KeyedWeakReference Class 所对应的所有 KeyedWeakReference 对象
     for (Instance instance : refClass.getInstancesList()) {
       List<ClassInstance.FieldValue> values = classInstanceValues(instance);
       Object keyFieldValue = fieldValue(values, "key");
@@ -65,6 +70,7 @@
       }
       String keyCandidate = asString(keyFieldValue);
       if (keyCandidate.equals(key)) {
+        // 比对 snapshot 中 KeyedWeakReference 对象的 key 值和我们需要搜索的 key。如果一致，则返回该对象。
         return fieldValue(values, "referent");
       }
       keysFound.add(keyCandidate);
@@ -73,11 +79,13 @@
         "Could not find weak reference with key " + key + " in " + keysFound);
   }
 ```
+为了能够准确找到被泄漏对象，LeakCanary 通过被泄漏对象的弱引用来在 Snapshot 中定位它。因为，如果一个对象被泄漏，一定也可以在内存中找到这个对象的弱引用，
+再通过弱引用对象的 referent 就可以直接定位被泄漏对象。下一步的工作就是找到一条有效的到被泄漏对象的最短的引用，这通过__findLeakTrace__来实现。
+
 
 ## findLeakTrace
 
 找到 snapshot 中，从 leakingRef 到 GCRoots 的最短路径：
-
 
 ```
   private AnalysisResult findLeakTrace(long analysisStartNanoTime, Snapshot snapshot,
@@ -122,6 +130,8 @@
   }
 ```
 
+在 findLeakTrace 方法中，主要通过 ShortestPathFinder#findPath 方法，在 snapshot 中，找到一条从 
+leakingRef 到 GCRoot 对象的最短路径。
 
 
 
