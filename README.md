@@ -74,6 +74,8 @@
 
 * [MotionEvent](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Andoird_view_event.md)
 
+* [EventBus 源码解析](http://a.codekk.com/detail/Android/Trinea/EventBus%20%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90)
+
 ### Android 内存
 
 * [Android_MemoryManager](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Android_MemoryManager.md)
