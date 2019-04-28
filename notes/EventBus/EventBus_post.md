@@ -1,6 +1,10 @@
 # EventBus
 
-## post 发布事件
+## post 流程
+
+![post]()
+
+## post 源码分析
 
 post 函数用于发布事件，cancel 函数用于取消某订阅者订阅的所有事件类型、removeStickyEvent 函数用于删除 sticky 事件。
 
@@ -29,7 +33,9 @@ postingState.isMainThread = false;
 }
 ```
 
-其中, PostingThreadState 的结构如下:
+post 函数会首先得到当前线程的 post 信息 PostingThreadState，其中包含事件队列，将当前事件添加到其事件队列中，然后循环调用 
+postSingleEvent 函数发布队列中的每个事件。值得注意的是，PostingThreadState 是存储在 ThreadLocal 中的，即每个线程都会有
+一个不同 PostingThreadState。PostingThreadState 的结构如下:
 
 ```
 /** For ThreadLocal, much faster to set (and get multiple values). */
@@ -42,10 +48,16 @@ Object event;
 boolean canceled;
 }
 ```
-利用 PostingThreadState 来对 event 发送前的状态进行检查, 如: 事件是否正在分发中,以及 event 事件是否被取消. 而真正进行 post 事件的是 postSingleEvent 方法,其源码如下:
+PostingThreadState 中会有一个 eventQueue 列表来存储当前线程中需要 post 的所有事件。使用 isPosting 来标记当前线程是否正在 post 事件，
+使用 isMainThread 标记当前线程是否为主线程，使用 canceled 标记当前线程的 post 操作是否被取消。
+
+
+
+循环调用 postSingleEvent 方法来分发当前线程的 eventQueue 列表中的事件,其源码如下:
 
 ```
 private void postSingleEvent(Object event, PostingThreadState postingState) throws Error {
+// 获取当前 post 的事件的 Class 对象
 Class<?> eventClass = event.getClass();
 boolean subscriptionFound = false;
 if (eventInheritance) {
@@ -70,9 +82,10 @@ post(new NoSubscriberEvent(this, event));
 }
 ```
 
+
 ### postSingleEventForEventType 
 
-在 subscriptionsByEventType 中查找该事件的订阅者队列, 然后调用 postToSubscription 函数向每个订阅者发布事件。
+在 subscriptionsByEventType 中查找该事件的订阅者列表 然后调用 postToSubscription 函数向每个订阅者发布事件。
 
 ```
 private boolean postSingleEventForEventType(Object event, PostingThreadState postingState, Class<?> eventClass) {
@@ -145,5 +158,57 @@ throw new IllegalStateException("Unknown thread mode: " + subscription.subscribe
 }
 }
 ```
+
+### ThreadMode 共有四类
+
+#### 1.POSTING
+
+默认的 ThreadMode，表示在执行 Post 操作的线程直接调用订阅者的事件响应方法，不论该线程是否为主线程（UI 线程）。当该线程为主线程时，
+响应方法中不能有耗时操作，否则有卡主线程的风险。适用场景：对于是否在主线程执行无要求，但若 Post 线程为主线程，不能耗时的操作。
+
+#### 2.MAIN
+
+在主线程中执行响应方法。如果发布线程就是主线程，则直接调用订阅者的事件响应方法，否则通过主线程的 Handler 发送消息在主线程中处理——调用
+订阅者的事件响应函数。显然，MainThread类的方法也不能有耗时操作，以避免卡主线程。适用场景：必须在主线程执行的操作。
+
+
+#### 3.BACKGROUND
+
+在后台线程中执行响应方法。如果发布线程不是主线程，则直接调用订阅者的事件响应函数，否则启动唯一的后台线程去处理。由于后台线程是唯一的，
+当事件超过一个的时候，它们会被放在队列中依次执行，因此该类响应方法虽然没有PostThread类和MainThread类方法对性能敏感，但最好不要有重度耗
+时的操作或太频繁的轻度耗时操作，以造成其他操作等待。适用场景：操作轻微耗时且不会过于频繁，即一般的耗时操作都可以放在这里。
+
+#### 4.ASYNC
+
+不论发布线程是否为主线程，都使用一个空闲线程来处理。和 BackgroundThread 不同的是，Async 类的所有线程是相互独立的，因此不会出现卡线程的问题。
+适用场景：长耗时操作，例如网络访问。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
