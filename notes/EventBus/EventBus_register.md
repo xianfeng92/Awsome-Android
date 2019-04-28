@@ -4,7 +4,7 @@
 
 register 订阅流程如下：
 
-![Register_process]()
+![Register_process](https://github.com/xianfeng92/Awsome-Android/blob/master/images/Register_process.png)
 
 ## register 源码分析
 
@@ -154,7 +154,7 @@ Subscription 中封装的是订阅者的 Class 对象，弱弱的感觉后面会
 订阅者向 EventBus 注册时，EventBus 会根据订阅者所要订阅的事件类型，将其存储哈希列表中。具体关系图如下所示：
 
 
-![subscriptionsByEventType]()
+![subscriptionsByEventType](https://github.com/xianfeng92/Awsome-Android/blob/master/images/subscriptionsByEventType.png)
 
 
 
