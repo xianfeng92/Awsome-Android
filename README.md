@@ -177,6 +177,12 @@
 
 * [野生 EventBus 文档](https://blog.boileryao.com/2018/02/eventbus-doc-cn/)
 
+* [EventBus_register](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_register.md)
+
+* [EventBus_post](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_post.md)
+
+* [EventBus_ThreadMode](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_ThreadMode.md)
+
 -------------------------------------------
 ## fastjson
 
