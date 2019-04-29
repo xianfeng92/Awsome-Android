@@ -20,7 +20,7 @@
 
 ### Android系统的消息机制
 
-* [Handler](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Handler%E5%88%86%E6%9E%90.md)
+* [Handler](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/android/Handler_Analysis.md)
 
 * [MainThreadMessageLooper](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/MainThreadMessageLooper.md)
 
