@@ -1,35 +1,31 @@
-先上结论：
+# 先上结论
 
 1. Handler的 sendMessage 方法做了什么？
 
-  本质上，就是将一个 message 存储到 handler 所维护的 MessageQueue 中。
+   本质上，就是将一个 message 存储到 Looper 的一个 MessageQueue 中。
 
-2. Handler 创建时需要先提供一个Looper对象（loop.prepare()），而 Looper 对象是依附于线程的（存储在 ThreadLocal 中），在 Looper 对象的构造中，会创建一个 MessageQueue 对象。
+2. Handler 创建时需要先提供一个 Looper 对象（loop.prepare()），而 Looper 对象是依附于线程的（存储在 ThreadLocal 中），在 Looper 对象的构造中，会创建一个 MessageQueue 对象。
 
-3. 为什么在 UI 线程中使用 Handler 处理消息，不需要调用Looper.prepare()和Looper.loop()
+3. 为什么在 UI 线程中使用 Handler 处理消息，不需要调用 Looper.prepare() 和 Looper.loop()
 
-  ActivityThread 创建中，已经调用了 Looper.prepareMainLooper() 和 Looper.loop()，来创建 Looper 和 MessageQueue。
+   ActivityThread 创建中，已经调用了 Looper.prepareMainLooper() 和 Looper.loop()，来创建 Looper 和 MessageQueue。
 
 4. MessageQueue作用
 
-  MessageQueue以msg的time为基准，维护一个优先级队列。
+   MessageQueue以 msg 的 time 为基准，维护一个优先级队列。
 
-5. Handler何时处理message？
+5. Handler 何时处理 message？
 
-  Handler中的 Looper.loop() ,会不断的从 MessageQueue 中取出 msg 进行处理（当MessageQueue为空时，进入阻塞状态）。取出msg时，会通过 msg.target 找到是哪个 Handler 发送这个mgs的，
+  Looper.loop() 方法会不断的从 MessageQueue 中取出 msg 进行处理（当MessageQueue为空时，进入阻塞状态）。取出msg时，会通过 msg.target 找到是哪个 Handler 发送这个mgs的，
   然后调用该 Handler 的 dispatchMessage 方法来处理 msg。
 
-6. Handler post一个runnable是如何处理的呢？
+6. Handler post 一个runnable是如何处理的呢？
 
-  Handler会将runnable封装成一个msg对象，并将runnable赋值给msg的一个callback变量。在dispatchMessage，此时检查到callback不为null，会调用callback.run()方法，即runnable的run方法被调用。
+  Handler 会将 runnable 封装成一个msg对象，并将 runnable 赋值给 msg 的一个callback变量。在 dispatchMessage，此时检查到 callback 不为null，会调用 callback.run()方法，即 
+  runnable的run方法被调用。
   
 # Android的消息机制概述
-   
-   从开发的角度来说，Handler 是 Android 消息机制的上层接口，这使得开发过程只需要和 Handler 交互即可。__Handler 的使用过程很简单，通过它可以轻松将一个任务切换到 Handler 所在线程去执行__。
-很多人认为Handler 的任务是更新 UI ，这的确没错，但是更新 UI 仅仅是 Handler 的一个特殊的使用场景。具体来说是这样的：有时候需要在子线程中进行耗时的 I/O 操作，可能是读取文件或访问网络等，当
-耗时任务完成后可能需要在 UI 上做一些改变，由于 Android 开发规范的限制，我们并不能在子线程中访问 UI 控件，否则会触发程序异常，这时候通过 Handler 就可以将更新 UI 的操作切换到主线程中执行。因此，
-本质上说，Handler 并不是专门用于更新 UI ，它只是常被开发者用来更新 UI。
-   
+
    Android 的消息机制主要是指 Handler 的运行机制，Handler 的运行需要底层的 MessageQueue 和 Looper 的支撑。MessageQueue 即消息队列，它内部存储了一组消息，以队列的形式对外提供插入和删除的工作。
 虽然叫做消息队列，但是它的内部存储结构是__采用单链表的数据结构来存储消息列表(基于单链表实现的队列)__。Looper 为消息循环。由于 MessageQueue 只是一个消息的存储单元，并不能
 去处理消息，而 Looper 就填补了这个功能，Looper 会以无限循环的形式去查找是否有新的消息，如果有的话就处理，否则就一直等待。Looper 中还有一个特殊的概念，那就是 ThreadLocal, ThreadLocal 并不是线程，
@@ -59,7 +55,7 @@ Handler 创建完毕后,这个时候其内部的 Lopper 以及 MeaasgeQueue 就�
 
 # Android的消息机制分析
 
-## ThreadLocal的工作原理
+## ThreadLocal 的工作原理
 
 __ThreadLocal 是一个线程内部的数据存储类，通过它可以在执行的线程中存储数据，数据存储后，只有在指定线程中可以获取到存储的数据，对于其他线程来说则无法获取到数据__。
 一般来说，某一个数据是以线程为作用域并且不同线程具有不同的 Looper，这个时候通过 ThreadLocal 就可以轻松的实现 Looper 在线程中的存取。
@@ -165,9 +161,9 @@ ThreadLocal 的值存储到 table 数组中的，如下所示：
         }
 ```
 
-通过上面的代码，我们可以看出一个存储规则，那就是 ThreadLocal 的值在 table 数组中的存储位置总是为 ThreadLocal 的 reference 字段所标识的对象的下一个位置，比如 ThreadLocal 的 reference 对象在 table
-数组中的索引为index，那么 ThreadLocal 的值在 table 数组中的索引就是 index + 1 ,最终 ThreadLocal 的值将会被存储在table数组中，table[index + 1] = vales
-
+通过上面的代码，我们可以看出一个存储规则，那就是 ThreadLocal 的值在 table 数组中的存储位置总是为 ThreadLocal 的 reference 字段所标识的对象的下一个位置，
+比如 ThreadLocal 的 reference 对象在 table数组中的索引为index，那么 ThreadLocal 的值在 table 数组中的索引就是 index + 1 ,最终 ThreadLocal 的值将会被存
+储在table数组中，table[index + 1] = vales。
 
 我们再来看下get方法：
 
@@ -204,7 +200,6 @@ public T get() {
 
 从 ThreadLocal 的 set 和 get 方法可以看出，它们所操作的对象都是当前线程的 localValues 对象的 table 数组，因此在不同线程中访问同一个 ThreadLocal 的set和get方法，
 它们对 ThreadLocal 所做的读写操作仅限于各自线程的内部，这就是为什么 ThreadLocal 可以在多个线程互不干扰的存储和修改数据。
-
 
 
 ## 消息队列的工作原理
@@ -268,7 +263,7 @@ public T get() {
 从 enqueueMessage 的实现中可以看出，主要是以 msg 的 delayed 为基准，将 msg 插入到消息队列中。
 
 
-下面看一下next方法的实现，next的主要逻辑：
+下面看一下 next 方法的实现，next 的主要逻辑：
 
 ```
   Message next() {
@@ -380,8 +375,6 @@ public T get() {
 2. 当有新消息到来时，next 方法会检查该 msg 是否达到 delayed 时间，如果有，则从 MessageQueue 中移除该 mgs，并执行。如果没有，next 会继续等待该 msg 达到 delayed 时间。
 
 
-
-
 ## Lopper的工作原理
 
 Looper 在消息机制中扮演着__消息循环__的角色，具体来说就是它会不停的从 MessageQueue 中查看是否有可以处理的消息，如果有就会立即处理，否则就会一直阻塞在那里。我们先来看下他的构造方法，
@@ -396,7 +389,7 @@ Looper 在消息机制中扮演着__消息循环__的角色，具体来说就是
 ```
 
 我们都知道，Handler 的工作需要 Looper，没有Looper的线程就会报错，那么如何为一个线程创建 Looper，其实很简单，就是通过Looper.prepare()就可以为他创建了，
-然后通过Looper.loop来开启循环。
+然后通过 Looper.loop 来开启循环。
 
 ```
         new Thread("Thread #2") {
@@ -471,7 +464,7 @@ public static void loop() {
 
 Looper的loop方法在工作过程也比较好理解，loop 方法是死循环，唯一跳出循环的方法是 MessageQueue 的 next 方法返回null。
 
-那么何时next 才会返回 null 呢？
+那么何时 next 才会返回 null 呢？
 
 当 Looper 被 quit 方法调用时，Looper 就会调用 MessageQueue 的 quit 或者 quitSafely 方法来通知队列退出。当消息队列被标记为退出状态的时候，它的next方法就会返回null，
 也就是说，Looper必须退出，否则 loop 方法就会无限循环下去，loop 方法会调用 MessageQueue 的 next 来获取最新消息，而 next 是一个阻塞操作，当没有消息时，next就会阻塞，
@@ -487,56 +480,22 @@ Handler 的工作主要是包含消息的发送和接收过程，消息的发送
 发送一条消息的典型过程如下：
 
 ```
-/**
-     * Pushes a message onto the end of the message queue after all pending messages
-     * before the current time. It will be received in {@link #handleMessage},
-     * in the thread attached to this handler.
-     * 
-     * @return Returns true if the message was successfully placed in to the 
-     *         message queue.  Returns false on failure, usually because the
-     *         looper processing the message queue is exiting.
-     */
     public final boolean sendMessage(Message msg)
     {
         return sendMessageDelayed(msg, 0);
     }
 
-    /**
-     * Sends a Message containing only the what value.
-     * 
-     * @return Returns true if the message was successfully placed in to the 
-     *         message queue.  Returns false on failure, usually because the
-     *         looper processing the message queue is exiting.
-     */
     public final boolean sendEmptyMessage(int what)
     {
         return sendEmptyMessageDelayed(what, 0);
     }
 
-    /**
-     * Sends a Message containing only the what value, to be delivered
-     * after the specified amount of time elapses.
-     * @see #sendMessageDelayed(android.os.Message, long) 
-     * 
-     * @return Returns true if the message was successfully placed in to the 
-     *         message queue.  Returns false on failure, usually because the
-     *         looper processing the message queue is exiting.
-     */
     public final boolean sendEmptyMessageDelayed(int what, long delayMillis) {
         Message msg = Message.obtain();
         msg.what = what;
         return sendMessageDelayed(msg, delayMillis);
     }
 
-    /**
-     * Sends a Message containing only the what value, to be delivered 
-     * at a specific time.
-     * @see #sendMessageAtTime(android.os.Message, long)
-     *
-     * @return Returns true if the message was successfully placed in to the 
-     *         message queue.  Returns false on failure, usually because the
-     *         looper processing the message queue is exiting.
-     */
 
     public final boolean sendEmptyMessageAtTime(int what, long uptimeMillis) {
         Message msg = Message.obtain();
@@ -544,17 +503,6 @@ Handler 的工作主要是包含消息的发送和接收过程，消息的发送
         return sendMessageAtTime(msg, uptimeMillis);
     }
 
-    /**
-     * Enqueue a message into the message queue after all pending messages
-     * before (current time + delayMillis). You will receive it in
-     * {@link #handleMessage}, in the thread attached to this handler.
-     * @return Returns true if the message was successfully placed in to the 
-     *         message queue.  Returns false on failure, usually because the
-     *         looper processing the message queue is exiting.  Note that a
-     *         result of true does not mean the message will be processed -- if
-     *         the looper is quit before the delivery time of the message
-     *         occurs then the message will be dropped.
-     */
     public final boolean sendMessageDelayed(Message msg, long delayMillis)
     {
         if (delayMillis < 0) {
@@ -563,23 +511,6 @@ Handler 的工作主要是包含消息的发送和接收过程，消息的发送
         return sendMessageAtTime(msg, SystemClock.uptimeMillis() + delayMillis);
     }
 
-    /**
-     * Enqueue a message into the message queue after all pending messages
-     * before the absolute time (in milliseconds) <var>uptimeMillis</var>.
-     * <b>The time-base is {@link android.os.SystemClock#uptimeMillis}.</b>
-     * You will receive it in {@link #handleMessage}, in the thread attached
-     * to this handler.
-     * 
-     * @param uptimeMillis The absolute time at which the message should be
-     *         delivered, using the
-     *         {@link android.os.SystemClock#uptimeMillis} time-base.
-     * @return Returns true if the message was successfully placed in to the 
-     *         message queue.  Returns false on failure, usually because the
-     *         looper processing the message queue is exiting.  Note that a
-     *         result of true does not mean the message will be processed -- if
-     *         the looper is quit before the delivery time of the message
-     *         occurs then the message will be dropped.
-     */
     public boolean sendMessageAtTime(Message msg, long uptimeMillis) {
         MessageQueue queue = mQueue;
         if (queue == null) {
@@ -591,17 +522,6 @@ Handler 的工作主要是包含消息的发送和接收过程，消息的发送
         return enqueueMessage(queue, msg, uptimeMillis);
     }
 
-    /**
-     * Enqueue a message at the front of the message queue, to be processed on
-     * the next iteration of the message loop.  You will receive it in
-     * {@link #handleMessage}, in the thread attached to this handler.
-     * <b>This method is only for use in very special circumstances -- it
-     * can easily starve the message queue, cause ordering problems, or have
-     * other unexpected side-effects.</b>
-     * @return Returns true if the message was successfully placed in to the 
-     *         message queue.  Returns false on failure, usually because the
-     *         looper processing the message queue is exiting.
-     */
     public final boolean sendMessageAtFrontOfQueue(Message msg) {
         MessageQueue queue = mQueue;
         if (queue == null) {
@@ -623,6 +543,7 @@ Handler 的工作主要是包含消息的发送和接收过程，消息的发送
 ```
 
 可以发现， Handler 发消息仅仅是向消息队列里插入一条消息，MessageQueue 的 next 方法就会返回这条消息给  Looper，最终 Handler 的 dispatchMessage 方法就会被调用。
+
 这个时候 Handler 就进入了处理消息的阶段，dispatchMessage的实现如下：
 
 ```
@@ -713,79 +634,6 @@ Handler 有一个特殊的构造方法，那就是通过一个特定的 Looper �
 2. View 的post()方法
 
 3. Activity 的 runOnUiThread()方法
-
-
-我们先来看下Handler中的post()方法，代码如下所示：
-
-```
-    public final boolean post(Runnable r)
-    {
-       return  sendMessageDelayed(getPostMessage(r), 0);
-    }
-
-```
-原来这里还是调用了sendMessageDelayed()方法去发送一条消息啊，并且还使用了getPostMessage()方法将Runnable对象转换成了一条消息，我们来看下这个方法的源码：
-
-```
-    private static Message getPostMessage(Runnable r) {
-        Message m = Message.obtain();
-        m.callback = r;
-        return m;
-    }
-
-```
-
-在这个方法中将消息的callback字段的值指定为传入的Runnable对象。咦？这个callback字段看起来有些眼熟啊，喔！在Handler的dispatchMessage()方法中原来有做一个检查，如果Message的callback等于null才会去调用handleMessage()方法，否则就调用handleCallback()方法。那我们快来看下handleCallback()方法中的代码吧：
-
-```
-    private static void handleCallback(Message message) {
-        message.callback.run();
-    }
-
-```
-
-直接调用了一开始传入的Runnable对象的run()方法。
-
-
-View的post()方法
-
-```
-    public boolean post(Runnable action) {
-        final AttachInfo attachInfo = mAttachInfo;
-        if (attachInfo != null) {
-            return attachInfo.mHandler.post(action);
-        }
-
-        // Postpone the runnable until we know on which thread it needs to run.
-        // Assume that the runnable will be successfully placed after attach.
-        getRunQueue().post(action);
-        return true;
-    }
-```
-
-原来就是调用了Handler中的post()方法，我相信已经没有什么必要再做解释了。
-
-最后再来看一下Activity中的runOnUiThread()方法，代码如下所示：
-
-```
-    /**
-     * Runs the specified action on the UI thread. If the current thread is the UI
-     * thread, then the action is executed immediately. If the current thread is
-     * not the UI thread, the action is posted to the event queue of the UI thread.
-     *
-     * @param action the action to run on the UI thread
-     */
-    public final void runOnUiThread(Runnable action) {
-        if (Thread.currentThread() != mUiThread) {
-            mHandler.post(action);
-        } else {
-            action.run();
-        }
-    }
-
-```
-
-如果当前的线程不等于UI线程(主线程)，就去调用Handler的post()方法，否则就直接调用Runnable对象的run()方法。还有什么会比这更清晰明了的吗？
 
 
 ## 主线程的消息循环
@@ -925,8 +773,8 @@ public static void main(String[] args) {
 
 ##  Handler 是如何能够线程切换
 
-线程间是共享资源的。所以Handler处理不同线程问题就只要注意异步情况即可。__Handler创建的时候会采用当前线程的Looper来构造消息循环系统，Looper在哪个线程创建，就跟哪个线程绑定__，
-并且__Handler是在它关联的Looper对应的线程中处理消息的__。
+线程间是共享资源的。所以Handler处理不同线程问题就只要注意异步情况即可。__Handler 创建的时候会采用当前线程的 Looper 来构造消息循环系统，Looper 在哪个线程创建，就跟哪个线程绑定__，
+并且__Handler是在它关联的 Looper 对应的线程中处理消息的__。
 
 那么Handler内部如何获取到当前线程的Looper呢—–ThreadLocal。ThreadLocal可以在不同的线程中互不干扰的存储并提供数据，通过ThreadLocal可以轻松获取每个线程的Looper。
 
@@ -935,25 +783,6 @@ public static void main(String[] args) {
 1. 线程是默认没有Looper的，如果需要使用Handler，就必须为线程创建Looper。我们经常提到的主线程，也叫UI线程，它就是 ActivityThread
 
 2. ActivityThread 被创建时就会初始化Looper，这也是在主线程中默认可以使用Handler的原因
-
-
-
-## 如何处理Handler 使用不当导致的内存泄露？
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 # 参考
