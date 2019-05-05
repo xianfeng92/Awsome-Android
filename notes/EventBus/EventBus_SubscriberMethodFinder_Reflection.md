@@ -1,12 +1,13 @@
 # SubscriberMethodFinder
 
-使用 subscriberMethodFinder#findSubscriberMethods 来找出订阅者所声明的事件响应函数。
+SubscriberMethodFinder类是用来查找和缓存订阅者响应函数的信息的类。使用 subscriberMethodFinder#findSubscriberMethods 
+来找出订阅者所声明的事件响应函数。
 
 ```
 List<SubscriberMethod> subscriberMethods = subscriberMethodFinder.findSubscriberMethods(subscriberClass);
 ```
 
-findSubscriberMethods 源码如下：
+findSubscriberMethods 方法根据订阅者的 Class 对象来解析其所有的事件响应函数，源码如下：
 
 ```
     List<SubscriberMethod> findSubscriberMethods(Class<?> subscriberClass) {
@@ -36,6 +37,7 @@ findSubscriberMethods 源码如下：
 
 ```
     private List<SubscriberMethod> findUsingReflection(Class<?> subscriberClass) {
+        // FindState 用来做订阅方法的校验和保存
         FindState findState = prepareFindState(); 
         findState.initForSubscriber(subscriberClass);
         // 此处为一个循环，目的是找出订阅者以及其父类中的所有的事件响应函数
@@ -44,11 +46,12 @@ findSubscriberMethods 源码如下：
             // 获取订阅者的父类的 Class 对象
             findState.moveToSuperclass();
         }
+           // 获取findState中的SubscriberMethod(也就是订阅方法List)并返回
         return getMethodsAndRelease(findState);
     }
 ```
 
-从上面的代码块，我们可以看到，第一步准备 FindState，我们点进去看看：
+从上面的代码块，我们可以看到，第一步准备 FindState，我们点进去看看:
 
 ```
     private FindState prepareFindState() {
@@ -65,32 +68,37 @@ findSubscriberMethods 源码如下：
     }
 ```
 该方法中使用对象池来提供 FindState 对象，FindState 中维护的就是我们对订阅方法查找结果的封装。当获取到 FindState
-对象后，使用 initForSubscriber方法将订阅者的Class 对象传给 FindState 对象。后面 FindState 就可以从订阅者的 Class 对象中的 Subscribe注解的函数。
+对象后，使用 initForSubscriber 方法将订阅者的 Class 对象传给 FindState 对象。后面 FindState 就可以从订阅者的 Class 对象
+中解析出使用 Subscribe 注解的函数。
 
 ```
     private void findUsingReflectionInSingleClass(FindState findState) {
         Method[] methods;
         try {
-            // 使用反射获取订阅者中所声明的方法
+            // //通过反射得到订阅者的方法数组
             methods = findState.clazz.getDeclaredMethods();
         } catch (Throwable th) {
             // Workaround for java.lang.NoClassDefFoundError, see https://github.com/greenrobot/EventBus/issues/149
+            // NoClassDefFoundError错误的发生，是因为Java虚拟机在编译时能找到合适的类，而在运行时不能找到合适的类导致的错误。
             methods = findState.clazz.getMethods();
             findState.skipSuperClasses = true;
         }
+        //遍历 Method
         for (Method method : methods) {
             int modifiers = method.getModifiers();
             if ((modifiers & Modifier.PUBLIC) != 0 && (modifiers & MODIFIERS_IGNORE) == 0) {
                 Class<?>[] parameterTypes = method.getParameterTypes();
+                 // 保证必须只有一个事件参数
                 if (parameterTypes.length == 1) {
                     // 获取方法的注解
                     Subscribe subscribeAnnotation = method.getAnnotation(Subscribe.class);
                     if (subscribeAnnotation != null) {
                     // 提取出注解中的参数：threadMode，eventType等
                         Class<?> eventType = parameterTypes[0];
+                     // 校验是否添加该方法
                         if (findState.checkAdd(method, eventType)) {
                             ThreadMode threadMode = subscribeAnnotation.threadMode();
-                            // 使用反射获取到的订阅者事件响应函数的相关信息，然后构建一个 SubscriberMethod 方法，并将其添加到 subscriberMethods 列表中。
+                            // 使用反射获取到的订阅者事件响应函数的相关信息来构建一个 SubscriberMethod 对象，并将其添加到 subscriberMethods 列表中。
                             findState.subscriberMethods.add(new SubscriberMethod(method, eventType, threadMode,
                                     subscribeAnnotation.priority(), subscribeAnnotation.sticky()));
                         }
@@ -111,15 +119,34 @@ findSubscriberMethods 源码如下：
 
 该方法主要做了如下三件事：
 
-1. 使用反射来获取订阅者中的所有方法（public）。
+1. 使用反射来获取订阅者中的所有方法。
 
 2. 循环订阅者的方法，找出使用 Subscribe 注解的方法。
 
 3. 解析使用 Subscribe 注解的方法，然后用其构造出一个 SubscriberMethod 对象。
 
 
-findUsingReflection 方法返回的是一个 getMethodsAndRelease(findState)，其源码如下：
+#### 补充
 
+1. 关于 Workaround for java.lang.NoClassDefFoundError, see https://github.com/greenrobot/EventBus/issues/149
+
+这是由于某些Android版本在调用GetDeclaredMethods或GetMethods时出现的bug。如果类的方法的参数对设备的 API 级别不可用，则会抛出 NoClassDefFoundError。
+
+EventBus 给出了一些解决这个bug的建议，[A java.lang.NoClassDefFoundError is throw when a subscriber class is registered. What can I do?](http://greenrobot.org/eventbus/documentation/faq/)
+
+其中一个建议是将出现该Error的方法改写成 non-public，这样当 getDeclaredMethods 调用抛出异常时，会在 catch 中尝试调用 getMethods，该方法不会调用 non-public 的方法，
+这样也就不会报错了。
+
+2. Replace `getMethods()` with `getDeclaredMethods()`
+
+public Method[] getMethods() 获取某个类的所有公用（public）方法包括其继承类的公用方法。
+
+public Method[] getDeclaredMethods() 获取当前类中所有方法，包括公共、保护、默认（包）访问和私有方法，但不包括继承的方法。
+
+EventBus 的[e47442b](https://github.com/greenrobot/EventBus/commit/e47442b684f04b4d346bb1d0af526908fda7cc1c) 提交中，Replace `getMethods()` with 
+`getDeclaredMethods()`。使用 getDeclaredMethods 可以很高效的获取“胖”类的方法，例如 Activity。
+
+findUsingReflection 方法返回的是一个 getMethodsAndRelease(findState)，其源码如下：
 
 ```
     private List<SubscriberMethod> getMethodsAndRelease(FindState findState) {
@@ -140,23 +167,8 @@ findUsingReflection 方法返回的是一个 getMethodsAndRelease(findState)，�
 
 该方法主要做了两件事：
 
-1. 取出findState对象搜索出的订阅者事件响应函数
+1. 取出findState对象搜索出订阅者的事件响应函数
 
-2. 重置findState对象的相关状态，然后将其放入对象池以便下次重复使用，
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+2. 重置 findState 对象的相关状态，然后将其放入对象池以便下次的复用
 
 
