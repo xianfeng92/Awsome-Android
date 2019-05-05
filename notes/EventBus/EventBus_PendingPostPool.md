@@ -31,12 +31,13 @@ subscription 和 event 的实体类，其内部维护着一个 pendingPost 对�
 PendingPost 中还有一个静态方法 releasePendingPost，其源码如下：
 
 ```
+    //  回收一个待处理的对象,并加入复用池
     static void releasePendingPost(PendingPost pendingPost) {
         pendingPost.event = null;
         pendingPost.subscription = null;
         pendingPost.next = null;
         synchronized (pendingPostPool) {
-            // Don't let the pool grow indefinitely
+            // Don't let the pool grow indefinitely 防止池无限增长
             if (pendingPostPool.size() < 10000) {
                 pendingPostPool.add(pendingPost);
             }
@@ -44,8 +45,9 @@ PendingPost 中还有一个静态方法 releasePendingPost，其源码如下：
     }
 ```
 
-当一个 PendingPost 对象不需要使用时，可以通过该方法将 PendingPost 放到 pendingPostPool 中，以便下次调用
-obtainPendingPost 来重复利用该对象。
+当一个 PendingPost 对象不需要使用时，可以通过该方法将 PendingPost 放到 pendingPostPool 中，以便下次调用 obtainPendingPost 来重复利用该对象。
+上面的代码中有一个对 pendingPostPool 大小的判断，即 if (pendingPostPool.size() < 10000) ，我们一次只可能创建一个 pendingPost，如果 ArrayList 里面存了上千个 
+pendingPost 都没有取走，那么肯定是使用出错了。
 
 
 

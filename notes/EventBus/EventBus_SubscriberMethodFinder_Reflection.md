@@ -1,11 +1,31 @@
 # SubscriberMethodFinder
 
-SubscriberMethodFinder类是用来查找和缓存订阅者响应函数的信息的类。使用 subscriberMethodFinder#findSubscriberMethods 
-来找出订阅者所声明的事件响应函数。
+SubscriberMethodFinder 类就是查看订阅者对象里面有没有 @Subscribe 注解的方法。怎么做到的？当然是反射。而且这个类用了大量的反射去查找类中方法名。
+
+先看它的变量声明：
 
 ```
-List<SubscriberMethod> subscriberMethods = subscriberMethodFinder.findSubscriberMethods(subscriberClass);
+/**
+ * 在较新的类文件，编译器可能会添加一些被 BRIDGE 或 SYNTHETIC 所修饰方法。
+ * EventBus 必须忽略这些修饰符所修饰的方法
+ */
+private static final int BRIDGE = 0x40;
+private static final int SYNTHETIC = 0x1000;
+
+//需要忽略的修饰符
+private static final int MODIFIERS_IGNORE = Modifier.ABSTRACT | Modifier.STATIC | BRIDGE |
+        SYNTHETIC;
+
+// key:订阅者的类名, value:该类中的事件响应函数集合
+private static final Map<Class<?>, List<SubscriberMethod>> METHOD_CACHE = new ConcurrentHashMap<>();
+
+private static final int POOL_SIZE = 4;
+// 对象池
+private static final FindState[] FIND_STATE_POOL = new FindState[POOL_SIZE];
+
 ```
+METHOD_CACHE 可以提供 app 在运行时的缓存，意味着，整个库在运行期间所有遍历的方法都会存在这个 map 中，而不必每次都去做耗时的反射取方法了。
+
 
 findSubscriberMethods 方法根据订阅者的 Class 对象来解析其所有的事件响应函数，源码如下：
 
@@ -124,7 +144,6 @@ findSubscriberMethods 方法根据订阅者的 Class 对象来解析其所有的
 2. 循环订阅者的方法，找出使用 Subscribe 注解的方法。
 
 3. 解析使用 Subscribe 注解的方法，然后用其构造出一个 SubscriberMethod 对象。
-
 
 #### 补充
 
