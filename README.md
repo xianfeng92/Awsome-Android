@@ -183,6 +183,16 @@
 
 * [EventBus_ThreadMode](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_ThreadMode.md)
 
+* [BackgroundPoster](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_BackgroundPoster.md)
+
+* [PendingPostPool](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_PendingPostPool.md)
+
+* [SubscriberMethodFinde](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_SubscriberMethodFinder_Reflection.md)
+
+* [HandlerPoster](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_HandlerPoster.md)
+
+* [AsyncPoster](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_AsyncPoster.md)
+
 -------------------------------------------
 ## fastjson
 
