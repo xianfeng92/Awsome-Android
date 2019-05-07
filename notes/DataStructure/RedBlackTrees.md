@@ -14,7 +14,7 @@
 正是红黑树的这5条性质，使得一棵 n 个结点是红黑树始终保持了 logn 的高度，从而也就解释了上面我们所说的“红黑树的查找、
 插入、删除的时间复杂度最坏为O(log n)”这一结论的原因。
 
-![RedBlackTree.png]()
+![RedBlackTree.png](https://github.com/xianfeng92/Awsome-Android/blob/master/images/RedBlackTree.png)
 
 [教你透彻了解红黑树](https://github.com/julycoding/The-Art-Of-Programming-By-July/blob/master/ebook/zh/03.01.md)
 
