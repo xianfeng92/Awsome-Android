@@ -1,9 +1,8 @@
 # ConcurrentHashMap
 
-ConcurrentHashMap 是 Java 并发包中提供的一个线程安全且高效的 HashMap 实现。
+ConcurrentHashMap 是 Java 并发包中提供的一个线程安全且高效的 HashMap。ConcurrentHashMap 底层数据结构与 HashMap 相同，仍然采用 table 数组+链表+红黑树结构。
 
 # ConcurrentHashMap 存储数据
-
 
 ```
     public V put(K key, V value) {
@@ -11,9 +10,7 @@ ConcurrentHashMap 是 Java 并发包中提供的一个线程安全且高效的 H
     }
 ```
 
-
 ```
- /** Implementation for put and putIfAbsent */
     final V putVal(K key, V value, boolean onlyIfAbsent) {
         if (key == null || value == null) throw new NullPointerException();
         int hash = spread(key.hashCode()); // 计算 key 的 hash 值
@@ -34,13 +31,13 @@ ConcurrentHashMap 是 Java 并发包中提供的一个线程安全且高效的 H
                 tab = helpTransfer(tab, f);
             else {
                 V oldVal = null;
-                synchronized (f) {
+                synchronized (f) { // 一个线程每次对一个桶（链表 or 红黑树）进行加锁，其他线程仍然可以访问其他桶
                     if (tabAt(tab, i) == f) {
                         if (fh >= 0) {// 链表节点
                             binCount = 1;
                             for (Node<K,V> e = f;; ++binCount) {
                                 K ek;
-                                // 查找链表中是否出现了此 key，如果出现，则更新value，并跳出循环
+                                // 查找链表中是否出现了此 key，如果出现，则更新 value，并跳出循环
                                 if (e.hash == hash &&
                                     ((ek = e.key) == key ||
                                      (ek != null && key.equals(ek)))) {
@@ -89,7 +86,8 @@ ConcurrentHashMap 是 Java 并发包中提供的一个线程安全且高效的 H
     }
 ```
 
-
+一个线程进行 put　操作时，若无 hash 冲突，则采用　CAS　算法保证线程安全。否则，对桶（链表 or 红黑树）加上　synchronized　独占锁来保证线程
+安全。即如果　hash 冲突比较少，那么多线程环境下，向　ConcurrentHashMap　中存储数据时，大多少都是通过 CAS 算法完成。
 
 ```
     // 获取索引　i　处的　Node
@@ -134,9 +132,6 @@ ConcurrentHashMap 是 Java 并发包中提供的一个线程安全且高效的 H
         return tab;
     }
 ```
-
-
-
 
 
 
