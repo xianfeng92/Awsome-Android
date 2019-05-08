@@ -15,7 +15,98 @@
 
 * [依赖倒置原则](https://github.com/xianfeng92/Awsome-Android/blob/master/SOLID/DependencyInversionPrinciple.md)
 
+------------------------------------------
+
+# Open Source Code Read
+
+## RxJava
+
+* [Rxjava 基本使用](https://github.com/xianfeng92/android-code-read/blob/master/notes/Rxjava/Rxjava.md)
+
+* [Rxjava 源码解读](https://github.com/xianfeng92/android-code-read/blob/master/notes/Rxjava/Rxjava_Code.md)
+
+* [Rxjava 线程调度](https://github.com/xianfeng92/android-code-read/blob/master/notes/Rxjava/Rxjava_Scheduler.md)
+
+* [Rxjava 设计模式](https://github.com/xianfeng92/android-code-read/blob/master/notes/Rxjava/Rxjava_design.md)
+
+----------------------------------------
+# DAGGER
+* [DAGGER基础](https://github.com/xianfeng92/android-code-read/blob/master/notes/Dagger2/Dagger_base.md)
+
+* [使用 @Inject 注入过程分析](https://github.com/xianfeng92/android-code-read/blob/master/notes/Dagger2/Dagger_Analysis_Inject.md)
+
+* [使用 @Provides 注入过程分析](https://github.com/xianfeng92/android-code-read/blob/master/notes/Dagger2/Dagger_Analysis_Provider.md)
+
+* [Dagger中的构建者模式](https://github.com/xianfeng92/android-code-read/blob/master/notes/Dagger2/Pattern_BuilderInDagger.md)
+
+* [Dagger中的简单工厂模式](https://github.com/xianfeng92/android-code-read/blob/master/notes/Dagger2/Pattern_ProviderInDagger.md)
+
+-----------------------------------------
+## Retrofit
+
+--------------------------------------
+
+## Okhttp
+
+----------------------------------------
+
+## Glide
+
+-----------------------------------------
+
+## LeakCanary
+
+* [用 LeakCanary 检测内存泄漏](https://academy.realm.io/cn/posts/droidcon-ricau-memory-leaks-leakcanary/)
+
+* [LeakGanary_basicUse](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/LeakGanary/LeakGanary_basicUse.md)
+
+* [LeakGanary](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/LeakGanary/LeakGanary.md)
+
+* [LeakGanary_WorkFlow](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/LeakGanary/LeakGanary_WorkFlow.md)
+
+* [LeakGanary_FragmentRefWatcher](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/LeakGanary/LeakGanary_FragmentRefWatcher.md)
+
+* [LeakGanary_HeapAnalyzerService](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/LeakGanary/LeakGanary_HeapAnalyzerService.md)
+
+* [LeakGanary_PatternDesign](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/LeakGanary/LeakGanary_PatternDesign.md)
+
+-----------------------------------------
+
+## EventBus
+
+* [野生 EventBus 文档](https://blog.boileryao.com/2018/02/eventbus-doc-cn/)
+
+* [EventBus_register](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_register.md)
+
+* [EventBus_post](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_post.md)
+
+* [EventBus_ThreadMode](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_ThreadMode.md)
+
+* [BackgroundPoster](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_BackgroundPoster.md)
+
+* [PendingPostPool](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_PendingPostPool.md)
+
+* [SubscriberMethodFinde](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_SubscriberMethodFinder_Reflection.md)
+
+* [HandlerPoster](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_HandlerPoster.md)
+
+* [AsyncPoster](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_AsyncPoster.md)
+
+-------------------------------------------
+## fastjson
+
+* [fastjson](https://github.com/alibaba/fastjson)
+
+* [JSON最佳实践](http://kimmking.github.io/2017/06/06/json-best-practice/)
+
 ---------------------------------------------
+
+## Design Patterns
+
+* [Adapter](https://github.com/xianfeng92/android-code-read/blob/master/notes/Patterns/Adapter.md)
+
+---------------------------------------------
+
 ## Android
 
 ### Android系统的消息机制
@@ -115,96 +206,6 @@
 
 * [强引用、弱引用、软引用、虚引用](https://www.jianshu.com/p/1fc5d1cbb2d4)
 * [ReferenceQueue的使用](https://www.jianshu.com/p/73260a46291c)
-
-------------------------------------------
-
-# Open Source Code Read
-
-## RxJava
-
-* [Rxjava 基本使用](https://github.com/xianfeng92/android-code-read/blob/master/notes/Rxjava/Rxjava.md)
-
-* [Rxjava 源码解读](https://github.com/xianfeng92/android-code-read/blob/master/notes/Rxjava/Rxjava_Code.md)
-
-* [Rxjava 线程调度](https://github.com/xianfeng92/android-code-read/blob/master/notes/Rxjava/Rxjava_Scheduler.md)
-
-* [Rxjava 设计模式](https://github.com/xianfeng92/android-code-read/blob/master/notes/Rxjava/Rxjava_design.md)
-
-----------------------------------------
-# DAGGER
-* [DAGGER基础](https://github.com/xianfeng92/android-code-read/blob/master/notes/Dagger2/Dagger_base.md)
-
-* [使用 @Inject 注入过程分析](https://github.com/xianfeng92/android-code-read/blob/master/notes/Dagger2/Dagger_Analysis_Inject.md)
-
-* [使用 @Provides 注入过程分析](https://github.com/xianfeng92/android-code-read/blob/master/notes/Dagger2/Dagger_Analysis_Provider.md)
-
-* [Dagger中的构建者模式](https://github.com/xianfeng92/android-code-read/blob/master/notes/Dagger2/Pattern_BuilderInDagger.md)
-
-* [Dagger中的简单工厂模式](https://github.com/xianfeng92/android-code-read/blob/master/notes/Dagger2/Pattern_ProviderInDagger.md)
-
------------------------------------------
-## Retrofit
-
---------------------------------------
-
-## Okhttp
-
-----------------------------------------
-
-## Glide
-
------------------------------------------
-
-## LeakCanary
-
-* [用 LeakCanary 检测内存泄漏](https://academy.realm.io/cn/posts/droidcon-ricau-memory-leaks-leakcanary/)
-
-* [LeakGanary_basicUse](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/LeakGanary/LeakGanary_basicUse.md)
-
-* [LeakGanary](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/LeakGanary/LeakGanary.md)
-
-* [LeakGanary_WorkFlow](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/LeakGanary/LeakGanary_WorkFlow.md)
-
-* [LeakGanary_FragmentRefWatcher](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/LeakGanary/LeakGanary_FragmentRefWatcher.md)
-
-* [LeakGanary_HeapAnalyzerService](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/LeakGanary/LeakGanary_HeapAnalyzerService.md)
-
-* [LeakGanary_PatternDesign](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/LeakGanary/LeakGanary_PatternDesign.md)
-
------------------------------------------
-
-## EventBus
-
-* [野生 EventBus 文档](https://blog.boileryao.com/2018/02/eventbus-doc-cn/)
-
-* [EventBus_register](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_register.md)
-
-* [EventBus_post](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_post.md)
-
-* [EventBus_ThreadMode](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_ThreadMode.md)
-
-* [BackgroundPoster](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_BackgroundPoster.md)
-
-* [PendingPostPool](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_PendingPostPool.md)
-
-* [SubscriberMethodFinde](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_SubscriberMethodFinder_Reflection.md)
-
-* [HandlerPoster](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_HandlerPoster.md)
-
-* [AsyncPoster](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_AsyncPoster.md)
-
--------------------------------------------
-## fastjson
-
-* [fastjson](https://github.com/alibaba/fastjson)
-
-* [JSON最佳实践](http://kimmking.github.io/2017/06/06/json-best-practice/)
-
-## Design Patterns
-
-* [Adapter](https://github.com/xianfeng92/android-code-read/blob/master/notes/Patterns/Adapter.md)
-
-
 
 
 
