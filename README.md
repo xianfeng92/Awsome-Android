@@ -22,6 +22,8 @@
 -----------------------------------------
 ## EventBus
 
+* [EventBus 思维导图](https://github.com/xianfeng92/Awsome-Android/blob/master/images/EventBus_mind.png)
+
 * [野生 EventBus 文档](https://blog.boileryao.com/2018/02/eventbus-doc-cn/)
 
 * [EventBus_register](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_register.md)
@@ -207,8 +209,10 @@
 
 # Java
 
+* [hashMap 思维导图](https://github.com/xianfeng92/Awsome-Android/blob/master/images/hashMap_Mind.png)
 * [强引用、弱引用、软引用、虚引用](https://www.jianshu.com/p/1fc5d1cbb2d4)
 * [ReferenceQueue的使用](https://www.jianshu.com/p/73260a46291c)
+
 
 
 
