@@ -3,7 +3,7 @@
 ![funny](https://github.com/xianfeng92/Awsome-Android/blob/master/images/funny.gif)
 
 ----------------------------------------------
-## SOLID
+# SOLID
 
 * [单一职责原则](https://github.com/xianfeng92/Awsome-Android/blob/master/SOLID/SingleResponsibilityPrinciple.md)
 
@@ -20,7 +20,6 @@
 # Open Source Code Read
 
 -----------------------------------------
-
 ## EventBus
 
 * [野生 EventBus 文档](https://blog.boileryao.com/2018/02/eventbus-doc-cn/)
@@ -110,9 +109,9 @@
 
 ---------------------------------------------
 
-## Android
+# Android
 
-### Android系统的消息机制
+## Android系统的消息机制
 
 * [Handler](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/android/Handler_Analysis.md)
 
@@ -120,9 +119,9 @@
 
 * [Binder](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/AIDL%E5%88%86%E6%9E%90.md)
 
-### 四大组件
+## 四大组件
 
-#### Activity相关
+### Activity相关
 
 * [Activity启动流程](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Activty%E5%90%AF%E5%8A%A8.md)
 
@@ -138,7 +137,7 @@
 
 * [Context分析](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Context.md)
 
-#### Service相关
+### Service相关
 
 * [Service](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Service.md)
 
@@ -148,9 +147,9 @@
 
 * [BroadCastRecevier](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Android_Broadcasts.md)
 
-### View 事件体系
+## View 事件体系
 
-#### View相关
+### View相关
 
 * [Andoird_view_LayoutInflater](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Andoird_view_LayoutInflater.md)
 
@@ -164,13 +163,13 @@
 
 * [Android_view_customView](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Android_view_customView.md)
 
-#### 事件
+### 事件
 
 * [MotionEvent](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Andoird_view_event.md)
 
 * [EventBus 源码解析](http://a.codekk.com/detail/Android/Trinea/EventBus%20%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90)
 
-### Android 内存
+## Android 内存
 
 * [Android_MemoryManager](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Android_MemoryManager.md)
 
@@ -182,7 +181,7 @@
 
 * [内存溢出和内存泄漏的区别、产生原因以及解决方案](https://www.cnblogs.com/Sharley/p/5285045.html)
 
-### Android 异步
+## Android 异步
 
 * [Android_ThreadBase](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Android_ThreadBase.md)
 
