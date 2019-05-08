@@ -19,6 +19,30 @@
 
 # Open Source Code Read
 
+-----------------------------------------
+
+## EventBus
+
+* [野生 EventBus 文档](https://blog.boileryao.com/2018/02/eventbus-doc-cn/)
+
+* [EventBus_register](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_register.md)
+
+* [EventBus_post](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_post.md)
+
+* [EventBus_ThreadMode](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_ThreadMode.md)
+
+* [BackgroundPoster](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_BackgroundPoster.md)
+
+* [PendingPostPool](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_PendingPostPool.md)
+
+* [SubscriberMethodFinde](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_SubscriberMethodFinder_Reflection.md)
+
+* [HandlerPoster](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_HandlerPoster.md)
+
+* [AsyncPoster](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_AsyncPoster.md)
+
+----------------------------------------------
+
 ## RxJava
 
 * [Rxjava 基本使用](https://github.com/xianfeng92/android-code-read/blob/master/notes/Rxjava/Rxjava.md)
@@ -30,6 +54,7 @@
 * [Rxjava 设计模式](https://github.com/xianfeng92/android-code-read/blob/master/notes/Rxjava/Rxjava_design.md)
 
 ----------------------------------------
+
 # DAGGER
 * [DAGGER基础](https://github.com/xianfeng92/android-code-read/blob/master/notes/Dagger2/Dagger_base.md)
 
@@ -69,28 +94,6 @@
 * [LeakGanary_HeapAnalyzerService](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/LeakGanary/LeakGanary_HeapAnalyzerService.md)
 
 * [LeakGanary_PatternDesign](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/LeakGanary/LeakGanary_PatternDesign.md)
-
------------------------------------------
-
-## EventBus
-
-* [野生 EventBus 文档](https://blog.boileryao.com/2018/02/eventbus-doc-cn/)
-
-* [EventBus_register](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_register.md)
-
-* [EventBus_post](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_post.md)
-
-* [EventBus_ThreadMode](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_ThreadMode.md)
-
-* [BackgroundPoster](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_BackgroundPoster.md)
-
-* [PendingPostPool](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_PendingPostPool.md)
-
-* [SubscriberMethodFinde](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_SubscriberMethodFinder_Reflection.md)
-
-* [HandlerPoster](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_HandlerPoster.md)
-
-* [AsyncPoster](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_AsyncPoster.md)
 
 -------------------------------------------
 ## fastjson
