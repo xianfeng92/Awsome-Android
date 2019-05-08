@@ -33,7 +33,7 @@ private volatile long foo;
 因为 volatile 内部已经做了 synchronized。
 
 
-## CAS无锁算法
+## CAS 无锁算法
 
 要实现无锁（lock-free）的非阻塞算法有多种实现方法，其中 CAS（比较与交换，Compare and swap）是一种有名的无锁算法。CAS 的语义是“我认为 V 的值应该为 A，如果是，
 那么将 V 的值更新为 B，否则不修改并告诉 V 的值实际为多少”,CAS 是项乐观锁技术，当多个线程尝试使用 CAS 同时更新同一个变量时，只有其中一个线程能更新变量的值，
@@ -45,7 +45,7 @@ private volatile long foo;
 
 ### 优点
 
-* 很高效的解决了原子操作问题
+* 高效的解决了原子操作问题
 
 
 ### 缺点
