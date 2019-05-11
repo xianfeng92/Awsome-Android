@@ -2,19 +2,6 @@
 
 ![funny](https://github.com/xianfeng92/Awsome-Android/blob/master/images/funny.gif)
 
-----------------------------------------------
-# SOLID
-
-* [单一职责原则](https://github.com/xianfeng92/Awsome-Android/blob/master/SOLID/SingleResponsibilityPrinciple.md)
-
-* [开-闭原则](https://github.com/xianfeng92/Awsome-Android/blob/master/SOLID/OpenClosedPrinciple.md)
-
-* [里氏替换原则](https://github.com/xianfeng92/Awsome-Android/blob/master/SOLID/LiskovSubstitutionPrinciple.md)
-
-* [接口隔离原则](https://github.com/xianfeng92/Awsome-Android/blob/master/SOLID/InterfaceSegregationPrinciple.md)
-
-* [依赖倒置原则](https://github.com/xianfeng92/Awsome-Android/blob/master/SOLID/DependencyInversionPrinciple.md)
-
 ------------------------------------------
 
 # Open Source Code Read
@@ -23,8 +10,6 @@
 ## EventBus
 
 * [EventBus 思维导图](https://github.com/xianfeng92/Awsome-Android/blob/master/images/EventBus_mind.png)
-
-* [野生 EventBus 文档](https://blog.boileryao.com/2018/02/eventbus-doc-cn/)
 
 * [EventBus_register](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_register.md)
 
@@ -41,6 +26,8 @@
 * [HandlerPoster](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_HandlerPoster.md)
 
 * [AsyncPoster](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/EventBus/EventBus_AsyncPoster.md)
+
+* [野生 EventBus 文档](https://blog.boileryao.com/2018/02/eventbus-doc-cn/)
 
 ----------------------------------------------
 
@@ -215,8 +202,18 @@
 * [handlerThread:看看在 LeakGananry 中的使用](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/LeakGanary/LeakGanary_AndroidWatchExecutor.md)
 
 * [intentService:看看在 LeakGananry 中的使用](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/LeakGanary/LeakGanary_HeapAnalyzerService.md)
-------------------------------------------
+----------------------------------------------
+# SOLID
 
+* [单一职责原则](https://github.com/xianfeng92/Awsome-Android/blob/master/SOLID/SingleResponsibilityPrinciple.md)
+
+* [开-闭原则](https://github.com/xianfeng92/Awsome-Android/blob/master/SOLID/OpenClosedPrinciple.md)
+
+* [里氏替换原则](https://github.com/xianfeng92/Awsome-Android/blob/master/SOLID/LiskovSubstitutionPrinciple.md)
+
+* [接口隔离原则](https://github.com/xianfeng92/Awsome-Android/blob/master/SOLID/InterfaceSegregationPrinciple.md)
+
+* [依赖倒置原则](https://github.com/xianfeng92/Awsome-Android/blob/master/SOLID/DependencyInversionPrinciple.md)
 
 
 
