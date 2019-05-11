@@ -112,6 +112,16 @@
 
 ---------------------------------------------
 
+
+# Java
+
+* [hashMap 思维导图](https://github.com/xianfeng92/Awsome-Android/blob/master/images/hashMap_Mind.png)
+* [强引用、弱引用、软引用、虚引用](https://www.jianshu.com/p/1fc5d1cbb2d4)
+* [ReferenceQueue的使用](https://www.jianshu.com/p/73260a46291c)
+* [SparseArray](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/DataStructure/SparseArray.md)
+
+---------------------------------------------
+
 # Android
 
 ## Android系统的消息机制
@@ -206,12 +216,6 @@
 
 * [intentService:看看在 LeakGananry 中的使用](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/LeakGanary/LeakGanary_HeapAnalyzerService.md)
 ------------------------------------------
-
-# Java
-
-* [hashMap 思维导图](https://github.com/xianfeng92/Awsome-Android/blob/master/images/hashMap_Mind.png)
-* [强引用、弱引用、软引用、虚引用](https://www.jianshu.com/p/1fc5d1cbb2d4)
-* [ReferenceQueue的使用](https://www.jianshu.com/p/73260a46291c)
 
 
 
