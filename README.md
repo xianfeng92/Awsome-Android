@@ -109,6 +109,12 @@
 * [强引用、弱引用、软引用、虚引用](https://www.jianshu.com/p/1fc5d1cbb2d4)
 * [ReferenceQueue的使用](https://www.jianshu.com/p/73260a46291c)
 * [SparseArray](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/DataStructure/SparseArray.md)
+* [ArrayList](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/DataStructure/ArrayList.md)
+* [LinkedList](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/DataStructure/LinkedList.md)
+* [ConcurrentHashMap_Intro](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/DataStructure/ConcurrentHashMap_Intro.md)
+* [ConcurrentHashMap_get](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/DataStructure/ConcurrentHashMap_get.md)
+* [ConcurrentHashMap_put](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/DataStructure/ConcurrentHashMap_put.md)
+* [BinarySearchTree](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/DataStructure/BinarySearchTree.md)
 
 ---------------------------------------------
 
