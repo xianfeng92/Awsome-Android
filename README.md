@@ -115,6 +115,7 @@
 * [ConcurrentHashMap_get](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/DataStructure/ConcurrentHashMap_get.md)
 * [ConcurrentHashMap_put](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/DataStructure/ConcurrentHashMap_put.md)
 * [BinarySearchTree](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/DataStructure/BinarySearchTree.md)
+* [LinkedHashMap](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/DataStructure/LinkedHashMap.md)
 
 ---------------------------------------------
 
