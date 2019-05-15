@@ -3,7 +3,7 @@
 LinkedHashMap 继承自 HashMap，在 HashMap 基础上，__通过维护一条双向链表，解决了 HashMap 不能随时保持遍历顺序和插入顺序一致的问题__。
 在实现上，LinkedHashMap 很多方法直接继承自 HashMap，仅为维护双向链表覆写了部分方法。LinkedHashMap 是 HashMap 的一个 Wrapper。
 
-![LinkedHashMap]()
+![LinkedHashMap](https://github.com/xianfeng92/Awsome-Android/blob/master/images/LinkedHashMap.png)
 
 LinkedHashMap 在 HashMap 的基础上，采用双向链表（doubly-linked list）的形式将所有 entry 连接起来，这样是为保证元素的迭代顺序跟插入顺序相同。
 上图给出了 LinkedHashMap 的结构图，主体部分跟 HashMap 完全一样，多了header指向双向链表的头部（dummy 节点），该双向链表的迭代顺序就是 entry 的
@@ -90,8 +90,7 @@ put(K key, V value) 方法是将指定的 key, value　对添加到 map　里。
 
 2. 从 header 的角度看，新的 entry 需要插入到双向链表的尾部。
 
-![LinkedHashMapaddEntry]()
-
+![LinkedHashMapaddEntry](https://github.com/xianfeng92/Awsome-Android/blob/master/images/LinkedHashMapaddEntry.png)
 
 
 ## 链表节点的删除过程
