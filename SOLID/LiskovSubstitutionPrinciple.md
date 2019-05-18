@@ -16,7 +16,7 @@ __这个原则正是保证继承能够被正确使用的前提__。
 里氏替换原则之所以这样要求是因为继承虽然是复用代码的一种方法，但同时继承在一定程度上违反了封装。父类的属性和方法对子类都是透明的，子类可以
 随意修改父类的成员。__确保程序遵循里氏替换原则可以要求我们的程序建立抽象，通过抽象去建立规范，然后用实现去扩展细节__。
 
-![WindowAndView]()
+![WindowAndView](https://github.com/xianfeng92/Awsome-Android/blob/master/SOLID/images/WindowAndView.png)
 
 上面简单模拟了一下 Android 系统中的 Window 与 View 的关系，Window 显示视图的时候只需要传一个 View 对象，但在具体的绘制过程中，传过来的可以是 
 View 的子类 TextView 或者是 ImageView 等等。
