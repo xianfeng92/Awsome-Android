@@ -1,12 +1,12 @@
 
 # 什么是 Context ？
 
-  在Android平台上 , Context 是一个基本的概念，它在逻辑上表示一个运行期的“上下文”。在Android平台上，应用里的每个重要UI界面都用一个小型上下文来封装，
-  而每个重要的对外服务也都用一个小型上下文封装。这些小型上下文都容身到一个Android大平台上, 并由Android统一调度管理, 形成一个统一的整体。
+  在 Android 平台上 , Context  是一个基本的概念，它在逻辑上表示一个运行期的“上下文”。在 Android 应用里的每个重要UI界面都用一个小型上下文来封装，
+  而每个重要的对外服务也都用一个小型上下文封装。这些小型上下文都容身到一个Android大平台上, 并由 Android 统一调度管理, 形成一个统一的整体。
 
 # Context的行为
 
-Context体现到代码上来说，是个抽象类，其主要表达的行为列表如下:
+Context 体现到代码上来说，是个抽象类，其主要表达的行为列表如下:
 
 ```
 Context行为分类         常用函数
@@ -28,20 +28,20 @@ Context行为分类         常用函数
                         deleteDatabase()......
 ```
 
-既然是抽象类，最终就总得需要实际的派生类才行。在Android上，我们可以画出如下的 Context 继承示意图:
+既然是抽象类，最终就总得需要实际的派生类才行。在 Android 上，我们可以画出如下的 Context 继承示意图:
 
 ![Context](https://github.com/xianfeng92/android-code-read/blob/master/images/context.jpg)
 
-我们可以琢磨一下这张图，很明显，在Android平台上，Activity 和 Service 在本质上都是个 Context, 而代表应用程序的Application对象，也是个Context，
-这个对象对应的就是 AndroidManifest.xml 里的<Application>部分。因为上下文访问应用资源或系统服务的动作是一样的，所以这部分动作被统一封装进一个ContextImpl辅助类里。
-__Activity、Service、Application内部都含有自己的ContextImpl，每当自己需要访问应用资源或系统服务时，无非是把请求委托给内部的ContextImpl而已__。
+我们可以琢磨一下这张图，很明显，在 Android 平台上，Activity 和 Service 在本质上都是个 Context, 而代表应用程序的 Application 对象，也是个 Context，
+这个对象对应的就是 AndroidManifest.xml 里的<Application>部分。因为上下文访问应用资源或系统服务的动作是一样的，所以这部分动作被统一封装进一个 ContextImpl 
+辅助类里。__Activity、Service、Application内部都含有自己的ContextImpl，每当自己需要访问应用资源或系统服务时，就是把请求委托给内部的 ContextImpl__。
 
 ## ContextWrapper
 
-上图中还有个ContextWrapper，该类是用于表示Context的包装类，它在做和上下文相关的动作时，基本上都是委托给内部mBase域记录的Context(即ContextIml)去做的。
-如果我们希望子类化上下文的某些行为，可以有针对性地重写ContextWrapper的一些成员函数。
+上图中还有个 ContextWrapper，该类为 Context 的包装类，它在做和上下文相关的动作时，基本上都是委托给内部 mBase 域记录的 Context(即ContextIml)去做的。
+如果我们希望子类化上下文的某些行为，可以有针对性地重写 ContextWrapper 的一些成员函数。
 
- ContextWrapper的代码截选如下：
+ ContextWrapper 的代码截选如下：
 
 ```
 【frameworks/base/core/java/android/content/ContextWrapper.java】
@@ -65,9 +65,9 @@ public class ContextWrapper extends Context {
     }
 ```
 
-代码中的mBase是它的核心。
+代码中的 mBase 是它的核心。
 
-ContextWrapper只是简单封装了Context，它重写了Context所有成员函数，比如：
+ContextWrapper 只是简单封装了 Context，它重写了 Context 所有成员函数，比如:
 
 ```
     @Override
@@ -83,9 +83,9 @@ ContextWrapper只是简单封装了Context，它重写了Context所有成员函�
 
 ## ContextImpl
 
-   前文我们已经说过，因为上下文访问应用资源或系统服务的动作是一样的，所以这部分动作被统一封装进一个ContextImpl辅助类里，现在我们就来看看这个类。
+   前文我们已经说过，因为上下文访问应用资源或系统服务的动作是一样的，所以这部分动作被统一封装进一个 ContextImpl 辅助类。
 
-ContextImpl的代码截选如下：
+ContextImpl 的代码截选如下:
 
 ```
 【frameworks/base/core/java/android/app/ContextImpl.java】
@@ -123,13 +123,13 @@ sSharedPrefsCache;
     private Context mReceiverRestrictedContext = null;
 ```
 
-很明显，作为一个上下文的核心部件，ContextImpl有责任和更大的系统进行通信（我们可以把Android平台理解为一个大系统），所以它会有一个mMainThread成员。
-就以启动activity动作来说吧，最后会走到ContextImpl的startActivity()，而这个函数内部大体上是进一步调用 mMainThread.getInstrumentation().execStartActivity()，
+很明显，作为一个上下文的核心部件，ContextImpl 有责任和更大的系统进行通信（我们可以把Android平台理解为一个大系统），所以它会有一个 mMainThread 成员。
+就以启动 activity 动作来说，最后会走到 ContextImpl 的 startActivity()，而这个函数内部大体上是进一步调用 mMainThread.getInstrumentation().execStartActivity()，
 从而将语义发送给Android系统。
 
-ContextImpl里的另一个重要方面是关于资源的访问。这就涉及到资源从哪里来。简单地说，当一个APK被加载起来时，系统会创建一个对应的LoadedApk对象，
-并通过解码模块将APK里的资源部分加载进LoadedApk。每当我们为一个上下文创建对应的ContextImpl对象时，就会从LoadedApk里获取正确的Resources对象，
-并记入ContextImpl的mResources成员变量，以便以后使用。
+ContextImpl 里的另一个重要方面是关于资源的访问。这就涉及到资源从哪里来。简单地说，当一个APK被加载起来时，系统会创建一个对应的 LoadedApk 对象，
+并通过解码模块将 APK 里的资源部分加载进 LoadedApk。每当我们为一个上下文创建对应的 ContextImpl 对象时，就会从 LoadedApk 里获取正确的 Resources 对象，
+并记入 ContextImpl 的 mResources 成员变量，以便以后使用。
 
 
 ## 什么时候创建Context实例 
