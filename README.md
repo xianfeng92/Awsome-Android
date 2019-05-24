@@ -123,9 +123,15 @@
 
 # Android
 
-## Android系统的消息机制
+## Android 消息处理机制
 
-* [Handler](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/android/Handler_Analysis.md)
+* [Handler_Analysis](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/android/Android_Messaging_Mechanism/Handler_Analysis.md)
+
+* [Looper_Analysis](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/android/Android_Messaging_Mechanism/Looper_Analysis.md)
+
+* [MessageQueue_Analysis](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/android/Android_Messaging_Mechanism/MessageQueue_Analysis.md)
+
+* [ThreadLocal_Analysis](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/android/Android_Messaging_Mechanism/ThreadLocal_Analysis.md)
 
 * [MainThreadMessageLooper](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/MainThreadMessageLooper.md)
 
