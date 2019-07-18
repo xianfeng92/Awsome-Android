@@ -1,6 +1,10 @@
 # SubscriberMethodFinder
 
-SubscriberMethodFinder 类就是查看订阅者对象里面有没有 @Subscribe 注解的方法。怎么做到的？当然是反射。而且这个类用了大量的反射去查找类中方法名。
+SubscriberMethodFinder 类用来查找订阅者对象里面有没有被 @Subscribe 注解的方法。
+
+怎么做到的？
+
+当然是反射，而且这个类用了大量的反射去查找类中方法名。
 
 先看它的变量声明：
 
@@ -25,7 +29,6 @@ private static final FindState[] FIND_STATE_POOL = new FindState[POOL_SIZE];
 
 ```
 METHOD_CACHE 可以提供 app 在运行时的缓存，意味着，整个库在运行期间所有遍历的方法都会存在这个 map 中，而不必每次都去做耗时的反射取方法了。
-
 
 findSubscriberMethods 方法根据订阅者的 Class 对象来解析其所有的事件响应函数，源码如下：
 
@@ -87,9 +90,7 @@ findSubscriberMethods 方法根据订阅者的 Class 对象来解析其所有的
         return new FindState();
     }
 ```
-该方法中使用对象池来提供 FindState 对象，FindState 中维护的就是我们对订阅方法查找结果的封装。当获取到 FindState
-对象后，使用 initForSubscriber 方法将订阅者的 Class 对象传给 FindState 对象。后面 FindState 就可以从订阅者的 Class 对象
-中解析出使用 Subscribe 注解的函数。
+该方法中使用对象池来提供 FindState 对象，FindState 中维护的就是我们对订阅方法查找结果的封装。当获取到 FindState 对象后，使用 initForSubscriber 方法将订阅者的 Class 对象传给 FindState 对象。后面 FindState 就可以从订阅者的 Class 对象中解析出使用 Subscribe 注解的函数。
 
 ```
     private void findUsingReflectionInSingleClass(FindState findState) {
@@ -189,5 +190,3 @@ findUsingReflection 方法返回的是一个 getMethodsAndRelease(findState)，�
 1. 取出findState对象搜索出订阅者的事件响应函数
 
 2. 重置 findState 对象的相关状态，然后将其放入对象池以便下次的复用
-
-
