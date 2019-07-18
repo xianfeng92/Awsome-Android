@@ -81,7 +81,7 @@ observable.subscribe(observer);
 
    __在不指定线程的情况下， RxJava 遵循的是线程不变的原则，在哪个线程调用 subscribe()，就在哪个线程生产事件; 在哪个线程生产事件，就在哪个线程消费事件__
    
-   如果需要切换线程，就需要用到 Scheduler （调度器）。
+   如果需要切换线程，就需要用到 Scheduler。
 
    在RxJava 中，Scheduler ——调度器，相当于线程控制器，RxJava 通过它来指定每一段代码应该运行在什么样的线程。RxJava 已经内置了几个 Scheduler ，它们已经适合大多数的使用场景：
 
@@ -90,13 +90,11 @@ observable.subscribe(observer);
 2. Schedulers.newThread(): 总是启用新线程，并在新线程执行操作
 
 3. Schedulers.io(): I/O 操作（读写文件、读写数据库、网络信息交互等）所使用的 Scheduler。行为模式和 newThread() 差不多，区别在于 io()
-   的内部实现是是用一个无数量上限的线程池，可以重用空闲的线程，因此多数情况下 io() 比 newThread() 更有效率。不要把计算工作放在 io() 中，可以避免创建不必要的线程。
+的内部实现是是用一个无数量上限的线程池，可以重用空闲的线程，因此多数情况下 io() 比 newThread() 更有效率。不要把计算工作放在 io() 中，可以避免创建不必要的线程。
 
-4. Schedulers.computation(): 计算所使用的 Scheduler。这个计算指的是 CPU 密集型计算，即不会被 I/O 等操作限制性能的操作，例如图形的计算。这个 Scheduler 
-   使用的固定的线程池，大小为 CPU 核数。不要把 I/O 操作放在 computation() 中，否则 I/O 操作的等待时间会浪费 CPU。
+4. Schedulers.computation(): 计算所使用的 Scheduler。这个计算指的是 CPU 密集型计算，即不会被 I/O 等操作限制性能的操作，例如图形的计算。这个 Scheduler 使用的固定的线程池，大小为 CPU 核数。不要把 I/O 操作放在 computation() 中，否则 I/O 操作的等待时间会浪费 CPU。
 
 5. Android 还有一个专用的 AndroidSchedulers.mainThread()，它指定的操作将在 Android 主线程运行。
-
 
 ```
        observable
@@ -105,12 +103,9 @@ observable.subscribe(observer);
                 .subscribe(observer);
 ```
 
-
 PS：
 
- subscribeOn() 的线程控制可以从事件发出的开端就造成影响， 而 observeOn() 控制的是它后面的线程
-
-
+ subscribeOn() 的线程控制可以从事件发出的开端就造成影响，而 observeOn() 控制的是它后面操作所在的线程
 
 ## 变换
 
@@ -241,6 +236,6 @@ flatMap() 和 map() 有一个相同点: 它也是把传入的参数转化之后�
 
 
 
+
+
 [友好 RxJava2.x 源码解析](https://juejin.im/post/5a209c876fb9a0452577e830)
-
-
