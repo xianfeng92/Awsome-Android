@@ -11,12 +11,12 @@ HandlerPoster 的构造方法如下：
     }
 ```
 
-在 HandlerPoster 的构造方法中会传入 eventBus，looper 以及 maxMillisInsideHandleMessage。eventBus 是用来处理 pendingPost。
-looper 决定了 eventBus 在哪个线程中处理 pendingPost。而 maxMillisInsideHandleMessage 为处理 pendingPost 耗时的阀值,关于
-为什么要有这个时间阀值，可以参考：[EventBus/issues/369](https://github.com/greenrobot/EventBus/issues/369)。
+在 HandlerPoster 的构造方法中会传入 eventBus，looper 以及 maxMillisInsideHandleMessage。eventBus 是用来处理 pendingPost，
+looper 决定了 eventBus 在哪个线程中处理 pendingPost，而 maxMillisInsideHandleMessage 为处理 pendingPost 耗时的阀值。
 
+关于为什么要有这个时间阀值，可以参考：[EventBus/issues/369](https://github.com/greenrobot/EventBus/issues/369)。
 
-接着是 HandlerPoster 的入队方法 enqueue()：
+HandlerPoster 的入队方法 enqueue()：
 
 ```
     public void enqueue(Subscription subscription, Object event) {
@@ -34,7 +34,7 @@ looper 决定了 eventBus 在哪个线程中处理 pendingPost。而 maxMillisIn
 
 ```
 
-入队方法会根据参数创建待处理对象 pendingPost 并加入队列,如果此时 handleMessage() 没有在运行中，即 handlerActive 标志为false,则发送一条空消息让 
+入队方法会根据参数创建 pendingPost 并加入队列,如果此时 handleMessage() 没有在运行中，即 handlerActive 标志为false,则发送一条空消息让 
 handleMessage 响应，接着是 handleMessage() 方法。
 
 ```
@@ -76,8 +76,7 @@ handleMessage 响应，接着是 handleMessage() 方法。
 
 1. 关于临时变量 rescheduled
 
-   在 handleMessage 方法中，如果处理 queue 中的 pendingPost 耗时超过 10ms，则会重新发一个空 message 来调用 handleMessage，同时也会将 rescheduled 置为 true，并中断对
-   queue 中的 pendingPost 的处理。
+   在 handleMessage 方法中，如果处理 queue 中的 pendingPost 耗时超过 10ms，则会重新发一个空 message 来调用 handleMessage，同时也会将 rescheduled 置为 true，并中断对 queue 中的 pendingPost 的处理。
 
 2. 关于 handlerActive 标志位
 
@@ -88,12 +87,6 @@ handleMessage 响应，接着是 handleMessage() 方法。
 
    使用 maxMillisInsideHandleMessage 可以很好的切割 queue 中的 pendingPost 的处理耗时，即每一次在主线程中 handleMessage 的执行耗时不会超过 10 ms。
    
-
 # 小结
 
-事件主线程处理，对应ThreadMode.MainThread。继承自 Handler，enqueue 函数将事件放到队列中，并利用 handler 发送 message，
-handleMessage 函数从队列中取事件，invoke 事件响应函数处理。
-
-![HandlerPoster]()
-
-值得注意的一个细节是：在主线程中执行 Event 事件时，如果事件的执行耗时超过 10ms，此时就会暂停在主线程中执行剩余的其他事件，避免阻塞主线程的正常运行。
+事件主线程处理，对应ThreadMode.MainThread。继承自 Handler，enqueue 函数将事件放到队列中，并利用 handler 发送 message，handleMessage 函数从队列中取事件，invoke 事件响应函数处理。值得注意的一个细节是：在主线程中执行 Event 事件时，如果事件的执行耗时超过 10ms，此时就会暂停在主线程中执行剩余的其他事件，避免阻塞主线程的正常运行。
