@@ -27,7 +27,6 @@ subscription 和 event 的实体类，其内部维护着一个 pendingPost 对�
 
 通过对象池缓存不用的对象，减少下次创建的性能消耗。
 
-
 PendingPost 中还有一个静态方法 releasePendingPost，其源码如下：
 
 ```
@@ -44,48 +43,5 @@ PendingPost 中还有一个静态方法 releasePendingPost，其源码如下：
         }
     }
 ```
-
 当一个 PendingPost 对象不需要使用时，可以通过该方法将 PendingPost 放到 pendingPostPool 中，以便下次调用 obtainPendingPost 来重复利用该对象。
-上面的代码中有一个对 pendingPostPool 大小的判断，即 if (pendingPostPool.size() < 10000) ，我们一次只可能创建一个 pendingPost，如果 ArrayList 里面存了上千个 
-pendingPost 都没有取走，那么肯定是使用出错了。
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+上面的代码中有一个对 pendingPostPool 大小的判断，即 if (pendingPostPool.size() < 10000) ，我们一次只可能创建一个 pendingPost，如果 ArrayList 里面存了上千个 pendingPost 都没有取走，那么肯定是使用出错了。
