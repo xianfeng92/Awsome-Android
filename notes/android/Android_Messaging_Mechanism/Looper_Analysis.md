@@ -1,11 +1,10 @@
 # 消息循环 Looper
 
-Looper 在消息机制中扮演着__消息循环__的角色，具体来说就是它会不停的从 MessageQueue 中查看是否有可以处理的消息，如果有就会立即处理，
-否则就会一直阻塞在那里。
+Looper 在消息机制中扮演着消息循环的角色, 它会不停的从 MessageQueue 中查看是否有可以处理的消息. 如果有就会立即处理，否则会一直阻塞在那里。
 
 ## Looper 构造方法
 
-在 Looper 构造方法里它会创建一个 MessageQueue，并保存当前的线程对象：
+在 Looper 构造方法里它会创建一个 MessageQueue, 并保存当前的线程对象:
 
 ```
     private Looper(boolean quitAllowed) {
@@ -14,7 +13,7 @@ Looper 在消息机制中扮演着__消息循环__的角色，具体来说就是
     }
 ```
 
-即，在哪个线程创建 Looper，该 Looper 对象就会与哪个线程关联起来。
+即在哪个线程创建 Looper，该 Looper 对象就会与哪个线程相互关联起来。
 
 通过 Looper.prepare() 就可以为一个线程创建 Looper 对象，然后调用 Looper.loop 来开启循环。
 
@@ -29,15 +28,13 @@ Looper 在消息机制中扮演着__消息循环__的角色，具体来说就是
         }.start();
 ```
 
-Looper 除了 prepare 方法外，还提供了 prepareMainLooper 方法，这个方法主要是给主线程也就是 ActivityThread 创建 Looper 使用的，由于主线程的Looper比较特殊，
-所以 Looper 提供了一个 getMainLooper 方法，通过它可以在任何地方获取到主线程的 Looper。Looper 也是可以退出的，提供了 quit 和 quitSafely 来退出一个Looper。
+Looper 除了 prepare 方法外，还提供了 prepareMainLooper 方法，这个方法是给主线程也就是 ActivityThread 创建 Looper 使用的，由于主线程的Looper比较特殊，所以 Looper 提供了一个 getMainLooper 方法，通过它可以在任何地方获取到主线程的 Looper。Looper 也是可以退出的，提供了 quit 和 quitSafely 来退出一个Looper。
 
-二者的区别是：
+二者的区别是:
 
-quit 会直接退出，而 quitSafely 只是设定一个退出标记，然后把消息队列中已有消息处理完毕后才安全退出。
+* quit 会直接退出，而 quitSafely 只是设定一个退出标记，然后把消息队列中已有消息处理完毕后才安全退出。
 
-Looper 退出后，通过 Handler 发送的消息会失败，这个时候 Handler 的 send 方法会返回 false。
-
+* Looper 退出后，通过 Handler 发送的消息会失败，这个时候 Handler 的 send 方法会返回 false。
 
 __在子线程中，如果手动为其创建 Looper，那么所有的事情完成以后应该调用 quit 方法来终止循环，否则子线程会一直处于等待状态__。
 
@@ -106,4 +103,3 @@ public static void loop() {
 所发送的消息最终又交给它的 dispatchMessage 方法来处理了。
 
 值得注意的是：__Handler 的 dispatchMessage 方法是在创建 Handler 时所使用的 Looper 中执行的，这样就成功的将代码逻辑切换到指定的线程中去执行__。
-
