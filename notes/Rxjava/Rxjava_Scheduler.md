@@ -42,7 +42,7 @@
 
 ## subscribeOn
 
- subscribeOn()源码如下：
+ subscribeOn() 源码如下：
 
 ```
     @SchedulerSupport(SchedulerSupport.CUSTOM)
@@ -51,14 +51,11 @@
         return RxJavaPlugins.onAssembly(new ObservableSubscribeOn<T>(this, scheduler));
     }
 ```
-
-ObservableSubscribeOn 类是一个装饰者，对下游的 Observer 进行装饰，很明显这里主要增加了一个 Scheduler 来做线程切换。
-ObservableSubscribeOn 已经不再是从前的那个__下游的Observer__，Scheduler 的能力让它可以牛逼轰轰的了。
-
+ObservableSubscribeOn 类是一个装饰者，对下游的 Observer 进行装饰，这里主要增加了一个 Scheduler 来做线程切换。ObservableSubscribeOn 已经不再是从前的那个 __下游的Observer__ ，Scheduler 的能力让它可以牛逼轰轰的了。
 
 ```
 public final class ObservableSubscribeOn<T> extends AbstractObservableWithUpstream<T, T> {
-    // 保存线程调度器,该栗子中即Schedulers.io()，Schedulers.io()生成的一个线程调度对象,此对象是维护这一个线程池,让操作在io线程池中执行
+    // 保存线程调度器,该栗子中即 Schedulers.io()，Schedulers.io() 生成的一个线程调度对象,此对象是维护这一个线程池,让操作在 io 线程池中执行
     final Scheduler scheduler;
 
     public ObservableSubscribeOn(ObservableSource<T> source, Scheduler scheduler) {
@@ -79,7 +76,7 @@ public final class ObservableSubscribeOn<T> extends AbstractObservableWithUpstre
 
     final class SubscribeTask implements Runnable {
         private final SubscribeOnObserver<T> parent;
-
+        
         SubscribeTask(SubscribeOnObserver<T> parent) {
             this.parent = parent;
         }
@@ -92,9 +89,7 @@ public final class ObservableSubscribeOn<T> extends AbstractObservableWithUpstre
     }
 ```
 
-上面的代码中，scheduler.scheduleDirect 将 SubscribeTask 加入到线程池中（此处为IO线程）执行。所以subscribeOn对线程切换是在
-Observer 对 ObservableSubscribeOn 类进行 subscribe 时发生的。即，当一个 Observer 对 ObservableSubscribeOn 进行订阅时，后面
-所有的操作都会在我们所指定线程中（此处为io）执行。
+上面的代码中，scheduler.scheduleDirect 将 SubscribeTask 加入到线程池中执行。所以 subscribeOn 对线程切换是在 Observer 对 ObservableSubscribeOn 类进行 subscribe 时发生的。即当一个 Observer 对 ObservableSubscribeOn 进行订阅时，后面所有的操作都会在我们所指定线程中（此处为io）执行。
 
 再来看看 SubscribeOnObserver 如何包装 observer:
 
@@ -146,9 +141,7 @@ Observer 对 ObservableSubscribeOn 类进行 subscribe 时发生的。即，当�
         }
     }
 ```
-SubscribeOnObserver 对象会持有一个observer对象，同时也会维护一个 Disposable 对象，用于保存上游的Disposable，
-以便在自身 dispose 时，连同上游一起 dispose。这里可以看到 SubscribeOnObserver 其实是 observer 对象的一个装饰者。
-
+SubscribeOnObserver 对象会持有一个observer对象，同时也会维护一个 Disposable 对象，用于保存上游的Disposable，以便在自身 dispose 时，连同上游一起 dispose。这里可以看到 SubscribeOnObserver 其实是 observer 对象的一个装饰。
 
 我们总结一下subscribeOn(Schedulers.xxx())的过程：
 
@@ -156,7 +149,7 @@ SubscribeOnObserver 对象会持有一个observer对象，同时也会维护一�
 
 * 上一步返回的对象被订阅时，回调该类中的 subscribeActual() 方法，在其中会立刻将线程切换到对应的 Schedulers.xxx() 线程
 
-* 在切换后的线程中，执行 source.subscribe(parent)，对上游(终点)Observable订阅
+* 在切换后的线程中，执行 source.subscribe(parent)，对上游(终点) Observable 订阅
 
 * 上游(终点) Observable 开始发送数据，上游发送数据仅仅是调用下游观察者对应的 onXXX() 方法而已，所以此时操作是在切换后的线程中进行
 
@@ -171,8 +164,7 @@ SubscribeOnObserver 对象会持有一个observer对象，同时也会维护一�
 
 * 而数据 push 时，是从上游到下游的，所以会在离源头最近的那次 subscribeOn(xxxx) 的线程里 push 数据（onXXX()）给下游
 
-
-## 线程调度 observeOn
+## observeOn
 
 增加一个 observeOn (AndroidSchedulers.mainThread())，就完成了观察者线程的切换。
 
