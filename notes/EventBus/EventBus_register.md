@@ -2,14 +2,13 @@
 
 ## EventBus 订阅流程
 
-register 订阅流程如下：
+  register 订阅流程如下：
 
 ![Register_process](https://github.com/xianfeng92/Awsome-Android/blob/master/images/Register_process.png)
 
 ## register 源码分析
 
-EventBus 默认可通过静态函数 getDefault 获取单例，当然有需要也可以通过 EventBusBuilder 或 构造函数新建一个 EventBus，每个新建的 EventBus 发布和订阅事件
-都是相互隔离的，即一个 EventBus 对象中的发布者发布事件，另一个 EventBus 对象中的订阅者不会收到该订阅。
+EventBus 默认可通过静态函数 getDefault 获取单例，当然有需要也可以通过 EventBusBuilder 或 构造函数新建一个 EventBus，每个新建的 EventBus 发布和订阅事件都是相互隔离的，即一个 EventBus 对象中的发布者发布事件，另一个 EventBus 对象中的订阅者不会收到该订阅。
 
 ```
 EventBus.getDefault.register(this);
@@ -26,8 +25,8 @@ synchronized (EventBus.class) {
 instance = EventBus.defaultInstance;
 if (instance == null) {
 instance = EventBus.defaultInstance = new EventBus();
-}
-}
+  }
+ }
 }
 return instance;
 }
@@ -136,7 +135,7 @@ checkPostStickyEventToSubscription(newSubscription, stickyEvent);
 
 4. 更新订阅者所订阅的事件列表,即 typesBySubscriber。
 
-5. 如果订阅方法的事件类型为 stickyEvent, 则取出 stickyEvent,  post给当前订阅者。
+5. 如果订阅方法的事件类型为 stickyEvent, 则取出 stickyEvent,  post 给当前订阅者。
 
 
 ## 小结
@@ -155,7 +154,4 @@ Subscription 中封装的是订阅者的 Class 对象，弱弱的感觉后面会
 
 订阅者向 EventBus 注册时，EventBus 会根据订阅者所要订阅的事件类型，将其存储哈希列表中。具体关系图如下所示：
 
-
 ![subscriptionsByEventType](https://github.com/xianfeng92/Awsome-Android/blob/master/images/subscriptionsByEventType.png)
-
-
