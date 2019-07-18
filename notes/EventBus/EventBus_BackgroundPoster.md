@@ -1,15 +1,15 @@
 # BackgroundPoster 源码分析
 
-BackgroundPoster 中有一个待处理任务队列 PendingPostQueue queue。
+BackgroundPoster 中有一个待处理任务队列 PendingPostQueue。
 
-队列定义了两个节点：
+该队列中定义了两个节点：
 
 ```
 private PendingPost head; //待处理对象队列 头节点
 private PendingPost tail;//待处理对象队列 尾节点
 ```
 
-再看这个 PendingPost 类的实现：
+再看这个 PendingPost 实现：
 
 ```
 //单例池,复用对象
@@ -36,7 +36,7 @@ BackgroundPoster 的入队方法enqueue()：
     }
 ```
 
-入队方法会根据参数创建 待处理对象 pendingPost 并加入队列。如果此时后台线程没有在处理 PendingPostQueue 中的待处理任务，即 executorRunning 为false。则调用 CachedThreadPool 去处理 BackgroundPoster，即 BackgroundPoster#run。
+入队方法会根据参数创建  pendingPost 并加入队列。如果此时后台线程没有在处理 PendingPostQueue 中的 pendingPost，即 executorRunning 为 false。则调用 CachedThreadPool 去处理 BackgroundPoster，即 BackgroundPoster#run。
 
 BackgroundPoster#run 源码如下：
 
