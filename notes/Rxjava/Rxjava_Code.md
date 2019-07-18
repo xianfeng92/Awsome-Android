@@ -1,5 +1,4 @@
-
-# 一个简单的例子
+# 一个简单的栗子
 
 ```
         Observable.create(new ObservableOnSubscribe<String>() {
@@ -34,7 +33,7 @@
                 });
 ```
 
-## 从create开始
+## 从 create 开始
 
 ```
     public static <T> Observable<T> create(ObservableOnSubscribe<T> source) {
@@ -43,7 +42,6 @@
     }
 
 ```
-
 返回值是 Observable,参数是 ObservableOnSubscribe ,定义如下：
 
 ```
@@ -51,8 +49,7 @@ public interface ObservableOnSubscribe<T> {
     void subscribe(ObservableEmitter<T> e) throws Exception;
 }
 ```
-
-ObservableOnSubscribe 是一个接口，里面就一个方法,也是我们实现的那个方法：该方法的参数是 ObservableEmitter，它是关联起 Disposable 概念的一层：
+ObservableOnSubscribe 接口里面就一个方法,该方法的参数是 ObservableEmitter，它是关联起 Disposable 概念的一层：
 
 ```
 public interface ObservableEmitter<T> extends Emitter<T> {
@@ -63,7 +60,7 @@ public interface ObservableEmitter<T> extends Emitter<T> {
 }
 ```
 
-ObservableEmitter 也是一个接口。里面方法很多，它继承了 Emitter<T> 接口。
+ObservableEmitter 接口继承自 Emitter<T>。
 
 ```
 public interface Emitter<T> {
@@ -75,9 +72,7 @@ public interface Emitter<T> {
 
 Emitter<T>定义了我们在 ObservableOnSubscribe 中实现 subscribe() 方法里最常用的三个方法。
 
-
-ObservableCreate 算是一种适配器的体现，create()需要返回的是 Observable,而我现在有的是（即 方法传入的参数）ObservableOnSubscribe 对象，ObservableCreate 
-将 ObservableOnSubscribe 适配成 Observable。 其中 subscribeActual()方法表示的是被订阅时真正被执行的方法。
+ObservableCreate 算是一种适配器的体现，create()需要返回的是 Observable,而现在有的是 observableOnSubscribe 对象，ObservableCreate 将 ObservableOnSubscribe 适配成 Observable。 其中 subscribeActual()方法表示的是被订阅时真正被执行的方法。
 
 ```
 public final class ObservableCreate<T> extends Observable<T> {
@@ -86,7 +81,7 @@ public final class ObservableCreate<T> extends Observable<T> {
     public ObservableCreate(ObservableOnSubscribe<T> source) {
         this.source = source;
     }
-
+    
     @Override
     protected void subscribeActual(Observer<? super T> observer) {
         CreateEmitter<T> parent = new CreateEmitter<T>(observer);
@@ -137,7 +132,6 @@ OK,至此，创建流程结束，我们得到了 Observable<T> 对象，其实�
             parent.onError(ex);
         }
     }
-
 ```
 
 source 即 ObservableOnSubscribe 对象，在本文中是：
@@ -189,7 +183,7 @@ ObservableOnSubscribe#subscribe 中会调用 parent.onNext() 和 parent.onComple
         }
 ```
 
-## 总结
+## 小结
 
 1. Observable 和 Observer 的关系没有被 dispose，才会回调 Observer 的 onXXXX()方法
 
@@ -204,11 +198,11 @@ ObservableOnSubscribe#subscribe 中会调用 parent.onNext() 和 parent.onComple
 6. CreateEmitter 将 Observer->ObservableEmitter,同时它也是 Disposable
 
 7. source.subscribe(parent)
-   这句代码执行时，才开始从发送 ObservableOnSubscribe 中利用 ObservableEmitter 发送数据给 Observer。即数据是从源头 push 给终点。
+
+   这句代码执行时，才开始从发送 ObservableOnSubscribe 中利用 ObservableEmitter 发送数据给 Observer，即数据是从源头 push 给终点。
 
 
 ## map操作符
-
 
 ```
         Observable.create(new ObservableOnSubscribe<String>() { // return ObservableCreate
@@ -221,7 +215,7 @@ ObservableOnSubscribe#subscribe 中会调用 parent.onNext() 和 parent.onComple
                 emitter.onComplete();
             }
         })
-                .map(new Function<String, String>() { // return ObservableMap, 并且ObservableMap持有对 ObservableSubscribeOn 的引用
+                .map(new Function<String, String>() { // return ObservableMap, 并且  ObservableMap 持有对 ObservableSubscribeOn 的引用
                     @Override
                     public String apply(String s) {
                         return s+s;
@@ -251,7 +245,7 @@ ObservableOnSubscribe#subscribe 中会调用 parent.onNext() 和 parent.onComple
 
 ```
 
-我们看一下map函数的源码：
+我们看一下 map 函数的源码：
 
 ```
     public final <R> Observable<R> map(Function<? super T, ? extends R> mapper) {
@@ -265,9 +259,9 @@ public final class ObservableMap<T, U> extends AbstractObservableWithUpstream<T,
     final Function<? super T, ? extends U> function;
 
     public ObservableMap(ObservableSource<T> source, Function<? super T, ? extends U> function) {
-        // super()将上游的Observable保存起来 ，用于subscribeActual()中用。
+        // super() 将上游的 Observable 保存起来 ，用于 subscribeActual() 
         super(source);
-        // 将function变换函数类保存起来
+        // 将 function 变换函数类保存起来
         this.function = function;
     }
 
@@ -278,7 +272,7 @@ public final class ObservableMap<T, U> extends AbstractObservableWithUpstream<T,
 
 ```
 
-ObservableMap 继承自 AbstractObservableWithUpstream,该类继承自 Observable，很简单，就是将上游的 ObservableSource 保存起来，做一次 wrapper，
+ObservableMap 继承自 AbstractObservableWithUpstream,该类继承自 Observable，就是将上游的 ObservableSource 保存起来，做一次 wrapper，
 所以它也算是装饰者模式的体现，如下:
 
 ```
@@ -314,7 +308,7 @@ public abstract class Observable<T> implements ObservableSource<T> {
 ```
 
 所以我们得到的 ObservableMap 对象也很简单，就是将上游的 Observable 和变换函数类Function保存起来。 
-Function的定义超级简单，就是一个接口，给我一个T，还你一个R。
+Function 的定义超级简单，就是一个接口，给我一个T，还你一个R。
 
 ```
 public interface Function<T, R> {
@@ -339,9 +333,9 @@ MapObserver 也是装饰者模式，对终点（下游）Observer修饰。
         final Function<? super T, ? extends U> mapper;
 
         MapObserver(Observer<? super U> actual, Function<? super T, ? extends U> mapper) {
-            // super()将actual保存起来
+            // super() 将 actual 保存起来
             super(actual);
-           // 保存Function变量
+           // 保存 Function 变量
             this.mapper = mapper;
         }
 
@@ -384,7 +378,7 @@ MapObserver 也是装饰者模式，对终点（下游）Observer修饰。
     }
 ```
 
-订阅的过程，是从下游到上游依次订阅的:
+订阅的过程，是从下游到上游依次订阅：
 
 * 即终点 Observer 订阅了 map 返回的 ObservableMap
 
@@ -395,4 +389,3 @@ MapObserver 也是装饰者模式，对终点（下游）Observer修饰。
 
 * 源头 Observable 传递数据给下游 Observer（本例就是MapObserver）,然后MapObserver接收到数据，对其变换操作后(实际的function在这一步执行)，
   再调用内部保存的下游 Observer 的 onNext() 发送数据给下游,以此类推，直到终点 Observer 。
-
