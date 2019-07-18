@@ -1,16 +1,15 @@
 
 # 基本介绍
 
-  一个在 Java VM 上使用可观测的序列来组成异步的、基于事件的程序的库。
-RxJava 本质上可以说到它就是一个实现异步操作的库。异步操作很关键的一点是程序的简洁性，因为在调度过程比较复杂的情况下，异步代码经常会既难写也难被读懂。 Android 创造的 AsyncTask 和 Handler , 
-其实都是为了让异步代码更加简洁。RxJava 的优势也是简洁，但它的简洁的与众不同之处在于，随着程序逻辑变得越来越复杂，它依然能够保持简洁。
+ 一个在 Java VM 上使用可观测的序列来组成异步的、基于事件的程序的库。
+ 
+__RxJava 本质上可以说到它就是一个实现异步操作的库__ 。异步操作很关键的一点是程序的简洁性，因为在调度过程比较复杂的情况下，异步代码经常会既难写也难被读懂。 Android 创造的 AsyncTask 和 Handler , 其实都是为了让异步代码更加简洁。RxJava 的优势也是简洁，但它的简洁的与众不同之处在于，随着程序逻辑变得越来越复杂，它依然能够保持简洁。
 
 ## RxJava 的观察者模式
 
-   RxJava 有四个基本概念：Observable (可观察者，即被观察者)、 Observer (观察者)、 subscribe (订阅)、事件。Observable 和 Observer 通过 subscribe() 方法实现订阅关系，从而 Observable 
-可以在需要的时候发出事件来通知 Observer。
+   RxJava 有四个基本概念：Observable (可观察者，即被观察者)、 Observer (观察者)、 subscribe (订阅)、事件。Observable 和 Observer 通过 subscribe() 方法实现订阅关系，从而 Observable 可以在需要的时候发出事件来通知 Observer。
 
-### 基于以上的概念， RxJava 的基本实现主要有三点:
+## 基于以上的概念， RxJava 的基本实现为如下三点:
 
 1. 创建 Observer & 定义响应事件的行为
 
@@ -58,9 +57,8 @@ RxJava 本质上可以说到它就是一个实现异步操作的库。异步操�
 
 ```
 
-可以看到，这里传入了一个 ObservableOnSubscribe 对象作为参数。ObservableOnSubscribe 会被存储在返回的 Observable 对象中，它的作用相当于一个__计划表__，
-__当 Observable 被订阅的时候，ObservableOnSubscribe 的 call() 方法会自动被调用，事件序列就会依照设定依次触发__（对于上面的代码，就是观察者Subscriber 
-将会被调用三次 onNext() 和一次 onCompleted()）。这样，由__被观察者调用了观察者的回调方法，就实现了由被观察者向观察者的事件传递__，即观察者模式。
+这里传入了一个 ObservableOnSubscribe 对象作为参数。ObservableOnSubscribe 会被存储在返回的 Observable 对象中，它的作用相当于一个 __计划表__，
+__当 Observable 被订阅的时候，ObservableOnSubscribe 的 call() 方法会自动被调用，事件序列就会依照设定依次触发__（对于上面的代码，就是观察者Subscriber 将会被调用三次 onNext() 和一次 onCompleted()）。这样，由 __被观察者调用了观察者的回调方法,就实现了由被观察者向观察者的事件传递__ ，即观察者模式。
 
 create() 方法是 RxJava 最基本的创造事件序列的方法。基于这个方法， RxJava 还提供了一些方法用来快捷创建事件队列，例如：
 
@@ -81,7 +79,8 @@ observable.subscribe(observer);
 
 ## 线程控制--Scheduler
 
-   __在不指定线程的情况下， RxJava 遵循的是线程不变的原则__，即：在哪个线程调用 subscribe()，就在哪个线程生产事件; 在哪个线程生产事件，就在哪个线程消费事件。
+   __在不指定线程的情况下， RxJava 遵循的是线程不变的原则，在哪个线程调用 subscribe()，就在哪个线程生产事件; 在哪个线程生产事件，就在哪个线程消费事件__
+   
    如果需要切换线程，就需要用到 Scheduler （调度器）。
 
    在RxJava 中，Scheduler ——调度器，相当于线程控制器，RxJava 通过它来指定每一段代码应该运行在什么样的线程。RxJava 已经内置了几个 Scheduler ，它们已经适合大多数的使用场景：
@@ -239,7 +238,6 @@ flatMap() 和 map() 有一个相同点: 它也是把传入的参数转化之后�
 ### lift()
 
    这些变换虽然功能各有不同，但实质上都是针对事件序列的处理和再发送。而在 RxJava 的内部，它们是基于同一个基础的变换方法： lift(Operator)
-
 
 
 
