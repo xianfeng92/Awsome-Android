@@ -1,18 +1,18 @@
-
 # 一切从main()方法开始
 
-Android中，一个应用程序的开始可以说就是从  ActivityThread.java  中的 main() 方法开始的。
+Android中一个应用程序是从  ActivityThread.java  中的 main() 方法开始。
 
-main()方法中主要做的事情有：
+main()方法中主要做的事情有:
 
-1. 初始化主线程的Looper、主Handler。并使主线程进入等待接收Message消息的无限循环状态。
+1. 初始化主线程的 Looper、Handler, 并使主线程进入等待接收消息的无限循环状态
 
-2. 调用attach()方法，主要就是为了发送出初始化 Application 的消息。
+2. 调用 attach() 方法, 发送出初始化 Application 的消息。
 
-## 创建Application的消息是如何发送的呢？
+## 创建 Application 的消息是如何发送的呢？
 
-上面提到过， ActivityThread 的attach()方法最终的目的是发送出一条创建 Application 的消息——H.BIND_APPLICATION，到主线程的主Handler中。那我们来看看attach()方法干了啥。
-attach()关键代码:
+ActivityThread 的 attach() 方法最终会发送出一条创建 Application 的消息——H.BIND_APPLICATION 到主线程的 Handler 中。
+
+attach()方法源码如下:
 
 ```
     private void attach(boolean system, long startSeq) {
@@ -24,7 +24,6 @@ attach()关键代码:
             } catch (RemoteException ex) {
                 throw ex.rethrowFromSystemServer();
             }
-
            ...
 
     public static IActivityManager getService() {
@@ -35,7 +34,7 @@ attach()关键代码:
             new Singleton<IActivityManager>() {
                 @Override
                 protected IActivityManager create() {
-                    // 这里是通过ServiceManager获取到IBinder实例的。
+                    // 这里是通过 ServiceManager 获取到 IBinder 实例
                     final IBinder b = ServiceManager.getService(Context.ACTIVITY_SERVICE);
                     final IActivityManager am = IActivityManager.Stub.asInterface(b);
                     return am;
@@ -43,11 +42,10 @@ attach()关键代码:
             };
 ```
 
+当我们调用 ActivityManager.getService() 获得的实际是一个代理类的实例 ActivityManagerProxy, 其 IActivityManager 接口。
+ActivityManagerProxy 是 ActivityManagerNative 的一个内部类。
 
-当我们调用 ActivityManager.getService(), 获得的实际是一个代理类的实例 ActivityManagerProxy，这个东西实现了 IActivityManager 接口。
-打开源码会发现，ActivityManagerProxy 是 ActivityManagerNative 的一个内部类。
-
-1. ActivityManagerProxy 的构造函数：
+1. ActivityManagerProxy 的构造函数:
 
 ```
 public ActivityManagerProxy(IBinder remote) {
@@ -55,8 +53,8 @@ public ActivityManagerProxy(IBinder remote) {
 }
 ```
 
-这个构造函数非常的简单。首先它需要一个 IBinder 参数，然后赋值给 mRemote 变量。这个mRemote显然是 ActivityManagerProxy 的成员变量，
-对它的操作是由 ActivityManagerProxy 来代理间接进行的。这样设计的好处是保护了mRemote，并且能够在操作mRemote前执行一些别的事务，
+这个构造函数非常的简单。首先它需要一个 IBinder 参数, 然后赋值给 mRemote 变量。这个mRemote显然是 ActivityManagerProxy 的成员变量，
+对它的操作是由 ActivityManagerProxy 来代理间接进行的。这样设计的好处是保护了mRemote，并且能够在操作 mRemote 前执行一些别的事务，
 并且我们是以IActivityManager的身份来进行这些操作的！这就非常巧妙了。
 
 ## attachApplication(mAppThread)方法
@@ -67,17 +65,13 @@ public ActivityManagerProxy(IBinder remote) {
 	  mRemote.transact(ATTACH_APPLICATION_TRANSACTION, data, reply, 0);
 	  ...
 	}
-
 ```
 
-这个方法中上面这一句是关键。调用了 IBinder 实例的 tansact() 方法，并且把参数放到了data中，最终传递给 ActivityManagerService。
+这个方法中上面这一句是关键:调用了 IBinder 实例的 tansact() 方法，并且把参数放到了 data , 最终传递给 ActivityManagerService。
 
-现在，我们已经基本知道了 IActivityManager 是个什么东东了,其实最重要的就是它的一个实现类 ActivityManagerProxy，它主要代理了内核中与ActivityManagerService通讯的Binder实例。
+现在，我们已经基本知道了 IActivityManager 是个什么东东了,其实它就是 ActivityManagerProxy 的一个实现类, 它主要代理了内核与ActivityManagerService 通讯的 Binder 实例。
 
-当调用 mRemote.transact(ATTACH_APPLICATION_TRANSACTION, data, reply, 0), 通过AIDL会远程调用 ActivityManagerService 的OnTransact方法, 该方法会
-
-调用 ApplicationThread 的 bindApplicatation 方法, ApplicationThread 会发送一条 BIND_APPLICATION 的 message.
-
+当调用 mRemote.transact(ATTACH_APPLICATION_TRANSACTION, data, reply, 0), 通过AIDL会远程调用 ActivityManagerService 的 OnTransact 方法, 该方法会调用 ApplicationThread#bindApplicatation(), ApplicationThread 会发送一条 BIND_APPLICATION 的 message.
 
 ## ApplicationThread mAppThread
 
@@ -85,17 +79,13 @@ public ActivityManagerProxy(IBinder remote) {
 	private class ApplicationThread extends IApplicationThread.Stub
 
 ```
-ApplicationThread 是 ActivityThread 中的一个内部类，为什么没有单独出来写在别的地方呢？我觉得这也是对最小惊异原则的实践。因为 ApplicationThread 是专门在这里使用的对象。
-很明显，ApplicationThread 最终也是一个Binder！同时，由于实现了 IApplicationThread 接口，所以它也是一个 IApplicationThread。
-我们终于知道attach()方法中出现的两个对象是啥了。ApplicationThread 作为 IApplicationThread 的一个实例，承担了最后发送Activity生命周期、及其它一些消息的任务。
-也就是说，前面绕了一大圈，最后还是回到这个地方来发送消息！
-
+ApplicationThread 是 ActivityThread 中的一个内部类, ApplicationThread 其实也是一个Binder! ApplicationThread 作为 IApplicationThread 的一个实例, 承担了最后发送 Activity 生命周期、及其它一些消息的任务。
 
 ## ActivityManagerService 调度发送初始化消息
 
 经过上面的辗转，ApplicationThread 终于到了 ActivityManagerService 中了。
 
-从上图中可以看到，ActivityManagerService中有一这样的方法：
+ActivityManagerService 中有一这样的方法：
 
 ```
 	private final boolean attachApplicationLocked(IApplicationThread thread
@@ -108,7 +98,7 @@ ApplicationThread 是 ActivityThread 中的一个内部类，为什么没有单�
 
 ```
 
-ApplicationThread 以 IApplicationThread 的身份到了 ActivityManagerService 中，经过一系列的操作，最终被调用了自己的bindApplication()方法，发出初始化Applicationd的消息。
+ApplicationThread 以 IApplicationThread 的身份到了 ActivityManagerService 中，经过一系列的操作，最终被调用了自己的 bindApplication() 方法,发出初始化 Applicationd 的消息。
 
 ```
   public final void bindApplication(String processName, ApplicationInfo appInfo,
@@ -125,36 +115,33 @@ ApplicationThread 以 IApplicationThread 的身份到了 ActivityManagerService 
 
             sendMessage(H.BIND_APPLICATION, data);
         }
-
 ```
 
 但是，这个地方，我们只要知道最后发了一条 H.BIND_APPLICATION 消息，接着程序开始了。
 
-总结一下, 其实是这样子的:
+总结一下,其实是这样子的:
 
-1. ActivityThread 的 attach方法中的 mgr.attachApplication(mAppThread, startSeq),是通过AIDL来调用 ActivityManagerService 中的 attachApplication.
+1. ActivityThread 的 attach 方法中的 mgr.attachApplication(mAppThread, startSeq),是通过 AIDL 来调用 ActivityManagerService 中的        attachApplication.
 
-2. 而 ActivityManagerService 的 attachApplication 方法中,通过会 IApplicationThread 接口(这里也是一个AIDL)调用 ApplicationThread 的bindApplication 方法.
+2. 而ActivityManagerService 的 attachApplication 方法中,通过会 IApplicationThread 接口(这里也是一个AIDL)调用 ApplicationThread 的        bindApplication 方法.
 
-3. ApplicationThread 为 ActivityThread 的一个内部类,其bindApplication方法会发送一条 BIND_APPLICATION 的 message. 当 ActivityThread 的内部Handler收到
-该message后,会 handleBindApplication,来完成application的创建.
-
+3. ApplicationThread 为 ActivityThread 的一个内部类,其 bindApplication 方法会发送一条 BIND_APPLICATION 的 message.当 ActivityThread    的内部 Handler 收到该 message 后会 handleBindApplication 来完成 application 的创建.
 
 # 收到初始化消息之后的世界
 
 上面我们已经找到初始化 Applicaitond 的消息是在哪发送的了。现在，需要看一看收到消息后都发生了些什么。
 
-现在上图的H下面找到第一个消息：H.BIND_APPLICATION。一旦接收到这个消息就开始创建Application了。这个过程是在handleBindApplication()中完成的。
+现在上图的H下面找到第一个消息：H.BIND_APPLICATION。一旦接收到这个消息就开始创建Application了。这个过程是在 handleBindApplication() 中完成的。
 
 ```
 private void handleBindApplication(AppBindData data) {
     ...
-    //通过反射初始化一个Instrumentation, 反射中用到的 className 来自于 ActivityManagerService 传过来的Binder
+    //通过反射初始化一个 Instrumentation, 反射中用到的 className 来自于 ActivityManagerService 传过来的Binder
     mInstrumentation = (Instrumentation)
         cl.loadClass(data.instrumentationName.getClassName())
         .newInstance();
     ...
-    //通过LoadedApp命令创建 Application 实例
+    //通过 LoadedApp 命令创建 Application 实例
     Application app = data.info.makeApplication(data.restrictedBackupMode, null);
     mInitialApplication = app;
     ...
@@ -167,22 +154,18 @@ private void handleBindApplication(AppBindData data) {
 
 ## Instrumentation
 
-Instrumentation 会在应用程序的任何代码运行之前被实例化，它能够允许你监视应用程序和系统的所有交互。
+Instrumentation 会在应用程序的任何代码运行之前被实例化, 它能够允许你监视应用程序和系统的所有交互。
 
-上面的代码我们可以看出，Instrumentation 确实是在 Application 初始化之前就被创建了。
+上面的代码我们可以看出，Instrumentation 是在 Application 初始化之前就被创建了。
 
-那么它是如何实现监视应用程序和系统交互的呢？
+### 那么它是如何实现监视应用程序和系统交互的呢？
 
-打开这个类你可以发现，最终 Apllication 的创建，Activity 的创建，以及生命周期都会经过这个对象去执行。
-
-简单点说，就是把这些操作包装了一层。通过操作 Instrumentation 进而实现上述的功能。
-
+打开这个类你可以发现，最终 Apllication 的创建，Activity 的创建，以及生命周期都会经过这个对象去执行。简单点说，就是把这些操作包装了一层。通过操作 Instrumentation 进而实现上述的功能。
 
 那么这样做究竟有什么好处呢？仔细想想。Instrumentation 作为抽象，当我们约定好需要实现的功能之后，我们只需要给 Instrumentation 添加这些抽象功能，
 然后调用就好。 __至于如何实现这些功能，都交给 Instrumentation 仪器的实现对象就好__。
 
-啊！这是多态的运用。啊！这是依赖抽象，不依赖具体的实践。__这是上层提出需求，底层定义接口，即依赖倒置原则的践行__。呵！抽象不过如此。
-
+啊！这是多态的运用。啊！这是依赖抽象，不依赖具体的实践。 __这是上层提出需求, 底层定义接口即依赖倒置原则的践行__. 
 
 从代码中可以看到，这里实例化 Instrumentation 的方法是反射！而反射的ClassName是来自于从 ActivityManagerService 中传过来的Binder的。
 
@@ -196,8 +179,6 @@ Instrumentation 会在应用程序的任何代码运行之前被实例化，它�
     }
 
 ```
-
-
 ## makeApplication
 
 ```
@@ -215,11 +196,9 @@ public Application makeApplication(boolean forceDefaultAppClass,
         .newApplication( cl, appClass, appContext);
     ...
 }
-
 ```
 
 在这个方法中，我们需要知道的就是，在取得 Application 的实际类名之后，最终的创建工作还是交由 Instrumentation 去完成，就像前面所说的一样。
-
 
 ## 现在把目光移回 Instrumentation
 
@@ -239,20 +218,17 @@ static public Application newApplication(Class<?> clazz
     }
 ```
 
-
 # LaunchActivity
 
-当Application初始化完成后，系统会更具Manifests中的配置的启动Activity发送一个Intent去启动相应的Activity。
+当 Application 初始化完成后，系统会根据 Manifests 中的配置发送一个 Intent 去启动相应的 Activity。
 
+Ps:Android 9.0 Activity启动流程会有所改变
 
-Ps:Android 9.0 Activity启动流程会有所改变:
+* Activity：startActivity 方法的真正实现在 Activity 中
 
-* Activity：startActivity方法的真正实现在Activity中
+* Instrumentation：用来辅助完成启动 Activity 的过程
 
-* Instrumentation：用来辅助Activity完成启动Activity的过程
-
-* ActivityThread（包含ApplicationThread + ApplicationThreadNative + IApplicationThread）：真正启动Activity的实现都在这里
-
+* ActivityThread（包含 ApplicationThread + ApplicationThreadNative + IApplicationThread）: 真正启动 Activity 的实现都在这里
 
 ```
     @Override
@@ -273,13 +249,12 @@ Ps:Android 9.0 Activity启动流程会有所改变:
 
 ```
 
-显然，从上往下，最终都是由 startActivityForResult 来实现的,
+显然, 最终都是由 startActivityForResult 来实现的,
 
 ```
-
     public void startActivityForResult(@RequiresPermission Intent intent, int requestCode,
             @Nullable Bundle options) {
-         //一般的Activity其mParent为null，mParent常用在ActivityGroup中，ActivityGroup已废弃
+         //一般的 Activity 的 mParent为null，mParent 常用在 ActivityGroup 中, ActivityGroup 已废弃
         if (mParent == null) {
             options = transferSpringboardActivityOptions(options);
          //这里会启动新的Activity，核心功能都在mMainThread.getApplicationThread()中完成
@@ -288,7 +263,7 @@ Ps:Android 9.0 Activity启动流程会有所改变:
                     this, mMainThread.getApplicationThread(), mToken, this,
                     intent, requestCode, options);
             if (ar != null) {
-         //发送结果，即onActivityResult会被调用
+         //发送结果，即 onActivityResult 会被调用
                 mMainThread.sendActivityResult(
                     mToken, mEmbeddedID, requestCode, ar.getResultCode(),
                     ar.getResultData());
@@ -321,20 +296,20 @@ Ps:Android 9.0 Activity启动流程会有所改变:
 
 可以发现，真正打开 activity 的实现在 Instrumentation 的 execStartActivity 方法中，去看看
 
-code：Instrumentation#execStartActivity
+Instrumentation#execStartActivity
 
 ```
     public ActivityResult execStartActivity(
         Context who, IBinder contextThread, IBinder token, String target,
         Intent intent, int requestCode, Bundle options) {
 
-        //核心功能在这个whoThread中完成，其内部scheduleLaunchActivity方法用于完成activity的打开
+        //核心功能在这个 whoThread 中完成，其内部 scheduleLaunchActivity 方法用于完成 activity 的打开
         IApplicationThread whoThread = (IApplicationThread) contextThread;
         if (mActivityMonitors != null) {
             synchronized (mSync) {
                 final int N = mActivityMonitors.size();
                 for (int i=0; i<N; i++) {
-                  //先查找一遍看是否存在这个activity
+                  //先查找一遍看是否存在这个 activity
                     final ActivityMonitor am = mActivityMonitors.get(i);
                     ActivityResult result = null;
                     if (am.ignoreMatchingSpecificIntents()) {
@@ -374,8 +349,7 @@ code：Instrumentation#execStartActivity
     }
 ```
 
-再说一下这个方法checkStartActivityResult，它也专业抛异常的，看代码，相信大家对下面的异常信息不陌生吧，就是它干的，
-其中最熟悉的非 Unable to find explicit activity class 莫属了，如果你在xml中没有注册目标activity，此异常将会抛出。
+再说一下这个方法 checkStartActivityResult，它也专业抛异常的，看代码，相信大家对下面的异常信息不陌生吧，就是它干的, 其中最熟悉的非 Unable to find explicit activity class 莫属了，如果你在xml中没有注册目标 activity，此异常将会抛出。
 
 再来看看  ActivityManager.getService() 得到的是啥？
 
@@ -393,29 +367,17 @@ code：Instrumentation#execStartActivity
                     return am;
                 }
             };
-
 ```
 
 通过上面代码可知得到的是一个 IActivityManager，其为 ActivityManagerService 的远程 Binder 对象。通过远程Binder对象调用 ActivityManagerService 的 startActivity 方法。
 
-接着startActivity 这个调用了很多层级的函数。。这里省略 。。。到后面调用了一个 Ibind 的接口回到到 app 进程中 ApplicationThread 类的 handleLaunchActivity 方法。
+接着startActivity 这个调用了很多层级的函数。。这里省略 。。。到后面调用了一个 Ibind 的接口回到 app 进程中 ApplicationThread 类的 handleLaunchActivity 方法。
 
-然后调用 H 的sendMessage（） msg.what 为LAUNCH_ACTIVITY，紧接着 去执行performLaunchActivity（），performLaunchActivity里面的动作是 newActivity （真真正正的创建activity）
+然后调用 H.sendMessage（） msg.what 为 LAUNCH_ACTIVITY，紧接着 去执行 performLaunchActivity（）, performLaunchActivity里面的动作是 newActivity (真真正正的创建activity）
 
-补充：
+## 补充
 
 ### Android中为什么主线程不会因为Looper.loop()里的死循环卡死？
-
-1. 进程
-
-   Android中，每个app运行时前首先创建一个进程，该进程是由Zygote fork出来的，用于承载App上运行的各种Activity
-   大多数情况一个App就运行在一个进程中，除非在AndroidManifest.xml中配置Android:process属性，或通过native代码fork进程。
-
-2. 线程
-
-   线程对应用来说非常常见，比如每次new Thread().start都会创建一个新的线程。该线程与App所在进程之间资源共享，从Linux角度来说进程与线程除了是否共享资源外，
-   并没有本质的区别，都是一个task_struct结构体，__在CPU看来进程或线程无非就是一段可执行的代码，CPU采用CFS调度算法，保证每个task都尽可能公平的享有CPU时间片__。
-
 
 对于线程既然是一段可执行的代码，当可执行代码执行完成后，线程生命周期便该终止了，线程退出。而对于主线程，我们是绝不希望会被运行一段时间，自己就退出，
 那么如何保证能一直存活呢？简单做法就是可执行代码是能一直执行下去的，死循环便能保证不会被退出。
@@ -424,12 +386,11 @@ code：Instrumentation#execStartActivity
 
 答案是：通过创建新线程的方式。
 
-真正会卡死主线程的操作是在回调方法onCreate/onStart/onResume等操作时间过长，会导致掉帧，甚至发生ANR。looper.loop本身不会导致应用卡死。
-
+真正会卡死主线程的操作是在回调方法 onCreate/onStart/onResume 等操作时间过长会导致掉帧, 甚至发生ANR。looper.loop 本身不会导致应用卡死。
 
 ### 在哪里为这个死循环准备了一个新线程去运转？
 
-事实上，会在进入死循环之前便创建了新 binder 线程，在代码 ActivityThread.main() 中：
+事实上在主线程进入消息循环之前便创建了新 binder 线程, 在代码 ActivityThread.main() 中：
 
 ```
 public static void main(String[] args) {
@@ -447,36 +408,27 @@ public static void main(String[] args) {
         Looper.loop(); //消息循环运行
         throw new RuntimeException("Main thread loop unexpectedly exited");
     }
-
 ```
-thread.attach(false)，便会创建一个Binder线程（具体是指ApplicationThread，Binder的服务端，用于接收系统服务AMS发送来的事件），
-该Binder线程通过Handler将Message发送给主线程。
+thread.attach(false) 便会创建一个 Binder 线程（即 ApplicationThread Binder的服务端, 用于接收系统服务AMS发送来的事件).
+该 Binder 线程通过 Handler 将 Message 发送给主线程。
 
-另外，ActivityThread实际上并非线程，不像HandlerThread类，ActivityThread并没有真正继承Thread类，只是往往运行在主线程，该人以线程的感觉，
-其实承载ActivityThread的主线程就是由Zygote fork而创建的进程。
+### 主线程的死循环一直运行是不是特别消耗CPU资源呢？ 
 
-主线程的死循环一直运行是不是特别消耗CPU资源呢？ 其实不然，这里就涉及到Linux pipe/epoll机制，简单说就是在主线程的MessageQueue没有消息时，便阻塞在loop的queue.next()中的nativePollOnce()方法里，
-详情见Android消息机制1-Handler(Java层)，此时主线程会释放CPU资源进入休眠状态，直到下个消息到达或者有事务发生，通过往pipe管道写端写入数据来唤醒主线程工作。
-这里采用的epoll机制，是一种IO多路复用机制，可以同时监控多个描述符，当某个描述符就绪(读或写就绪)，则立刻通知相应程序进行读或写操作，本质同步I/O，即读写是阻塞的。 
+其实不然，这里就涉及到Linux pipe/epoll机制，简单说就是在主线程的MessageQueue没有消息时，便阻塞在loop的queue.next()中的nativePollOnce()方法里, 详情见Android消息机制1-Handler(Java层)，此时主线程会释放CPU资源进入休眠状态，直到下个消息到达或者有事务发生，通过往pipe管道写端写入数据来唤醒主线程工作。这里采用的epoll机制，是一种IO多路复用机制，可以同时监控多个描述符，当某个描述符就绪(读或写就绪)，则立刻通知相应程序进行读或写操作，本质同步I/O，即读写是阻塞的。 
 
 所以说，主线程大多数时候都是处于休眠状态，并不会消耗大量CPU资源。
 
-
-###  Activity的生命周期是怎么实现在死循环体外能够执行起来的？
+###  Activity 的生命周期是怎么实现在死循环体外能够执行起来的？
 
 ActivityThread的内部类H继承于Handler，通过handler消息机制，简单说Handler机制用于同一个进程的线程间通信。
 
-Activity的生命周期都是依靠主线程的Looper.loop，当收到不同Message时则采用相应措施。
-在H.handleMessage(msg)方法中，根据接收到不同的msg，执行相应的生命周期。
+Activity的生命周期都是依靠主线程的Looper.loop，当收到不同Message时则采用相应措施。在H.handleMessage(msg)方法中，根据接收到不同的msg，执行相应的生命周期。
 
-system_server进程是系统进程，java framework框架的核心载体，里面运行了大量的系统服务，比如这里提供ApplicationThreadProxy（简称ATP），ActivityManagerService（简称AMS），
-这个两个服务都运行在system_server进程的不同线程中，由于ATP和AMS都是基于IBinder接口，都是binder线程，binder线程的创建与销毁都是由binder驱动来决定的。
+system_server 进程是系统进程，java framework框架的核心载体, 里面运行了大量的系统服务. 比如这里提供 ApplicationThreadProxy（简称ATP），ActivityManagerService（简称AMS）,这个两个服务都运行在 system_server 进程的不同线程中. 由于 ATP 和 AMS 都是基于IBinder接口都是binder线程，binder 线程的创建与销毁都是由 binder 驱动来决定的。
 
  ![](https://github.com/xianfeng92/android-code-read/blob/master/images/ActivityThread_MessageModule.jpg)
 
-App进程则是我们常说的应用程序，主线程主要负责Activity/Service等组件的生命周期以及UI相关操作都运行在这个线程； 另外，每个App进程中至少会有两个binder线程
-ApplicationThread(简称AT)和ActivityManagerProxy（简称AMP）。Binder用于不同进程之间通信，由一个进程的Binder客户端向另一个进程的服务端发送事务，比如图中线程2向线程4发送事务；
-而handler用于同一个进程中不同线程的通信，比如图中线程4向主线程发送消息。
+App进程则是我们常说的应用程序，主线程主要负责 Activity/Service 等组件的生命周期以及UI相关操作都运行在这个线程；另外，每个App进程中至少会有两个binder线程 ApplicationThread(简称AT) 和 ActivityManagerProxy（简称AMP）。Binder 用于不同进程之间通信，由一个进程的Binder客户端向另一个进程的服务端发送事务，比如图中线程2向线程4发送事务；而handler用于同一个进程中不同线程的通信，比如图中线程4向主线程发送消息。
 
 结合图说说Activity生命周期，比如暂停Activity，流程如下：
 
@@ -486,9 +438,6 @@ ApplicationThread(简称AT)和ActivityManagerProxy（简称AMP）。Binder用于
 
 * 主线程在looper.loop()中循环遍历消息，当收到暂停Activity的消息时，便将消息分发给ActivityThread.H.handleMessage()方法，再经过方法的调用，
   最后便会调用到Activity.onPause()，当onPause()处理完后，继续循环loop下去。
-
-
-
 
 # 参考
 
