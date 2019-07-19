@@ -24,7 +24,7 @@ ps:为什么Binder的Map<String,IInterface>对象,存储一个 IInterface 而不
 
 ## AIDL 调用流程
 
-![aidl.png](https://github.com/xiahttps://www.jianshu.com/p/1eff5a13000dnfeng92/android-code-read/blob/master/images/aidl.png)
+![aidl.png](https://github.com/xianfeng92/Awsome-Android/blob/master/images/aidl.png)
 
 假设客户端已经 bind 服务端,并且客户端的已持有系统所提供的服务端的 Binder 对象(mRemote), 服务端提供 addBook 和 getBook 的服务。
 
