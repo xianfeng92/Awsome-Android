@@ -141,7 +141,7 @@
 
 ### Activity相关
 
-* [Activity启动流程](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Activty%E5%90%AF%E5%8A%A8.md)
+* [Activity启动流程](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/android/Activty_Start.md)
 
 * [Task And BackStack](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Android_Activity_Task.md)
 
