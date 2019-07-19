@@ -36,9 +36,7 @@ ps:为什么Binder的Map<String,IInterface>对象,存储一个 IInterface 而不
 
 4. 服务端是通过线程池来处理客户端的请求,所以 AIDL 调用是多线程的。
 
-
 ## 代码实现和解析
-
 
 ### 客户端代码
 
@@ -144,7 +142,6 @@ public class BookManagerService extends Service {
         return mBinder;
     }
 }
-
 ```
 
 ### AIDL文件
@@ -164,7 +161,6 @@ public Stub()
 this.attachInterface(this, DESCRIPTOR);
 }
 
-
 /**
  * Cast an IBinder object into an com.example.zhongxianfeng.demo_aidl.IBookManager interface,
  * generating a proxy if needed.
@@ -172,7 +168,7 @@ this.attachInterface(this, DESCRIPTOR);
    // 将Binder对象转换成 IBookManager 接口,分两种情况:
    // 1 服务端: 其实是可以通过 queryLocalInterface ,查到对应的 IBookManager 接口的,那么此时就会直接返回 IBookManager 接口
   //  注意,在服务端我们已经实现了 IBookManager的Stub. 面向对象的多态特性决定了在服务端调用 IBookManager 相关的getBook或者addBook
-  //   方法时,其实是在调用服务端的getBook或者addBook的具体实现.
+  //  方法时,其实是在调用服务端的getBook或者addBook的具体实现.
 
  // 2 客户端: 客户端返回的将是一个 IBookManager 的 proxy 对象, 当我们在客户端调用 proxy的 getBook或者addBook 时
  //  其实是通过一个调用一个 mRemote 的 transact 方法,来远程调用服务端相应方法的具体实现. 
@@ -193,8 +189,8 @@ return new com.example.zhongxianfeng.demo_aidl.IBookManager.Stub.Proxy(obj);
 return this;
 }
 
-// 这个方法运行在服务端的Binder线程池中，当客户端发起跨进程请求时，远程请求会通过系统底层封装后交由此方法来处理。服务端通过code可以确定客户端所请求的目标方法是什么，
-// 接着从data中取出目标方法所需要的参数（如果目标方法中有参数的话），然后执行目标方法，当目标方法执行完毕后，就向reply中写入返回值（如果目标方法有返回值的话)
+// 这个方法运行在服务端的Binder线程池中，当客户端发起跨进程请求时，远程请求会通过系统底层封装后交由此方法来处理。服务端通过code可以确定客户端所请求的    目标方法是什么，
+// 接着从data中取出目标方法所需要的参数（如果目标方法中有参数的话），然后执行目标方法，当目标方法执行完毕后，就向reply中写入返回值（如果目标方法有返回    值的话)
 @Override 
 public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply, int flags) throws android.os.RemoteException
 {
@@ -235,7 +231,6 @@ return super.onTransact(code, data, reply, flags);
 }
 }
 
-
 // 服务端BookManager的代理对象,其也实现了IBookManager接口
 private static class Proxy implements com.example.zhongxianfeng.demo_aidl.IBookManager
 {
@@ -253,17 +248,15 @@ public android.os.IBinder asBinder()
 return mRemote;
 }
 
-
 public java.lang.String getInterfaceDescriptor()
 {
 return DESCRIPTOR;
 }
 
-
-// 这个方法运行在客户端，当客户端远程调用此方法时，它的内部实现是这样的：
-// 首先创建该方法所需要的输入型Parcel对象_data、输出型Parcel对象_reply和返回值对象List,然后把该方法的参数信息写入_data中（如果有参数的话)
-// 接着调用transact方法来发起RPC（远程过程调用)请求，同时当前线程挂起,然后服务端的onTransact方法会被调用。
-// 直到RPC过程返回后，当前线程继续执行，并从_reply中取出RPC过程的返回结果,最后返回_reply中的数据。
+// 这个方法运行在客户端，当客户端远程调用此方法时,它的内部实现是这样的：
+// 首先创建该方法所需要的输入型 Parcel对象_data、输出型Parcel对象_reply和返回值对象List,然后把该方法的参数信息写入_data中（如果有参数的话)
+// 接着调用 transact 方法来发起 RPC（远程过程调用)请求, 同时当前线程挂起,然后服务端的 onTransact 方法会被调用。
+// 直到RPC过程返回后, 当前线程继续执行, 并从 _reply 中取出 RPC 过程的返回结果,最后返回_reply中的数据。
 @Override 
 public java.util.List<com.example.zhongxianfeng.demo_aidl.Book> getBook() throws android.os.RemoteException
 {
