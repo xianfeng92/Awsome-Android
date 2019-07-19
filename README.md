@@ -135,7 +135,7 @@
 
 * [MainThreadMessageLooper](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/MainThreadMessageLooper.md)
 
-* [Binder](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/AIDL%E5%88%86%E6%9E%90.md)
+* [AIDL_Analysis](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/android/AIDL/AIDL_Analysis.md)
 
 ## 四大组件
 
