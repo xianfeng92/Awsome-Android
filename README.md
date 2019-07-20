@@ -169,17 +169,19 @@
 
 ### View相关
 
-* [Andoird_view_LayoutInflater](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Andoird_view_LayoutInflater.md)
+* [Android_View_Introduce](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/android/Android_View/Android_View_Introduce.md)
 
-* [Android_view_Measure](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Android_view_Measure.md)
+* [Andoird_view_LayoutInflater](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/android/Android_View/Andoird_view_LayoutInflater.md)
 
-* [Android_view_Layout](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Android_view_Layout.md)
+* [Android_view_Measure](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/android/Android_View/Android_view_Measure.md)
 
-* [Android_view_Draw](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Android_view_Draw.md)
+* [Android_view_Layout](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/android/Android_View/Android_view_Layout.md)
 
-* [Android_window](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Android_window.md)
+* [Android_view_Draw](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/android/Android_view_Draw.md)
 
-* [Android_view_customView](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/Android_view_customView.md)
+* [Android_window](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/android/Android_view_Draw.md)
+
+* [Android_view_customView](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/android/Android_view_customView.md)
 
 ### 事件
 
