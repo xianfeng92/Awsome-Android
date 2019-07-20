@@ -47,10 +47,6 @@ class PhotoDecodeRunnable implements Runnable {
 
 有两点值得注意的是:
 
-1. PhotoDecodeRunnable 线程优先级的设置, 将子线程的优先级设置为 THREAD_PRIORITY_BACKGROUND, 这样可以减少 UI Thread 和子线程之间的系统资源争夺.
-   让系统尽可能的处理 UI Thread 中相关操作.
+1. PhotoDecodeRunnable 线程优先级的设置, 将子线程的优先级设置为 THREAD_PRIORITY_BACKGROUND,这样可以减少 UI Thread 和子线程之间的系统资源争    夺.让系统尽可能的处理 UI Thread 中相关操作.
 
 2. PhotoTask 存储了当前线程的引用,这样在必要的时候进行中断线程的操作.
-
-
-
