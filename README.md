@@ -217,6 +217,8 @@
 
 * [AsyncTask](https://github.com/xianfeng92/android-code-read/blob/master/notes/android/AsyncTask%E5%88%86%E6%9E%90.md)
 
+* [Android_Thread 小结](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/android/Android_Thread.md)
+
 * [handlerThread:看看在 LeakGananry 中的使用](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/LeakGanary/LeakGanary_AndroidWatchExecutor.md)
 
 * [intentService:看看在 LeakGananry 中的使用](https://github.com/xianfeng92/Awsome-Android/blob/master/notes/LeakGanary/LeakGanary_HeapAnalyzerService.md)
