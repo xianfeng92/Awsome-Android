@@ -1,6 +1,10 @@
 # Create a manager for multiple threads
 
-如果我们执行的是“一次性”的任务, 可以通过实现一个 Runnable 接口,在其 run 方法中定义任务,然后交给Thread去 start; 如果我们执行的是在不同的数据集( different sets of data)上需要重复执行的(repeat)任务,但一次只需要执行一个任务,此时可以使用 IntentService; 如果我们想要在资源可用时自动执行任务，或允许多个任务同时执行,此时可以使用 ThreadPoolExecutor 实例,想要执行一个任务,只需将其添加到队列(queue)中,ThreadPoolExecutor 会有空闲的线程时,从队列中取出任务并执行。
+如果我们执行的是“一次性”的任务, 可以通过实现一个 Runnable 接口,在其 run 方法中定义任务,然后交给Thread去 start; 
+
+如果我们执行的是在不同的数据集( different sets of data)上需要重复执行的(repeat)任务, 但一次只需要执行一个任务,此时可以使用 IntentService; 
+
+如果我们想要在资源可用时自动执行任务或允许多个任务同时执行,此时可以使用 ThreadPoolExecutor,只需将任务添加到队列(queue)中,ThreadPoolExecutor 会有空闲的线程时,从队列中取出任务并执行。
 
 线程池(ThreadPool)可以并行的执行任务,因此应该确保代码是线程安全的。一般需要将可由多个线程访问的变量放入同步块中。此方法会阻止一个线程在另一个线程向其写入变量时读取该变量。
 
@@ -135,9 +139,7 @@ public class PhotoManager {
 ```
 
 
-BlockingQueue 主要作用为存储 Runnable 对象,这样当线程池有空闲的线程时,ThreadPoolExecutor就可以从 BlockingQueue 取出 Runnable ,并将其放到一个线程上执行. 具体使用哪种
-BlockingQueue 取决于具体的使用场景和需求.
-
+BlockingQueue 主要作用为存储 Runnable 对象,这样当线程池有空闲的线程时,ThreadPoolExecutor就可以从 BlockingQueue 取出 Runnable ,并将其放到一个线程上执行. 具体使用哪种 BlockingQueue 取决于具体的使用场景和需求.
 
 ### Create a thread pool
 
@@ -161,8 +163,6 @@ Max pool size 都为 NUMBER_OF_CORES, 所以 ThreadPoolExecutor 在实例化时�
     }
 ```
 
-
 如果我们并不需要并发处理任务, 此时可以使用 Executors 工厂方法去创建一个 single thread executor,该 executor 会将所有的任务都放在一个线程中处理.
-
 
 [Create a manager for multiple threads](https://developer.android.google.cn/training/multiple-threads/create-threadpool.html)
