@@ -10,7 +10,7 @@ Service 属于 Android 四大组件之一,开启Service有两种不同的方式:
    
 2. 调用 stopService结束服务, 生命周期执行 onDestroy 方法. 多次调用 stopService 时, onDestroy 只有第一次会被执行。
 
-3 bindService 绑定服务
+3. bindService 绑定服务
 
 ```
 //开启服务
@@ -65,6 +65,8 @@ bindService 的方法参数需要一个 ServiceConnection 接口的实现类对�
     java.lang.IllegalArgumentException: Service not registered: com.xforg.demo_service.MainActivity$MyServerConnec@33ab3bb
         at android.app.LoadedApk.forgetServiceDispatcher(LoadedApk.java:1562)
         at android.app.ContextImpl.unbindService(ContextImpl.java:1692)
+```
+
 ```
 
 2. onBind 返回值不为 null
