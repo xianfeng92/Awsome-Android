@@ -49,10 +49,6 @@
 
 * [使用 @Provides 注入过程分析](https://github.com/xianfeng92/android-code-read/blob/master/notes/Dagger2/Dagger_Analysis_Provider.md)
 
-* [Dagger中的构建者模式](https://github.com/xianfeng92/android-code-read/blob/master/notes/Dagger2/Pattern_BuilderInDagger.md)
-
-* [Dagger中的简单工厂模式](https://github.com/xianfeng92/android-code-read/blob/master/notes/Dagger2/Pattern_ProviderInDagger.md)
-
 -----------------------------------------
 ## Retrofit
 
@@ -96,8 +92,13 @@
 ### 创建型模式
 
 #### 构建者模式
+
 ##### EventBus 实例的构建
 * [EventBusBuilder](https://github.com/greenrobot/EventBus/blob/master/EventBus/src/org/greenrobot/eventbus/EventBusBuilder.java)
+
+##### Dagger 中构建者模式
+
+* [Dagger中的构建者模式](https://github.com/xianfeng92/android-code-read/blob/master/notes/Dagger2/Pattern_BuilderInDagger.md)
 
 #### 单例模式
 ##### 双重锁检查
@@ -107,12 +108,24 @@
 
 #### 抽象工厂模式
 
+##### Dagger中的简单工厂模式
+
+* [Pattern ProviderInDagger](https://github.com/xianfeng92/android-code-read/blob/master/notes/Dagger2/Pattern_ProviderInDagger.md)
+
 ----------
 ### 结构型模式
 
 #### 适配器模式
 
+##### Rxjava 中使用 ObservableCreate 适配 ObservableOnSubscribe 和 Observable
+
+*[ObservableCreate](https://github.com/ReactiveX/RxJava/blob/cc7fce89c46e67c4a124da9e206e4c770b6f8850/src/main/java/io/reactivex/internal/operators/observable/ObservableCreate.java)
+
 #### 装饰器模式
+
+#### Rxjava 中使用 MapObserver 去装饰 Observer
+
+* [MapObserver](https://github.com/ReactiveX/RxJava/blob/cc7fce89c46e67c4a124da9e206e4c770b6f8850/src/main/java/io/reactivex/internal/operators/observable/ObservableMap.java#L35)
 
 #### 外观模式
 
@@ -121,7 +134,15 @@
 
 #### 观察者模式
 
+##### 在一个类中注册 EventBus 实例,也就是在订阅 EventBus 的相关事件
+
+* [register](https://github.com/greenrobot/EventBus/blob/2e7c0461106a3c261859579ec6fdcb5353ed31a4/EventBus/src/org/greenrobot/eventbus/EventBus.java#L140)
+
 #### 策略模式
+
+##### AndroidAutoSize 中屏幕适配
+
+* [AutoAdaptStrategy](https://github.com/JessYanCoding/AndroidAutoSize/blob/b1518770bf537eba26488ba4f6e548bca77ece3e/autosize/src/main/java/me/jessyan/autosize/AutoAdaptStrategy.java)
 
 #### 责任链模式
 
