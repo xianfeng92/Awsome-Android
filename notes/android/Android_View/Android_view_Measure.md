@@ -1,53 +1,50 @@
-通过 LayoutInflater 可以获取到布局文件中的View，任何一个View都不可能凭空突然出现在屏幕上，它们都是要经过非常科学的绘制流程后才能显示出来的。
-每一个视图的绘制过程都必须经历三个最主要的阶段，即onMeasure()、onLayout()和onDraw()。
+通过 LayoutInflater 可以获取到布局文件中的 View. 任何一个 View 都不可能凭空突然出现在屏幕上, 它们都是要经过非常科学的绘制流程后才能显示出来的。
+每一个视图的绘制过程都必须经历三个最主要的阶段, 即 onMeasure()、onLayout()和onDraw()。
 
 ## 关于Measure几个小结论:
 
-1. View 的 measureSpec 由其父容器的 measureSpec(mode和size) 及自身的 LayoutParams(具体值,wrapContent,matchParent) 共同决定. 对于        ViewRoot其测量模式为Exactly,大小为Window大小.
+1. View 的 measureSpec 由其父容器的 measureSpec(mode和size) 及自身的 LayoutParams(具体值、wrapContent、matchParent) 共同决定. 对于      ViewRoot 其测量模式为 Exactly,大小为 Window 大小.
 
-2. 对于所有的控件,如果在布局中指定了具体数值的高和宽时,系统就会给它指定数值的高和宽的空间.至于屏幕上有没有那么多空间给这些控件那是另外一回事,其实如果我    们尝试在LinearLayout中,将Button A的布局宽度设置为屏幕宽度的1/2,将Button B的布局宽度设置为整个屏幕的宽.假设在系统measure,先测量的Button A,    那么运行时会发现Button B的宽度只会显示出其宽度的1/2.
+2. 对于所有的控件,如果在布局中指定了具体数值的高和宽时,系统就会给它指定数值的高和宽的空间.至于屏幕上有没有那么多空间给这些控件那是另外一回事,其实如果    在 LinearLayout中将Button A的布局宽度设置为屏幕宽度的1/2,将Button B的布局宽度设置为整个屏幕的宽.假设在系统measure,先测量的Button A,那么运    行时会发现Button B的宽度只会显示出其宽度的1/2.
 
-3. 当一个控件的布局宽度设置为match_parant时,此时传给它的 measureSize 就是其父控件可用的布局宽度值,它的 measureMode为 Exactly.那么该控件实际显    示的宽度还要看其自身 OnMeasure 中在 mode 为 Exactly 时的实现.
+3. 当一个控件的布局宽度设置为 match_parant 时,此时传给它的 measureSize 就是其父控件可用的布局宽度值,它的 measureMode为 Exactly.那么该控件实    际显示的宽度还要看其自身 OnMeasure 中在 mode 为 Exactly 时的实现.
 
-4. 当一个控件的布局宽度设置为wrap_content时,如果其父View为Exactly,那么其mode为At_Most,size为父View可用的布局宽度值.如果其父View的mode为        At_most,那么传给子View的mode为At_most,size为父View可用的布局宽度值.
+4. 当一个控件的布局宽度设置为 wrap_content 时,如果其父View为Exactly,那么其mode为At_Most,size为父View可用的布局宽度值.如果其父View的mode为    At_most,那么传给子View的mode为At_most,size为父View可用的布局宽度值.
 
 5. 对View进行测量的目的是让View的父控件知道View想要多大的尺寸.当我们的子View在布局文件中,设置具体的布局大小时,其实就是在直接告诉父View,我想要这么    大的布局空间.当我们的子View在布局文件中为match_parent时,其实就是在告诉父View,你有多大布局空间就给我多大的布局空间,贪婪呀~~~~ .当我们的子View    在布局文件中为wrap_content时,其实是在告诉父View,我不贪,我只要够我用的布局空间就可以了.此时父View传给子View的size其实还是父view的可用空间.
-
 
 ## View的MeasureSpec的创建规则
 
    ![](https://github.com/xianfeng92/android-code-read/blob/master/images/view_measureSpec.png)
 
-   父View传给子View的mode = 父View + 子view的布局参数的设定
+   父 View 传给子 View 的 mode = 父View + 子view的布局参数的设定
    
    我们在布局文件中设置一个View的布局宽高时,有三种选择:具体数值(dp),match_parent,wrap_content,而对于ViewRoot其mode为Exactly,所有一般
    我们只需要考虑mode为Exactly和At_most两种情况.当布局为一个很大的View树时,从根View开始,父View传给子View的一般都是Exactly或At_most.
+  
+   我们在自定义View的时候,重点需要考虑,当该 View 在布局文件中是 match_parent 或 wrap_content 时,我们希望它以何种大小显示(这是我们要根据我        们的需要来决定的)
    
-   所有说,我们在自定义View的时候,重点需要考虑,当该View在布局文件中是match_parent 或 wrap_content 时,我们希望它以何种大小显示(这是我们要根据我们    的需要来决定的)
-   
-   
-## onMeasures
+## onMeasure
 
-__对View进行测量的目的是让View的父控件知道View想要多大的尺寸__。
+__对 View 进行测量的目的是让 View 的父控件知道 View 想要多大的尺寸__。
 
-整个应用测量的起点是 ViewRootImpl 类，从它开始依次对子 View 进行测量，如果子View是一个 ViewGroup，那么又会遍历该 ViewGroup 的子 View 依次进行测量。 __也就是说，测量会从 View 树的根结点，纵向递归进行，从而实现自上而下对View树进行测量，直至完成对叶子节点View的测量__。
+整个应用测量的起点是 ViewRootImpl 类, 从它开始依次对子 View 进行测量. 如果子View是一个 ViewGroup, 那么又会遍历该 ViewGroup 的子 View 依次进行测量。 __测量会从 View 树的根结点，纵向递归进行，从而实现自上而下对 View 树进行测量, 直至完成对叶子节点View的测量__。
 
 那么到底如何对一个View进行测量呢？
 
-Android通过调用View的measure()方法对View进行测量，让该View的父控件知道该View想要多大的尺寸空间。
+Android 通过调用 View#measure()方法对View进行测量, 让该 View 的父控件知道该 View 想要多大的尺寸空间。
 
-具体来说，View 的父控件 ViewGroup 会调用 View 的 measure 方法，ViewGroup 会将一些宽度和高度的限制条件传递给 View 的 measure 方法。
+具体来说，View 的父控件 ViewGroup 会调用 View 的 measure 方法, ViewGroup 会将一些宽度和高度的限制条件传递给 View 的 measure 方法。
 
-在View的measure方法会首先从成员变量中读取以前缓存过的测量结果，如果能找到该缓存值，那么就基本完事了，如果没有找到缓存值，那么measure方法会执行onMeasure回调方法，
-measure方法会将上述的宽度和高度的限制条件依次传递给onMeasure方法。onMeasure方法会完成具体的测量工作，并将测量的结果通过调用 View 的 setMeasuredDimension
-方法保存到 View 的成员变量 mMeasuredWidth 和 mMeasuredHeight 中。
+在View的measure方法会首先从成员变量中读取以前缓存过的测量结果，如果能找到该缓存值，那么就基本完事了，如果没有找到缓存值，那么measure方法会执行onMeasure回调方法, measure 方法会将上述的宽度和高度的限制条件依次传递给onMeasure方法。onMeasure方法会完成具体的测量工作, 并将测量的结果通过调用 View 的 setMeasuredDimension 方法保存到 View 的成员变量 mMeasuredWidth 和 mMeasuredHeight 中。
 
-测量完成之后，View的父控件就可以通过调用 getMeasuredWidth、getMeasuredState、getMeasuredWidthAndState 这三个方法获取View的测量结果。
+测量完成之后，View 的父控件就可以通过调用 getMeasuredWidth、getMeasuredState、getMeasuredWidthAndState 这三个方法获取View的测量结果。
 
 ### 理解 MeasureSpec
 
 从名字上看，MeasureSpec 看起来像“测量规格”或者“测量说明书”，不管怎么翻译，他看起来就好像是或多或少的决定了View的测量过程，通过源码可以发现，MeasureSpec的确参与了View的测量过程。
-__在测量过程中，系统会将 View 的 LayoutParams 根据父容器所施加的规则转换成对应的 MeasureSpec，然后再根据这个 measureSpec 来测量出View的宽高__。
+
+__在测量过程中, 系统会将 View 的 LayoutParams 根据父容器所施加的规则转换成对应的 MeasureSpec, 然后再根据这个 measureSpec 来测量出View的宽高__。
 
 #### MeasureSpec
 
@@ -57,24 +54,25 @@ SpecMode 一共有三种类型，如下所示：
 
 1. EXACTLY
 
-   父容器已经检测出View所需要的精度大小，这个时候View的最终大小就是 SpecSize 所指定的值，它对应于 LayoutParams 中的 match_parent,和具体的数值这两种模式。
+   父容器已经检测出View所需要的精度大小, 这个时候View的最终大小就是 SpecSize 所指定的值, 它对应于 LayoutParams 中的 match_parent,和具体的数值这两种模式。
 
 2. AT_MOST
 
-   父容器指定了一个可用大小，即SpecSize，view的大小不能大于这个值，具体是什么值要看不同view的具体实现，它对应于 LayoutParams 中 wrap_content。
+   父容器指定了一个可用大小, 即SpecSize. view的大小不能大于这个值, 具体是什么值要看不同view的具体实现, 它对应于 LayoutParams 中 wrap_content。
 
 3. UNSPECIFIED
    
-   父容器不对View有任何的限制，要多大给多大，这种情况一般用于系统内部，表示一种测量的状态.
-
+   父容器不对View有任何的限制, 这种情况一般用于系统内部表示一种测量的状态.
 
 ### MeasureSpec 和 LayoutParams 的对应关系
 
-在view测量的时候，系统会将 layoutparams 在父容器的约束下转换成对应的 MeasureSpec，然后再根据这个 MeasureSpec 来确定view测量后的宽高，需要注意的是，
-MeasureSpec 不是唯一由 layoutparams 决定的，layoutparams 需要和父容器一起决定 view 的 MeasureSpec 从而进一步决定view的宽高。另外，对于顶级View（DecorView）
-和普通的View来说，MeasureSpec 的转换过程有所不同。__对于 DecorView，其 MeasureSpec 由窗口尺寸和其自身的 LayoutParams 共同决定__;对于普通View，其MeasureSpec由父容器的
-MeasureSpec 和自身的 LayoutParams 来共通决定。__MeasureSpec 一旦确定后，onMeasure 中就可以确定View的测量宽和高了__。
+在view测量的时候, 系统会将 layoutparams 在父容器的约束下转换成对应的 MeasureSpec, 然后再根据这个 MeasureSpec 来确定view测量后的宽高. 需要注意的是, MeasureSpec 不是唯一由 layoutparams 决定的，layoutparams 需要和父容器一起决定 view 的 MeasureSpec 从而进一步决定view的宽高。另外，对于顶级View（DecorView）和普通的View来说, MeasureSpec 的转换过程有所不同。
 
+__对于 DecorView，其 MeasureSpec 由窗口尺寸和其自身的 LayoutParams 共同决定__;
+
+对于普通View，其MeasureSpec由父容器的 MeasureSpec 和自身的 LayoutParams 来共通决定。
+
+__MeasureSpec 一旦确定后，onMeasure 中就可以确定 View 的测量宽和高了__。
 
 ## DecorView的Measure
 
@@ -84,11 +82,9 @@ MeasureSpec 和自身的 LayoutParams 来共通决定。__MeasureSpec 一旦确�
 ```
 childWidthMeasureSpec = getRootMeasureSpec(desiredWindowWidth, lp.width);
 childHeightMeasureSpec = getRootMeasureSpec(desiredWindowHeight, lp.height);
-
 ```
 
-可以看到，这里调用了getRootMeasureSpec()方法去获取 widthMeasureSpec 和 heightMeasureSpec 的值，注意方法中传入的参数，其中lp.width和lp.height在创建ViewGroup实例的时候就被赋值了，
-它们都等于MATCH_PARENT。
+可以看到, 这里调用了getRootMeasureSpec()方法去获取 widthMeasureSpec 和 heightMeasureSpec 的值，注意方法中传入的参数，其中lp.width和lp.height在创建ViewGroup实例的时候就被赋值了, 它们都等于MATCH_PARENT。
 
 ```
     private static int getRootMeasureSpec(int windowSize, int rootDimension) {
@@ -120,10 +116,11 @@ childHeightMeasureSpec = getRootMeasureSpec(desiredWindowHeight, lp.height);
 
 * 固定大小（比如100dp）：精确模式，大小为LayoutParams中指定的大小
 
-
 ## 普通View
 
-对应普通View，这里是指我们布局中的View，View的onMeasure过程是由 ViewGroup 传递而来，先看一下 ViewGroup 的 measureChildWidthMargins 方法：
+对应普通View, 这里是指我们布局中的View，View的onMeasure过程是由 ViewGroup 传递而来. 
+
+先看一下 ViewGroup#measureChildWidthMargins 方法:
 
 ```
     protected void measureChildWithMargins(View child,
@@ -143,9 +140,10 @@ childHeightMeasureSpec = getRootMeasureSpec(desiredWindowHeight, lp.height);
     }
 ```
 
-上述的方法会对子元素进行measure，在调用子元素的measure方法之前会通过 getChildMeasureSpec 方法得到子元素的 MesureSpec，
+上述的方法会对子元素进行 measure, 在调用子元素的measure方法之前会通过 getChildMeasureSpec 方法得到子元素的 MesureSpec，
 
 __从代码上看，很显然，子元素的 MesureSpec 的创建和父容器的 MesureSpec 和子元素的LayoutParams有关，此外，还和view的margin有关__。
+
 具体可以看下ViewGroup的getChildMeasureSpec方法。
 
 ```
@@ -220,8 +218,7 @@ __从代码上看，很显然，子元素的 MesureSpec 的创建和父容器的
 ```
 
 
-上述方法不难理解，他的主要作用是根据父容器的 MeasureSpec 同时结合 view 本身来 layoutparams 来确定子元素的MesureSpec。
-参数中的 pading 是指父容器中已占有的控件大小，因此子元素可以用的大小为父容器的尺寸减去 pading，具体代码：
+上述方法不难理解，他的主要作用是根据父容器的 MeasureSpec 同时结合 view 本身来 layoutparams 来确定子元素的MesureSpec。参数中的 pading 是指父容器中已占有的控件大小，因此子元素可以用的大小为父容器的尺寸减去 pading，具体代码：
 
 ```
 int specSize = MesureSpec.getSize(spec);
@@ -244,9 +241,7 @@ int size = Math.max(0,specSize - pading);
 
 通过这张表可以看出，只要提供父容器的MeasureSpec和子元素的LayoutParams，就可以快速地确定出子元素的MeasureSpec了，有了 MeasureSpec就可以进一步确定出子元亲测量后的大小了。需要说明的是，表中并非是什么经验总结，它只是getchildMeasureSpec 这个方法以表格的方式呈现出来而已。
 
-
-## view的measure过程
-
+## view#measure 过程
 
 当 View 的父控件 ViewGroup 对View进行测量时，会调用View的measure方法，ViewGroup会传入 widthMeasureSpec 和 heightMeasureSpec。
 
@@ -482,18 +477,15 @@ Android 会将 View 想要的尺寸以及其父控件对其尺寸限制信息 me
 
 ```
 
-在上面的代码中，我们只需要给View指定一个默认的内部宽/高(mWidth和mHeight)),并在wrapcontent时设置此宽/高即可。对于非 wrapcontent 情形，我们沿用系统的测量值即可，
-至于这个默认的内部宽/高的大小如何指定，这个没有固定的依据，根据需要灵活指定即可。如果查看TextView、Imageview等的源码就可以知道，
+在上面的代码中，我们只需要给View指定一个默认的内部宽/高(mWidth和mHeight)),并在wrapcontent时设置此宽/高即可。对于非 wrapcontent 情形，我们沿用系统的测量值即可，至于这个默认的内部宽/高的大小如何指定，这个没有固定的依据，根据需要灵活指定即可。如果查看TextView、Imageview等的源码就可以知道，
 针对 wrapcontent情形，它们的onMeasure方法均做了特殊处理。
 
 这样在onMeasure方法中， 当执行getDefaultSize(getSuggestedMinimumWidth(), widthMeasureSpec)时，我们就得到了最终测量到的宽度值； 
 当执行getDefaultSize(getSuggestedMinimumHeight(), heightMeasureSpec)时，我们就得到了最终测量到的高度值。
 
+## ViewGroup#measure过程
 
-## ViewGroup的measure过程
-
-对于ViewGroup来说，除了完成自己的measure过程以外，还会遍历去调用所有子元素的measure方法，各个子元素再通归去执行这个过程。和 View 不同的是，ViewGroup 是一个抽象类，
-因此它没有重写 View 的 onMeasure 方法，但是它提供了一个叫 measureChildren:
+对于ViewGroup来说，除了完成自己的measure过程以外，还会遍历去调用所有子元素的measure方法，各个子元素再通归去执行这个过程。和 View 不同的是，ViewGroup 是一个抽象类, 因此它没有重写 View 的 onMeasure 方法, 但是它提供了一个叫 measureChildren:
 
 ```
    protected void measureChildren(int widthMeasureSpec, int heightMeasureSpec) {
@@ -852,7 +844,6 @@ Android 会将 View 想要的尺寸以及其父控件对其尺寸限制信息 me
 具体来说，是指，如果他的布局中高度采用的是match_parent或者具体值，那么他的绘制过程和View一致，即高度为specSize，如果他的布局中高度采用warp_content，那么它的高度是所有的子元素所占用的高度综合，
 但是仍然不能超过他的父容器剩余空间，但是他的最终高度还是需要考虑其他的竖直方向上的 pading。
 
-
   View的onMeasure是三大流程中最复杂的一个，measure完成以后，通过 getMeasureWidth/Height 就可以正确地获取到View的测量宽/高。需要注意的是，在某些极端情况下measure才能确定最终的测量宽/高，
 在这种情形下，系统可能要多次调用measure方法进行测量，在这种情况下，在onMeasure方法中拿到的测量值很可能是不准确的。
 
@@ -868,8 +859,7 @@ onResume 时某个Vicw已经测量完毕了。如果View还没有测量完毕，
 答案是有的，这里给出四种方法来解决这个问题：
 
 1. onWindowFocusChanged这个方法的含义是：__View已经初始化完毕了，宽/高已经准备好了，这个时候去获取宽/高是没问题的__。需要注意的是，onWindowFocusChanged 会被调用多次。
-当 Activity 的窗口得到焦点和失去焦点时均会被调用一次。具体来说，当 Activity 继续执行和暂停执行时，onWindowFocusChanged 均会被调用，如果频繁地进行onResume和onPause，
-那么onWindowFocusChanged也会被频繁地调用。典型代码如下：
+当 Activity 的窗口得到焦点和失去焦点时均会被调用一次。具体来说，当 Activity 继续执行和暂停执行时，onWindowFocusChanged 均会被调用，如果频繁地进行onResume和onPause, 那么onWindowFocusChanged也会被频繁地调用。典型代码如下：
 
 ```
  public void onWindowFocusChanged(boolean hasWindowFocus) {
@@ -991,7 +981,6 @@ private void setMeasuredDimensionRaw(int measuredWidth, int measuredHeight) {
     //最后将View的状态位mPrivateFlags设置为已测量状态
     mPrivateFlags |= PFLAG_MEASURED_DIMENSION_SET;
 }
-
 ```
 
 测量完成的尺寸的state
@@ -1007,7 +996,6 @@ private void setMeasuredDimensionRaw(int measuredWidth, int measuredHeight) {
 3. getMeasuredState方法
 
 后面那两组方法有啥用？
-
 
 此处我们要再仔细研究一下 View 中保存测量结果的成员变量 mMeasuredWidth 和 mMeasuredHeight，下面的讨论我们都只讨论宽度，理解了宽度的处理方式，高度也是完全一样的。
 
