@@ -1,19 +1,18 @@
 
 ## 什么是View
 
-View是Android中所有控件的基类，不光是简单的 Button 和 TextView 还是复杂的 RelativeLayout 和 Listview ,它们的共同基类都是View。
-__所以说，View是一种界面层的控件的一种抽象，它代表了一个控件__。除了View，还有 ViewGroup，ViewGroup 内部包含了许多个控件，即一组View。
-在Android的设计中，ViewGroup 也继承了View，这就意味着 View 本身就可以是单个控件也可以是由多个控件组成的一组控件，通过这种关系就形成了View树的结构。
-根据这个概念，我们知道，Button 显然是个 View，而 LinearLayout 不但是一个 View 而且还是一个 ViewGroup，而 ViewGroup 内部是可以有子View的，这个子View同样还可以是ViewGroup。
+View是Android中所有控件的基类. 不光是简单的 Button 和 TextView 还是复杂的 RelativeLayout 和 Listview ,它们的共同基类都是View。
+__所以说, View是一种界面层的控件的一种抽象, 它代表了一个控件__。
 
+除了View, 还有 ViewGroup, ViewGroup 内部包含了许多个控件, 即一组View。在Android的设计, ViewGroup 也继承了View, 这就意味着 View 本身就可以是单个控件也可以是由多个控件组成的一组控件, 通过这种关系就形成了View树的结构。根据这个概念, Button 显然是个 View, 而 LinearLayout 不但是一个 View 而且还是一个 ViewGroup. ViewGroup 内部是可以有子View, 这个子View同样还可以是 ViewGroup。
 
 ## View的位置参数
 
 View 的位置主要由它的四个顶点来决定，分别对应于 View 的四个属性：top、left、right，bottom，其中top是左上角纵坐标，left是左上角横坐标，right是右下角横坐标，bottom是有下角纵坐标。
-需要注意的是，这些坐标都是相对于View的父容器来说的，因此它是一种相对坐标。在Android中，x轴和y轴的正别为右和下。
 
+这些坐标都是相对于View的父容器来说的，因此它是一种相对坐标。在Android中, x轴和y轴的为右和下。
 
-![view_location.png]()
+![view_location.png](https://github.com/xianfeng92/Awsome-Android/blob/master/images/view_location.png)
 
 
 从图中的关系我们很容易得到宽高的关系:
@@ -21,34 +20,27 @@ View 的位置主要由它的四个顶点来决定，分别对应于 View 的四
 ```
 width= right- left
 height = bottom - top
-
 ```
 
-那么如何得到View的四个参数呢？也很简单，在对应的源码众有这四个方法:
+那么如何得到View的四个参数呢？也很简单, 在对应的源码中有这四个方法:
 
 ```
 Left = getLeft();
 Right = getRight();
 Top = getTop();
 Bottom = getBottom():
-
 ```
 
-从Android3.0开始，View增加了额外的几个参数，x,y，translationX,translationY,其中x，y是View左上角的图标，而 translationX,translationY 是左上角相对父容器的偏移角量，这几个参数也是相对于父容器的坐标。
-并且 translationX,translationY 的默认值为 0；和 View 的四个基本位置参数一样，View也为我们提供了get/set方法这几个换算关系：
-
+从Android3.0开始，View 增加了额外的几个参数: x,y，translationX,translationY,其中x，y是View左上角的图标，而 translationX,translationY 是左上角相对父容器的偏移角量, 这几个参数也是相对于父容器的坐标。并且 translationX,translationY 的默认值为 0. 和 View 的四个基本位置参数一样，View也为我们提供了get/set方法这几个换算关系:
 
 ```
 x = left + translationX
 y = top + translationY
-
 ```
 
-需要注意的是： __View在平移的过程中，top和left表示在原始左上角的位置信息，其值并不会发生什么，此时发生改变的是 x,y,translationX,translationY 这四个参数。__
+__View在平移的过程中，top和left表示在原始左上角的位置信息，其值并不会发生什么，此时发生改变的是 x,y,translationX,translationY 这四个参数。__
 
-
-
-## MotionEvent和TouchSlop
+## MotionEvent 和 TouchSlop
 
 ### MotionEvent
 
@@ -60,39 +52,31 @@ y = top + translationY
 
 3. ACTION_UP——手机从屏幕上松开的一瞬间
 
+正常情况下, 一次手指触摸屏幕的行为会触发一系列点击事件. 考虑如下几种情况:
 
-正常情况下，一次手指触摸屏幕的行为会触发一系列点击事件，考虑如下几种情况:
+1. 点击屏幕后离开松开, 事件序列为DOWN->UP
 
-1. 点击屏幕后离开松开，事件序列为DOWN->UP
+2. 点击屏幕滑动一会再松开, 事件序列为DOwN > MOVE >…..>MOVE-Up
 
-2. 点击屏幕滑动一会再松开，事件序列为DOwN > MOVE >…..>MOVE-Up
-
-
-上述三种情况是典型的事件序列，同时通过 MotionEvent 对象我们可以得到点击事件发生的x和y坐标。为此，系统提供了两组方法：getX/gety和 getRawX/getRawY。
-它们的区别其实很简单，getX/getY返回的是相对于当前View左上角的x和y坐标，而geiRawX/getRawY返回的是相对于手机屏幕左上角的x和y坐标。
-
+通过 MotionEvent 对象我们可以得到点击事件发生的x和y坐标。为此, 系统提供了两组方法：getX/gety和 getRawX/getRawY。getX/getY返回的是相对于当前View左上角的x和y坐标, 而getRawX/getRawY返回的是相对于手机屏幕左上角的x和y坐标。
 
 ### TouchSlop
 
-__TouchSlop是系统所能识别出的被认为是滑动的最小距离__，换句话说，当手指在屏慕上滑动时，如果两次滑动之间的距离小于这个常量，那么系统就不认为你是在进行滑动操作。
-原理很简单，滑动的距离太短，系统不认为他在滑动，这是一个常量，和设备无关，在不同的设备下这个值可能不同，通过如下方式即可获取这个常量：
-ViewConfigurtion.get(getContext()).getScaledTouchSlop,这个常量有什么意义呢?当我们在处理滑动时，可以利用这个常量来做一些过滤，比如当两次滑动事件的滑动距离小于这个值，
-我们就可以认为未达到常动距离的临界值，因此就可以认为它们不是滑动，这样做可以有更好的用户体验在fraweworks/base/core/res/va;ues/config.xml中，就有这个常量的定义
-
-
+__TouchSlop是系统所能识别出的被认为是滑动的最小距离__. 当手指在屏慕上滑动时，如果两次滑动之间的距离小于这个常量, 那么系统就不认为你是在进行滑动操作。
+通过如下方式即可获取这个常量: ViewConfigurtion.get(getContext()).getScaledTouchSlop,这个常量有什么意义呢?当我们在处理滑动时, 可以利用这个常量来做一些过滤, 比如当两次滑动事件的滑动距离小于这个值,我们就可以认为未达到常动距离的临界值认为它们不是滑动,这样做可以有更好的用户体验.
 
 ## VelocityTracker,GestureDetector 和 Scroller
 
 ### VelocityTracker
 
-速度追踪，用于追踪手指在屏幕上滑动的速度，包括水平和竖直方向上的速度使用过程很简单，首先，在View的onTouchEvent方法里追踪：
+速度追踪，用于追踪手指在屏幕上滑动的速度:包括水平和竖直方向上的速度. 使用过程很简单首先, 在View的 onTouchEvent 方法里追踪:
 
 ```
   VelocityTracker velocityTracker = VelocityTracker.obtain();
   velocityTracker.addMovement(event);
 ```
 
-接着，当我们想知道当前的滑动速度时，这个时候可以采用如下的方式得到当前的速度：
+当我们想知道当前的滑动速度时, 这个时候可以采用如下的方式得到当前的速度：
 
 ```
 velocityTracker.computeCurrentVelocity(1000);
@@ -107,22 +91,18 @@ int yVelocity = (int) velocityTracker.getYVelocity();
 
 			```
 			速度 = （终点位置 -  起点位置）/时间段
-
 			```
 
-根据上面的公式再加上Android系统的坐标系，可以知道，手指逆着坐标系的正方向滑动， 所产生的速度为赋值。
+根据上面的公式再加上Android系统的坐标系,可以知道手指逆着坐标系的正方向滑动, 所产生的速度为负值。
 
 最后，当不需要使用它的时候，需要调用clear方法来重置并回收内存:
 
 ```
 velocityTracker.clear();
 velocityTracker.recycle();
-
 ```
 
-
 ### GestureDetector
-
 
 手势检测，用于辅助检测用户的单击、滑动、长按、双击等行为。要使用 GestureDetector 也不复杂参考如下过程。
 
@@ -134,26 +114,20 @@ velocityTracker.recycle();
 			mGestureDetector.setIsLongpressEnabled(false);
 			```
 
-接着，接管目标View的onTouchEvent方法，在待监听View的 onTouchEvent 方法中添加如下实现：
+接着, 接管目标View的onTouchEvent方法，在待监听View的 onTouchEvent 方法中添加如下实现：
 
 			```
 			boolean consum = mGestureDetector.onTouchEvent(event);
 			return consum;
 			```
 
+做完了上面两步, 我们就可以有选择地实现 OnGestureListener 和 OnDoubleTapListener 中的方法了. 这两个接口中的方法介绍如下图：
 
-
-做完了上面两步，我们就可以有选择地实现 OnGestureListener 和 OnDoubleTapListener 中的方法了，这两个接口中的方法介绍如下图：
-
-
-![gestureDetector]()
-
+![gestureDetector](https://github.com/xianfeng92/Awsome-Android/blob/master/images/gestureDetector.png)
 
 ### Scroller
 
-弹性滑动对象，用于实现 View 的弹性滑动，我们知道，当使用 View 的 scrollTo/scrollBy 方法来进行滑动的时候，其过程是瞬间完成的，这个没有过度效果的滑动用户体验肯定是不好的。
-这个时候就可以用Scroller来实现过度效果的滑动，其过程不是瞬间完成的，而是在一定的时间间隔去完成的，Scroller本身是无法让 View 弹性滑动。
-它需要和 view 的 computScrioll 方法配合才能完成这个功能。
+弹性滑动对象, 用于实现 View 的弹性滑动. 当使用 View 的 scrollTo/scrollBy 方法来进行滑动的时候, 其过程是瞬间完成的, 这个没有过度效果的滑动用户体验肯定是不好的。这个时候就可以用 Scroller 来实现过度效果的滑动, 其过程不是瞬间完成的, 而是在一定的时间间隔去完成的. Scroller本身是无法让 View 弹性滑动, 它需要和 view 的 computScrioll 方法配合才能完成这个功能。
 
 ```
 scroller = new Scroller(getContext());
@@ -175,19 +149,15 @@ public void computeScroll() {
  }
 ```
 
-
-
 ## View的滑动
 
-在Android设备上，滑动几乎是应用的标配，不管是下拉刷新还是 SlidingMenu，它们的基础都是滑动。从另外一方面来说，Android手机由于屏幕比较小，为了给用户呈现更多的内容，
-就需要使用滑动来隐藏和显示一些内容。基于上述两点，可以知道，滑动在Android开发中具有很重要的作用，不管一些滑动效果多么绚丽，归根结底，它们都是由不同的滑动外加一些特效所组成的。
-因此，掌握滑动的方法是实现绚丽的自定义控件的基础。
+在Android设备上，滑动几乎是应用的标配，不管是下拉刷新还是 SlidingMenu，它们的基础都是滑动。从另外一方面来说，Android手机由于屏幕比较小，为了给用户呈现更多的内容, 就需要使用滑动来隐藏和显示一些内容。基于上述两点，可以知道，滑动在Android开发中具有很重要的作用. 不管一些滑动效果多么绚丽,它们都是由不同的滑动外加一些特效所组成的。因此, 掌握滑动的方法是实现绚丽的自定义控件的基础。
 
-通过三种方式可以实现View的滑动：
+通过三种方式可以实现View的滑动:
 
-###  第一种是通过View本身提供的 scrollTo/scrollBy 方法来实现滑动
+###  第一种是通过 View 本身提供的 scrollTo/scrollBy 方法来实现滑动
 
-为了实现View的滑动，View提供了专门的方法来实现这个功能，那就是scrollTo/scrollBy，我们先来看看这两个方法的实现，如下所示：
+View提供了专门的方法来实现这个功能, 那就是scrollTo/scrollBy. 我们先来看看这两个方法的实现, 如下所示:
 
 ```
   /**
@@ -224,16 +194,15 @@ public void computeScroll() {
 ```
 
 从上面的源码可以看出，scrollBy 实际上也是调用了 scrolrTo 方法，它实现了基于当前位置的相对滑动，而 scrollTo 则实现了基于所传递参数的绝对滑动。
-利用 scrollTo 和 scrollBy 来实现 View 的滑动，这不是一件困难的事，但是我们要明白滑动过程，View 内部的两个属性 mScrollX 和 mScrollY 的改变规则，
-这两个属性可以通过getScrollX和getScrollY方法分别得到。
+利用 scrollTo 和 scrollBy 来实现 View 的滑动,这不是一件困难的事, 但是我们要明白滑动过程, View 内部的两个属性 mScrollX 和 mScrollY 的改变规则,这两个属性可以通过 getScrollX 和 getScrollY方 法分别得到。
 
-这里先简要概况一下：
+这里先简要概况一下:
 
 1. 在滑动过程中，__mScrollX的值总是等于 View 左边缘和 View 内容左边缘在水平方向的距离，而 mScrollY 的值总是等于 View 上边缘和 View 内容上边缘在竖直方向的距离__。
 
-2. View 边缘是指View的位置，由四个顶点组成，而 View 内容边缘是指View中的内容的边缘，scrolTo 和 scrollBy 只能改变View内容的位置而不能变View在布局中的位置。
+2. View 边缘是指View的位置,由四个顶点组成，而 View 内容边缘是指View中的内容的边缘，scrolTo 和 scrollBy 只能改变View内容的位置而不能变View在布局中的位置。
 
-3. mScrollX和mscrollY的单位为像素，并且当View左边缘在Veiw内容左边缘的右边时，mScrolX为正值，反之为负值， 当View上边缘在View内容上边缘的下边时，mScrollY为正值，反之为负值。
+3. mScrollX 和mscrollY 的单位为像素，并且当View左边缘在Veiw内容左边缘的右边时，mScrolX为正值，反之为负值， 当View上边缘在View内容上边缘的下边时，mScrollY为正值，反之为负值。
 
 4. __如果从左向右滑动，那么mScrollX负值，反之为正值__。如果从上往下滑动，那么mScrollY为负值，反之为正值。
 
@@ -242,7 +211,7 @@ public void computeScroll() {
 
 通过动画，我们来让一个View移动，而平移就是一种滑动，使用动画来移动View，主要是操作View的translationX，translationY属性，即可以采用传统的View动画，也可以采用属性动画。
 
-采用View动画的代码，如下所示，此动画可以在100ms里让一个View从初始的位置向右下角移动100个像素:
+采用 View 动画的代码, 此动画可以在100ms里让一个View从初始的位置向右下角移动100个像素:
 
 ```
 <?xml version="1.0" encoding="utf-8"?>
@@ -258,30 +227,22 @@ public void computeScroll() {
         android:toXDelta="100"
         android:toYDelta="100"
         />
-
 </set>
 ```
-如果采用属性动画的话，那就更简单了，我们可用这样：
+如果采用属性动画的话, 我们可用这样：
 
 ```
 ObjectAnimator.ofFloat(testButton,"translationX",0,100).setDuration(100).start();
-
 ```
+使用动画来做 View 的滑动要注意一点，View动画是对 View 的影像做操作，它并不能真正改变 View 的位置参数，包括高宽，并且如果希望动画后的状态得以保存还必须将 fillAfter 属性设置为true。否则动画完成之后就会消失，比如我们要把View向右移动100个像素，如果 fillAfter 为 false，那么动画完成的一刹那，View就会恢复之前的状态，fillAfter为true的话就会停留在最终点,这是视图动画. 属性动画不会有这样的问题。
 
-使用动画来做 View 的滑动要注意一点，View动画是对 View 的影像做操作，它并不能真正改变 View 的位置参数，包括高宽，并且如果希望动画后的状态得以保存还必须将 fillAfter 属性设置为true。
-否则动画完成之后就会消失，比如我们要把View向右移动100个像素，如果 fillAfter 为 false，那么动画完成的一刹那，View就会恢复之前的状态，fillAfter为true的话就会停留在最终点，
-这是视图动画，属性动画不会有这样的问题。
+上面提到的View的动画并不能真正改变View的位置，这会带来一个很严重的后果，试想一下，比如我们通过一个View动画将一个button向右移动100px，并且这个View设置点击事件，然后你会发现，在新位置无法触发，而在老位置可以触发点击事件，所以，这只是视图的变化，在系统眼里，这个button并没有发生任何改变。他的真生仍然在原始的位置，在这种情况下，单击新位置当然不会触发点击事件了。
 
-上面提到的View的动画并不能真正改变View的位置，这会带来一个很严重的后果，试想一下，比如我们通过一个View动画将一个button向右移动100px，并且这个View设置点击事件，然后你会发现，
-在新位置无法触发，而在老位置可以触发点击事件，所以，这只是视图的变化，在系统眼里，这个button并没有发生任何改变。他的真生仍然在原始的位置，在这种情况下，单击新位置当然不会触发点击事件了。
-
-
-### 第三种是通过改变Viev的LayoutParams使得View重新布局从而实现滑动
-
+### 第三种是通过改变Viev的 LayoutParams 使得View重新布局从而实现滑动
 
 这个比较好理解了，比如我们想把一个Button向右平移100px，我们只需要将这个 Bution 的 LayoutParams 里的 marginLeft 参数的值增加 100px 即可。
 
-还有一种情形，view的默认宽度为0，当我们需要向右移动Button时，只需要重新设置空View的宽度即可，就自动被挤向右边，即实现了向右平移的效果。
+还有一种情形, view的默认宽度为0，当我们需要向右移动Button时，只需要重新设置空View的宽度即可，就自动被挤向右边，即实现了向右平移的效果。
 
 				```
 				ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) testButton.getLayoutParams();
@@ -290,18 +251,15 @@ ObjectAnimator.ofFloat(testButton,"translationX",0,100).setDuration(100).start()
 				testButton.requestLayout(); //testButton.setLayoutParams(layoutParams);
 				```
 
-通过改变LayoutParams的方式去实现View的滑动同样是一种很灵活的方法，需要根据不同情况去做不同的处理。
-
-
+通过改变LayoutParams的方式去实现View的滑动同样是一种很灵活的方法, 需要根据不同情况去做不同的处理。
 
 ## 各种滑动方式的对比
 
-* scrollTo/scrollBy：操作简单，适合对View内容的滑动
+* scrollTo/scrollBy: 操作简单, 适合对 View 内容的滑动
 
-* 动画：操作简单，主要适用于没有交互的 View 和实现复杂的动画效果
+* 动画: 操作简单, 主要适用于没有交互的 View 和实现复杂的动画效果
 
-* 改变布局参数：操作稍微复杂，适用于有交互的View
-
+* 改变布局参数: 操作稍微复杂，适用于有交互的View
 
 
 ## 弹性滑动
@@ -497,50 +455,3 @@ ObjectAnimator.ofFloat(testView, "translationX", 0, 100).setDuration(100).start(
     };
 
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
