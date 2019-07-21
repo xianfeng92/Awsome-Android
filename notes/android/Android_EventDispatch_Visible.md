@@ -1,20 +1,16 @@
 ## View的事件分发
 
-当一个 MotionnEvent 产生了以后，系统需要把这个事件传递给一个具体的 View，而这个传递的过程就是分发过程。事件从 Activity到 ViewGroup,再从 ViewGroup 
-分发到具体的View.
+当一个 MotionnEvent 产生了以后, 系统需要把这个事件传递给一个具体的 View，而这个传递的过程就是分发过程。事件从 Activity到 ViewGroup,再从 ViewGroup 分发到具体的View.
 
 先简单看看下面几个结论,稍后用 AndroidStudioProfiler 来验证:
 
-1. 一个应用 View 树的实际的根节点是 PhoneWindow$DecorView。而 DecorView 内的 invalidate() 或 requestLayout() 等操作是通过 ViewRootImpl 来开始的。
-   ViewRootImpl 内有一个叫 mView 的成员变量，这个变量就是 DecorView。
+1. 一个应用 View 树的实际的根节点是 PhoneWindow$DecorView。而 DecorView 内的 invalidate() 或 requestLayout() 等操作是通过 ViewRootImpl 来开始的。ViewRootImpl 内有一个叫 mView 的成员变量，这个变量就是 DecorView。
 
-2. ViewRootImpl 中最重要的方法是 performTraversals()，在这个方法里面执行整个 View 树的 measure、layout 和 draw 操作。
+2. ViewRootImpl 中最重要的方法是 performTraversals(), 在这个方法里面执行整个 View 树的 measure、layout 和 draw 操作。
 
 3. 在实现上，ViewRootImpl 监听 Choreographer，Choreographer 监听 VSync。
 
-4. 当某个子 View 调用 invalidate() 或 requestLayout() 方法时，说明视图树需要更新，ViewRootImpl 会监听 Choreographer，而 Choreographer 则请求 VSync 信号。
-   当 VSync 信号到来时，执行 Choreographer 的相关方法，处理 3 种事件：Input、Animation 和 Traversal。 其中，Traversal 也就是 ViewRootImpl#performTraversals()，
-   然后 View 树就会被更新，进而显示在屏幕上。
+4. 当某个子 View 调用 invalidate() 或 requestLayout() 方法时，说明视图树需要更新，ViewRootImpl 会监听 Choreographer，而 Choreographer 则请求 VSync 信号。当 VSync 信号到来时，执行 Choreographer 的相关方法，处理 3 种事件：Input、Animation 和 Traversal。 其中，Traversal 也就是 ViewRootImpl#performTraversals(), 然后 View 树就会被更新，进而显示在屏幕上。
 
 
 下面使用 AndroidStudioProfiler 来分析一下,点击事件发生后是如何传递的：
@@ -76,71 +72,6 @@ Activity -->PhoneWindow(DecoverView)--->ViewGroup---->SwipeRefreshLayout
 
 
 在 ViewRootImpl 中调用了 performTraversals()，在这个方法里面执行整个 View 树的 measure、layout 和 draw 操作。
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
