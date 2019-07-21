@@ -92,16 +92,40 @@
 ---------------------------------------------
 
 ## Design Patterns
+----------------
+### 创建型模式
 
-* [Adapter](https://github.com/xianfeng92/android-code-read/blob/master/notes/Patterns/Adapter.md)
+#### 构建者模式
+##### EventBus 实例的构建
+* [EventBusBuilder](https://github.com/greenrobot/EventBus/blob/master/EventBus/src/org/greenrobot/eventbus/EventBusBuilder.java)
 
----------------------------------------------
+#### 单例模式
+##### 双重锁检查
+* [EventBus getDefault实现](https://github.com/greenrobot/EventBus/blob/2e7c0461106a3c261859579ec6fdcb5353ed31a4/EventBus/src/org/greenrobot/eventbus/EventBus.java#L80)
 
-# Algorithms
+#### 工厂方法模式
 
+#### 抽象工厂模式
+
+----------
+### 结构型模式
+
+#### 适配器模式
+
+#### 装饰器模式
+
+#### 外观模式
+
+--------
+### 行为型模式
+
+#### 观察者模式
+
+#### 策略模式
+
+#### 责任链模式
 
 ----------------------------------------------
-
 
 # Java
 
@@ -238,6 +262,3 @@
 * [接口隔离原则](https://github.com/xianfeng92/Awsome-Android/blob/master/SOLID/InterfaceSegregationPrinciple.md)
 
 * [依赖倒置原则](https://github.com/xianfeng92/Awsome-Android/blob/master/SOLID/DependencyInversionPrinciple.md)
-
-
-
