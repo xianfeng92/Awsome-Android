@@ -1,10 +1,9 @@
 # layout
 
-Layout的作用是 ViewGroup 用来确定子元素的位置，__当 ViewGroup 的位置被确认之后，他的 layout 就会去遍历所有子元素并且调用 onLayout 方法__
-，在layout方法中 onLayou 又被调用。__layout 方法确定了 View 本身的位置，而 onLayout 方法则会确定所有子元素的位置。__
+Layout的作用是 ViewGroup 用来确定子元素的位置, 当 ViewGroup 的位置被确认之后, 他的 layout 就会去遍历所有子元素并且调用 onLayout 方法
+。layout 方法确定了 View 本身的位置，而 onLayout 方法则会确定所有子元素的位置。
 
-先看 View 的layout方法，如下所示：
-
+先看 View 的layout方法, 如下所示:
 ```
  public void layout(int l, int t, int r, int b) {
         // 成员变量mPrivateFlags3中的一些比特位存储着和layout相关的信息
@@ -109,7 +108,7 @@ Layout的作用是 ViewGroup 用来确定子元素的位置，__当 ViewGroup �
 
 ### setFrame
 
-setFrame()方法是具体用来完成给View分配尺寸以及位置工作的，在layout()方法中会调用setFrame()方法。其源码如下所示：
+setFrame()方法是具体用来完成给 View 分配尺寸以及位置工作的, 在layout()方法中会调用setFrame()方法。其源码如下所示：
 
 ```
 protected boolean setFrame(int left, int top, int right, int bottom) {
@@ -195,29 +194,20 @@ layout的方法的大致流程如下：
 
 3. onLayout的具体位置实现同样和具体布局有关，所有 View 和 ViewGroup 均没有真正的实现onLayout方法。
 
-
-
-
 View的测量宽高和最终宽高有什么区别，即 View的 getMeasureWidth 和 getWidth 这两个方法有什么区别？
 
-
-在View的默认实现中，View的测量宽高和最终的是一样的，只不过一个是measure过程，一个是layout过程。而最终形成的是layout过程，即两者的赋值时机不同，测量宽高的赋值时机，
-稍微早一些。因此，在日常开发中，我们可用认为他们是相等的
-
+在View的默认实现中，View的测量宽高和最终的是一样的，只不过一个是measure过程，一个是layout过程。而最终形成的是layout过程，即两者的赋值时机不同，测量宽高的赋值时机，稍微早一些。因此，在日常开发中，我们可用认为他们是相等的
 
 但是还是有些不相同的，我们可用重写View的layout方法：
-
 
 ```
   public void layout(int l,int t,int r, int b){
         super.layout(l,t,t+100,b+100);
     }
-
 ```
 
 上述代码会导致在任何平台下 View 的最终宽高总是比测量大于100px,虽然这样这样会导致View显示不正常和没什么意义，但是这证明了测量不等于最终。
 另一种情况是在某种情况下，View 需要多次 measure 才能确定自己的测量宽高，在前几次的测量过程中，其得出的测量宽高可能和最终宽高是不一致的。
-
 
 
 # 参考
