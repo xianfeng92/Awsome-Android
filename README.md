@@ -119,7 +119,7 @@
 
 ##### Rxjava 中使用 ObservableCreate 适配 ObservableOnSubscribe 和 Observable
 
-*[ObservableCreate](https://github.com/ReactiveX/RxJava/blob/cc7fce89c46e67c4a124da9e206e4c770b6f8850/src/main/java/io/reactivex/internal/operators/observable/ObservableCreate.java)
+* [ObservableCreate](https://github.com/ReactiveX/RxJava/blob/cc7fce89c46e67c4a124da9e206e4c770b6f8850/src/main/java/io/reactivex/internal/operators/observable/ObservableCreate.java)
 
 #### 装饰器模式
 
