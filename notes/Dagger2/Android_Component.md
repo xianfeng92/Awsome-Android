@@ -1,8 +1,8 @@
-#@Component
+# @Component
 
 Component 管理着依赖实例，根据依赖实例之间的关系就能确定 Component 的关系。这些关系可以用 object graph描述，我称之为依赖关系图。
 
-在 Dagger 中可以用 dependencies 来表明一个 Component 依赖__其他 Compoent 公开的依赖__。
+在 Dagger 中可以用 dependencies 来表明一个 Component 依赖 __其他 Compoent 公开的依赖__。
 
 ```
 public class Son {
