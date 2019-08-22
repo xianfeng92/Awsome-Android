@@ -143,7 +143,7 @@ public final class DaggerPersonComponent implements PersonComponent {
 
 #### PersonModule 对象的创建
 
-1. 在构建DaggerPersonComponent时，显示的传入一个 PersonModule 对象，如下所示：
+1. 在构建DaggerPersonComponent时传入一个 PersonModule 对象，如下所示：
 
    DaggerPersonComponent.builder().personModule(new PersonModule()).build()
 
@@ -167,7 +167,7 @@ PersonModule 类是我们自己定义的，主要用来提供 car 对象。
 
 #### PersonModule_ProvideCarFactory 对象的创建
 
-使用简单工厂模式，创建一个 PersonModule_ProvideCarFactory 对象，该对象会持有 PersonModule 对象的引用，并提供一个 get 方法用来调用 module.provideCar()，源码如下：
+使用简单工厂模式创建 PersonModule_ProvideCarFactory 对象，该对象会持有 PersonModule 对象的引用并提供一个 get 方法用来调用 module.provideCar()，源码如下：
 
 ```
 public final class PersonModule_ProvideCarFactory implements Factory<Car> {
@@ -190,11 +190,11 @@ public final class PersonModule_ProvideCarFactory implements Factory<Car> {
 }
 ```
 
-PersonModule_ProvideCarFactory 对象可以看成是PersonModule对象的一个Wrapper。 
+PersonModule_ProvideCarFactory 对象可以看成是 PersonModule 对象的一个 Wrapper。 
 
 #### Person_MembersInjector 对象的创建
 
-使用简单工厂模式，创建一个 Person_MembersInjector 对象，该对象会持有 PersonModule_ProvideCarFactory 对象的引用，并提供一个 injectMembers 方法,源码如下：
+使用简单工厂模式创建 Person_MembersInjector 对象，该对象会持有 PersonModule_ProvideCarFactory 对象的引用，并提供一个 injectMembers 方法,源码如下：
 
 ```
 public final class Person_MembersInjector implements MembersInjector<Person> {
@@ -227,7 +227,7 @@ Person_MembersInjector对象主要负责依赖的注入，上面的 injectMember
 
 #### DaggerPersonComponent 对象的创建
 
-当调用 DaggerPersonComponent.builder().build() 方法后，即会创建一个 DaggerPersonComponent 对象，源码如下：
+当调用 DaggerPersonComponent.builder().build() 方法后会创建一个 DaggerPersonComponent 对象，源码如下：
 
 ```
     public PersonComponent build() {
@@ -238,7 +238,5 @@ Person_MembersInjector对象主要负责依赖的注入，上面的 injectMember
     }
 ```
 
-其实在创建 DaggerPersonComponent 对象过程中，已经顺带创建了 PersonModule 对象、PersonModule_ProvideCarFactory 以及 Person_MembersInjector 对象。
-
-调用 DaggerPersonComponent 对象的 inject(person) 方法时，Person_MembersInjector 对象会从 PersonModule_ProvideCarFactory 获取 car 对象来注入给 person。
+其实在创建 DaggerPersonComponent 对象过程中，已经顺带创建了 PersonModule 对象、PersonModule_ProvideCarFactory 以及 Person_MembersInjector 对象。调用 DaggerPersonComponent 对象的 inject(person) 方法时，Person_MembersInjector 对象会从 PersonModule_ProvideCarFactory 获取 car 对象来注入给 person。
 
