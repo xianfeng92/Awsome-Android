@@ -137,9 +137,7 @@ public final class DaggerPersonComponent implements PersonComponent {
   }
 }
 ```
-DaggerPersonComponent类实现了我们的 PersonComponent，其通过构建者模式来创建 DaggerPersonComponent 对象，
-在该对象构建过程中会调用 initialize(builder) ，该方法利用 Person_MembersInjector.create 来实例化一个 personMembersInjector 对象，至于 personMembersInjector
-到底是干嘛的，后面再说。
+DaggerPersonComponent 实现了 PersonComponent接口， 通过构建者模式来创建 DaggerPersonComponent 对象。 在该对象构建过程中会调用 initialize(builder) 利用 Person_MembersInjector.create 来实例化一个 personMembersInjector 对象，至于 personMembersInjector 到底是干嘛的，后面再说。
 
 所以说调用 DaggerPersonComponent.builder().build() 后，其实就是构建一个 DaggerPersonComponent 对象，然后继续调用其 inject 方法来注入依赖。
 
@@ -242,18 +240,18 @@ DaggerPersonComponent.builder().build().inject(person)
 
    * 在实例化 Person_MembersInjector 对象过程中，会保存 Car 的实例，以待后面的依赖的注入
 
-   * Car 的实例化是通过工厂方法（Car_Factory.create()）来完成
+   * Car 的实例化是通过 Car_Factory.create() 来完成
 
    牛逼吧～当我们构建 DaggerPersonComponent 对象中，其实也构建了 Person_MembersInjector 对象和依赖对象 car
 
-2. 调用 DaggerPersonComponent 对象的injec方法，将 car 注入到 person 中
+2. 调用 DaggerPersonComponent 对象的 inject 方法，将 car 注入到 person 中
 
 
 ## 小结：
 
 ### 依赖对象 car 何时创建
 
-调用 DaggerPersonComponent.builder().build() 方法时，通过工厂方法创建Car对象。
+调用 inject 方法时, 通过 Car_Factory.create() 创建 Car 对象。
 
 ### 谁负责注入
 
